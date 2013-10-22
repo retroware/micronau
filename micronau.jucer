@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="EA4Akn" name="micronau" projectType="audioplug" version="1.0.0"
+              bundleIdentifier="com.retroware.micronau" buildVST="1" buildAU="1"
+              pluginName="micronau" pluginDesc="micronau" pluginManufacturer="retroware"
+              pluginManufacturerCode="Retr" pluginCode="Mico" pluginChannelConfigs="{1, 1}, {2, 2}"
+              pluginIsSynth="1" pluginWantsMidiIn="1" pluginProducesMidiOut="1"
+              pluginSilenceInIsSilenceOut="1" pluginEditorRequiresKeys="0"
+              pluginAUExportPrefix="micronAU" pluginRTASCategory="" aaxIdentifier="com.retroware.micronau"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="3.1.0">
+  <MAINGROUP id="Z7l85g" name="micronau">
+    <GROUP id="{E6F88093-29FA-DE20-1C16-D06398D26127}" name="Resources">
+      <FILE id="mOthAl" name="parameters.xml" compile="0" resource="1" file="Source/parameters.xml"/>
+    </GROUP>
+    <GROUP id="{5A22A242-2771-EA47-479D-4FE4D37B0685}" name="Source">
+      <FILE id="HnNfz5" name="tinystr.cpp" compile="1" resource="0" file="Source/tinystr.cpp"/>
+      <FILE id="Z7cWDT" name="tinystr.h" compile="0" resource="0" file="Source/tinystr.h"/>
+      <FILE id="P0mKuu" name="tinyxml.cpp" compile="1" resource="0" file="Source/tinyxml.cpp"/>
+      <FILE id="XQI6JY" name="tinyxml.h" compile="0" resource="0" file="Source/tinyxml.h"/>
+      <FILE id="R4v3Dv" name="tinyxmlerror.cpp" compile="1" resource="0"
+            file="Source/tinyxmlerror.cpp"/>
+      <FILE id="hYIBbN" name="tinyxmlparser.cpp" compile="1" resource="0"
+            file="Source/tinyxmlparser.cpp"/>
+      <FILE id="UyfRMs" name="tracking.h" compile="0" resource="0" file="Source/tracking.h"/>
+      <FILE id="RYTKLt" name="IonSysex.cpp" compile="1" resource="0" file="Source/IonSysex.cpp"/>
+      <FILE id="AbcbJF" name="IonSysex.h" compile="0" resource="0" file="Source/IonSysex.h"/>
+      <FILE id="SEs6iR" name="mapping.h" compile="0" resource="0" file="Source/mapping.h"/>
+      <FILE id="T6KYMf" name="micronau.cpp" compile="1" resource="0" file="Source/micronau.cpp"/>
+      <FILE id="yeIIoZ" name="micronau.h" compile="0" resource="0" file="Source/micronau.h"/>
+      <FILE id="GXnDrE" name="micronauEditor.cpp" compile="1" resource="0"
+            file="Source/micronauEditor.cpp"/>
+      <FILE id="smktV0" name="micronauEditor.h" compile="0" resource="0"
+            file="Source/micronauEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_gui_audio" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" juceFolder="../JUCE/modules">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="64BitUniversal"
+                       isDebug="1" optimisation="1" targetName="micronau"/>
+        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="64BitUniversal"
+                       isDebug="0" optimisation="2" targetName="micronau"/>
+      </CONFIGURATIONS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+</JUCERPROJECT>
