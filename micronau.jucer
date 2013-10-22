@@ -7,12 +7,55 @@
               pluginIsSynth="1" pluginWantsMidiIn="1" pluginProducesMidiOut="1"
               pluginSilenceInIsSilenceOut="1" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="micronAU" pluginRTASCategory="" aaxIdentifier="com.retroware.micronau"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="3.1.0">
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="3.1.0"
+              includeBinaryInAppConfig="1">
   <MAINGROUP id="Z7l85g" name="micronau">
     <GROUP id="{E6F88093-29FA-DE20-1C16-D06398D26127}" name="Resources">
+      <FILE id="MigGlu" name="background.png" compile="0" resource="1" file="Source/gui/background.png"/>
+      <FILE id="x3gphZ" name="knob.png" compile="0" resource="1" file="Source/gui/knob.png"/>
+      <FILE id="uznabK" name="knobBack.png" compile="0" resource="1" file="Source/gui/knobBack.png"/>
+      <FILE id="pvHoCU" name="lcd_panel.png" compile="0" resource="1" file="Source/gui/lcd_panel.png"/>
+      <FILE id="gaZylN" name="led_button_dim.png" compile="0" resource="1"
+            file="Source/gui/led_button_dim.png"/>
+      <FILE id="kZUexs" name="led_button_off.png" compile="0" resource="1"
+            file="Source/gui/led_button_off.png"/>
+      <FILE id="poHNoi" name="led_button_on.png" compile="0" resource="1"
+            file="Source/gui/led_button_on.png"/>
+      <FILE id="I1io5f" name="pbutton0.png" compile="0" resource="1" file="Source/gui/pbutton0.png"/>
+      <FILE id="PiY9Fx" name="pbutton1.png" compile="0" resource="1" file="Source/gui/pbutton1.png"/>
+      <FILE id="nnxm39" name="sliderThumb.png" compile="0" resource="1" file="Source/gui/sliderThumb.png"/>
       <FILE id="mOthAl" name="parameters.xml" compile="0" resource="1" file="Source/parameters.xml"/>
     </GROUP>
     <GROUP id="{5A22A242-2771-EA47-479D-4FE4D37B0685}" name="Source">
+      <GROUP id="{CEAAFAE0-F040-FCA9-7558-4B2F67051CBF}" name="gui">
+        <FILE id="kryHox" name="Fx1Panel.cpp" compile="1" resource="0" file="Source/gui/Fx1Panel.cpp"/>
+        <FILE id="EAPIAK" name="Fx1Panel.h" compile="0" resource="0" file="Source/gui/Fx1Panel.h"/>
+        <FILE id="EfKhAT" name="Fx2Panel.cpp" compile="1" resource="0" file="Source/gui/Fx2Panel.cpp"/>
+        <FILE id="Au87dW" name="Fx2Panel.h" compile="0" resource="0" file="Source/gui/Fx2Panel.h"/>
+        <FILE id="aJXWqk" name="LcdComboBox.cpp" compile="1" resource="0" file="Source/gui/LcdComboBox.cpp"/>
+        <FILE id="zvhTWm" name="LcdComboBox.h" compile="0" resource="0" file="Source/gui/LcdComboBox.h"/>
+        <FILE id="Oud16O" name="LcdLabel.cpp" compile="1" resource="0" file="Source/gui/LcdLabel.cpp"/>
+        <FILE id="NyuL9m" name="LcdLabel.h" compile="0" resource="0" file="Source/gui/LcdLabel.h"/>
+        <FILE id="CxwPYY" name="LcdTextEditor.cpp" compile="1" resource="0"
+              file="Source/gui/LcdTextEditor.cpp"/>
+        <FILE id="kQZNfl" name="LcdTextEditor.h" compile="0" resource="0" file="Source/gui/LcdTextEditor.h"/>
+        <FILE id="d1dpHy" name="LookAndFeel.cpp" compile="1" resource="0" file="Source/gui/LookAndFeel.cpp"/>
+        <FILE id="qOw1qD" name="LookAndFeel.h" compile="0" resource="0" file="Source/gui/LookAndFeel.h"/>
+        <FILE id="vxxWCS" name="MicronTabBar.cpp" compile="1" resource="0"
+              file="Source/gui/MicronTabBar.cpp"/>
+        <FILE id="izb56m" name="MicronTabBar.h" compile="0" resource="0" file="Source/gui/MicronTabBar.h"/>
+        <FILE id="UxOp9W" name="MicronToggleButton.cpp" compile="1" resource="0"
+              file="Source/gui/MicronToggleButton.cpp"/>
+        <FILE id="OZc0xc" name="MicronToggleButton.h" compile="0" resource="0"
+              file="Source/gui/MicronToggleButton.h"/>
+        <FILE id="N6rl2E" name="SliderBank.cpp" compile="1" resource="0" file="Source/gui/SliderBank.cpp"/>
+        <FILE id="J8LY88" name="SliderBank.h" compile="0" resource="0" file="Source/gui/SliderBank.h"/>
+        <FILE id="cC3Qyl" name="StdComboBox.cpp" compile="1" resource="0" file="Source/gui/StdComboBox.cpp"/>
+        <FILE id="Ha6uc1" name="StdComboBox.h" compile="0" resource="0" file="Source/gui/StdComboBox.h"/>
+        <FILE id="rlaTMQ" name="MicronSlider.cpp" compile="1" resource="0"
+              file="Source/gui/MicronSlider.cpp"/>
+        <FILE id="coBzVu" name="MicronSlider.h" compile="0" resource="0" file="Source/gui/MicronSlider.h"/>
+      </GROUP>
       <FILE id="HnNfz5" name="tinystr.cpp" compile="1" resource="0" file="Source/tinystr.cpp"/>
       <FILE id="Z7cWDT" name="tinystr.h" compile="0" resource="0" file="Source/tinystr.h"/>
       <FILE id="P0mKuu" name="tinyxml.cpp" compile="1" resource="0" file="Source/tinyxml.cpp"/>
