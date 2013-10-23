@@ -633,7 +633,7 @@
             <listitem name="held" nrpnvalue="0"/>
         </parameter>
         <parameter name="Analog drift" conversion="PERCENT" min="0" max="100" sysexoffset="160" nrpn="519" />
-        <parameter name="Osc sync" conversion="LIST" min="0" max=4" sysexoffset="278" nrpn="520">
+        <parameter name="Osc sync" conversion="LIST" min="0" max="4" sysexoffset="278" nrpn="520">
             <listitem name="off" nrpnvalue="0"/>
             <listitem name="hard 2 -&gt; 1" nrpnvalue="1"/>
             <listitem name="hard 2+3 -&gt; 1"nrpnvalue="2" />
@@ -682,7 +682,7 @@
             <listitem name="6 semitones" nrpnvalue="6"/>
             <listitem name="7 semitones" nrpnvalue="7"/>
         </parameter>
-        <parameter name="Osc 1 pitch fine" conversion="PITCH_FINE" min="-995" max="995" sysexoffset="200" nrpn="527" />
+        <parameter name="Osc 1 pitch fine" conversion="PITCH_FINE" min="-999" max="999" sysexoffset="200" nrpn="527" />
         <parameter name="Osc 1 p wheel range" conversion="INT32" min="0" max="12" sysexoffset="274" nrpn="528" />
 	    <parameter name="Osc 1 level" conversion="PERCENT" min="0" max="100" sysexoffset="360" nrpn="541" defaultval="100" />
 	    <parameter name="Osc 1 balance" conversion="PRE_BAL" min="-50" max="50" sysexoffset="400" nrpn="547" />
@@ -721,7 +721,7 @@
             <listitem name="6 semitones" nrpnvalue="6"/>
             <listitem name="7 semitones" nrpnvalue="7"/>
         </parameter>
-        <parameter name="Osc 2 pitch fine" conversion="PITCH_FINE" min="-995" max="995" sysexoffset="216" nrpn="533" />
+        <parameter name="Osc 2 pitch fine" conversion="PITCH_FINE" min="-999" max="999" sysexoffset="216" nrpn="533" />
         <parameter name="Osc 2 p wheel range" conversion="INT32" min="0" max="12" sysexoffset="312" nrpn="534" />
         <parameter name="Osc 2 level" conversion="PERCENT" min="0" max="100" sysexoffset="368" nrpn="542" defaultval="100" />
         <parameter name="Osc 2 balance" conversion="PRE_BAL" min="-50" max="50" sysexoffset="408" nrpn="548" />
@@ -759,7 +759,7 @@
             <listitem name="6 semitones" nrpnvalue="6"/>
             <listitem name="7 semitones" nrpnvalue="7"/>
         </parameter>
-		<parameter name="Osc 3 pitch fine" conversion="PITCH_FINE" min="-995" max="995" sysexoffset="232" nrpn="539" />
+		<parameter name="Osc 3 pitch fine" conversion="PITCH_FINE" min="-999" max="999" sysexoffset="232" nrpn="539" />
         <parameter name="Osc 3 level" conversion="PERCENT" min="0" max="100" sysexoffset="376" nrpn="543" defaultval="100"/>
         <parameter name="Osc 3 balance" conversion="PRE_BAL" min="-50" max="50" sysexoffset="416" nrpn="549" />
 		<parameter name="Osc 3 p wheel range" conversion="INT32" min="0" max="12" sysexoffset="316" nrpn="540" />

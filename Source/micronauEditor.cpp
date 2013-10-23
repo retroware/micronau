@@ -9,12 +9,21 @@
 
 #include "micronau.h"
 #include "micronauEditor.h"
+#include "gui/MicronSlider.h"
+#include "gui/LcdLabel.h"
+#include "gui/StdComboBox.h"
+#include "gui/LookAndFeel.h"
 
 
 //==============================================================================
 MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcessor* ownerFilter)
     : AudioProcessorEditor (ownerFilter)
 {
+	LookAndFeel::setDefaultLookAndFeel( PluginLookAndFeel::getInstance() );
+
+	background = ImageCache::getFromMemory (BinaryData::background_png,
+                                     BinaryData::background_pngSize);
+
     owner = ownerFilter;
     
     // create all of the gui elements and hook them up to the processor
@@ -22,8 +31,8 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
         ext_slider *s;
         float min, max;
         
-        sliders[i] = s = new ext_slider(owner, new Slider(), i+523);
-        s->setSliderStyle (Slider::Rotary);
+        sliders[i] = s = new ext_slider(owner, i+523);
+        s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
         s->addListener (this);
         min = s->get_min();
         max = s->get_max();
@@ -39,20 +48,15 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     sync_sysex->addListener(this);
     addAndMakeVisible(sync_sysex);
     
-    
-    param_name = new Label("panel", "micronAU");
-    param_name->setColour(TextEditor::textColourId, Colours::black);
-    param_name->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
-    param_name->setFont (Font (15.00f, Font::plain));
-    addAndMakeVisible(param_name);
+	param_display = new LcdLabel("panel", "micronAU\nretroware");
+    param_display->setJustificationType (Justification::centredLeft);
+    param_display->setEditable (false, false, false);
+    param_display->setColour (TextEditor::textColourId, Colours::black);
+    param_display->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
+    param_display->setFont (Font (18.00f, Font::plain));
+	addAndMakeVisible(param_display);
 
-    param_value = new Label("panel", "retroware");
-    param_value->setColour(TextEditor::textColourId, Colours::black);
-    param_value->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
-    param_value->setFont (Font (15.00f, Font::plain));
-    addAndMakeVisible(param_value);
-   
-    midi_in_menu = new ComboBox ();
+    midi_in_menu = new StdComboBox ();
     midi_in_menu->setEditableText (false);
     StringArray x = MidiInput::getDevices();
     for (int i = 0; i < x.size(); i++) {
@@ -62,7 +66,7 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     midi_in_menu->addListener(this);
     addAndMakeVisible (midi_in_menu);
 
-    midi_out_menu = new ComboBox ();
+    midi_out_menu = new StdComboBox ();
     midi_out_menu->setEditableText (false);
     x = MidiOutput::getDevices();
     for (int i = 0; i < x.size(); i++) {
@@ -86,8 +90,7 @@ MicronauAudioProcessorEditor::~MicronauAudioProcessorEditor()
 //==============================================================================
 void MicronauAudioProcessorEditor::paint (Graphics& g)
 {
-    
-    g.fillAll (Colours::white);
+	g.drawImageWithin(background, 0, 0, getWidth(), getHeight(), RectanglePlacement(RectanglePlacement::stretchToFit));
     g.setColour (Colours::black);
 }
 
@@ -98,8 +101,7 @@ void MicronauAudioProcessorEditor::resized()
         s->setBounds(20+i*180, 60, 150, 40);
     }
 
-    param_name->setBounds(360, 110, 150, 20);
-    param_value->setBounds(360, 130, 150, 20);
+	param_display->setBounds(360,110,150,45);
 
     sync_nrpn->setBounds(20, 120, 30, 20);
     sync_sysex->setBounds(70, 120, 30, 20);
@@ -120,11 +122,20 @@ void MicronauAudioProcessorEditor::timerCallback()
 
 void MicronauAudioProcessorEditor::sliderValueChanged (Slider *slider)
 {
-    ext_slider *s = (ext_slider *) slider;
-    s->set_value(slider->getValue());
-    param_name->setText(s->get_name(), dontSendNotification);
-    param_value->setText(s->get_txt_value(slider->getValue()), dontSendNotification);
+    ext_slider *s = dynamic_cast<ext_slider*>( slider );
+	if (s)
+	{
+		// NOTE: must use the down-casted pointer for getValue/setValue, as they aren't virtual in JUCE's Slider base class.
+		s->set_value(s->getValue());
+		param_display->setText(s->get_name() + "\n" + s->get_txt_value(s->getValue()), dontSendNotification);
+	}
 }
+
+void MicronauAudioProcessorEditor::sliderDragStarted (Slider* slider)
+{	// when user just touches a slider, update its value so it may be seen in the parameter display box.
+	sliderValueChanged(slider);
+}
+
 
 void MicronauAudioProcessorEditor::buttonClicked (Button* button)
 {

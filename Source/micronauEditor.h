@@ -12,12 +12,14 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "micronau.h"
+#include "gui/MicronSlider.h"
+class LcdLabel;
+class StdComboBox;
 
-
-class ext_slider : public Slider
+class ext_slider : public MicronSlider
 {
 public:
-    ext_slider(MicronauAudioProcessor *owner, Slider *s, int nrpn_num) : s(s),  plugin(owner) {
+    ext_slider(MicronauAudioProcessor *owner, int nrpn_num) : plugin(owner) {
         param = owner->param_of_nrpn(nrpn_num);
         idx = owner->index_of_nrpn(nrpn_num);
     }
@@ -29,7 +31,6 @@ public:
     const String get_txt_value (int v) { return param->getConvertedValue(v);}
     
 private:
-    Slider *s;
     IonSysexParam *param;
     MicronauAudioProcessor *plugin;
     int idx;
@@ -52,18 +53,20 @@ public:
     void paint (Graphics& g);
     void resized();
     void timerCallback();
-    void sliderValueChanged (Slider*);
+    void sliderValueChanged (Slider* slider);
+	void sliderDragStarted (Slider* slider);
     void buttonClicked (Button* button);
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
     
 private:
+	Image background;
+
     ScopedPointer<TextButton> sync_nrpn;
     ScopedPointer<TextButton> sync_sysex;
-    ScopedPointer<ComboBox> midi_in_menu;
-    ScopedPointer<ComboBox> midi_out_menu;
+    ScopedPointer<StdComboBox> midi_in_menu;
+    ScopedPointer<StdComboBox> midi_out_menu;
 
-    ScopedPointer<Label> param_name;
-    ScopedPointer<Label> param_value;
+    ScopedPointer<LcdLabel> param_display;
 
     MicronauAudioProcessor *owner;
 
