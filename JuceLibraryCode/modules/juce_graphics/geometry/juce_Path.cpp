@@ -250,7 +250,7 @@ Rectangle<float> Path::getBounds() const noexcept
 
 Rectangle<float> Path::getBoundsTransformed (const AffineTransform& transform) const noexcept
 {
-    return getBounds().transformed (transform);
+    return getBounds().transformedBy (transform);
 }
 
 //==============================================================================
@@ -1475,12 +1475,12 @@ String Path::toString() const
     return s.toUTF8();
 }
 
-void Path::restoreFromString (const String& stringVersion)
+void Path::restoreFromString (StringRef stringVersion)
 {
     clear();
     setUsingNonZeroWinding (true);
 
-    String::CharPointerType t (stringVersion.getCharPointer());
+    String::CharPointerType t (stringVersion.text);
     juce_wchar marker = 'm';
     int numValues = 2;
     float values [6];

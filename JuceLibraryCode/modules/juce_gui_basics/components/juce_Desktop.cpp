@@ -23,13 +23,13 @@
 */
 
 Desktop::Desktop()
-    : mouseClickCounter (0), mouseWheelCounter (0),
+    : mouseSources (new MouseInputSource::SourceList()),
+      mouseClickCounter (0), mouseWheelCounter (0),
       kioskModeComponent (nullptr),
       allowedOrientations (allOrientations),
-      masterScaleFactor (1.0f)
+      masterScaleFactor ((float) getDefaultMasterScale())
 {
     displays = new Displays (*this);
-    addMouseInputSource();
 }
 
 Desktop::~Desktop()
@@ -143,18 +143,6 @@ void Desktop::componentBroughtToFront (Component* const c)
 }
 
 //==============================================================================
-void Desktop::addPeer (ComponentPeer* peer)
-{
-    peers.add (peer);
-}
-
-void Desktop::removePeer (ComponentPeer* peer)
-{
-    peers.removeFirstMatchingValue (peer);
-    triggerFocusCallback();
-}
-
-//==============================================================================
 Point<int> Desktop::getMousePosition()
 {
     return getInstance().getMainMouseSource().getScreenPosition();
@@ -176,113 +164,18 @@ int Desktop::getMouseWheelMoveCounter() const noexcept      { return mouseWheelC
 void Desktop::incrementMouseClickCounter() noexcept         { ++mouseClickCounter; }
 void Desktop::incrementMouseWheelCounter() noexcept         { ++mouseWheelCounter; }
 
-int Desktop::getNumDraggingMouseSources() const noexcept
-{
-    int num = 0;
-    for (int i = mouseSources.size(); --i >= 0;)
-        if (mouseSources.getUnchecked(i)->isDragging())
-            ++num;
-
-    return num;
-}
-
-MouseInputSource* Desktop::getDraggingMouseSource (int index) const noexcept
-{
-    int num = 0;
-    for (int i = mouseSources.size(); --i >= 0;)
-    {
-        MouseInputSource* const mi = mouseSources.getUnchecked(i);
-
-        if (mi->isDragging())
-        {
-            if (index == num)
-                return mi;
-
-            ++num;
-        }
-    }
-
-    return nullptr;
-}
-
-MouseInputSource* Desktop::getOrCreateMouseInputSource (int touchIndex)
-{
-    jassert (touchIndex >= 0 && touchIndex < 100); // sanity-check on number of fingers
-
-    for (;;)
-    {
-        if (MouseInputSource* mouse = getMouseSource (touchIndex))
-            return mouse;
-
-        if (! addMouseInputSource())
-        {
-            jassertfalse; // not enough mouse sources!
-            return nullptr;
-        }
-    }
-}
+const Array<MouseInputSource>& Desktop::getMouseSources() const noexcept        { return mouseSources->sourceArray; }
+int Desktop::getNumMouseSources() const noexcept                                { return mouseSources->sources.size(); }
+int Desktop::getNumDraggingMouseSources() const noexcept                        { return mouseSources->getNumDraggingMouseSources(); }
+MouseInputSource* Desktop::getMouseSource (int index) const noexcept            { return mouseSources->getMouseSource (index); }
+MouseInputSource* Desktop::getDraggingMouseSource (int index) const noexcept    { return mouseSources->getDraggingMouseSource (index); }
+MouseInputSource Desktop::getMainMouseSource() const noexcept                   { return MouseInputSource (mouseSources->sources.getUnchecked(0)); }
+void Desktop::beginDragAutoRepeat (int interval)                                { mouseSources->beginDragAutoRepeat (interval); }
 
 //==============================================================================
-class MouseDragAutoRepeater  : public Timer
-{
-public:
-    MouseDragAutoRepeater() {}
-
-    void timerCallback() override
-    {
-        Desktop& desktop = Desktop::getInstance();
-        int numMiceDown = 0;
-
-        for (int i = desktop.getNumMouseSources(); --i >= 0;)
-        {
-            MouseInputSource& source = *desktop.getMouseSource(i);
-
-            if (source.isDragging())
-            {
-                source.triggerFakeMove();
-                ++numMiceDown;
-            }
-        }
-
-        if (numMiceDown == 0)
-            desktop.beginDragAutoRepeat (0);
-    }
-
-private:
-    JUCE_DECLARE_NON_COPYABLE (MouseDragAutoRepeater)
-};
-
-void Desktop::beginDragAutoRepeat (const int interval)
-{
-    if (interval > 0)
-    {
-        if (dragRepeater == nullptr)
-            dragRepeater = new MouseDragAutoRepeater();
-
-        if (dragRepeater->getTimerInterval() != interval)
-            dragRepeater->startTimer (interval);
-    }
-    else
-    {
-        dragRepeater = nullptr;
-    }
-}
-
-//==============================================================================
-void Desktop::addFocusChangeListener (FocusChangeListener* const listener)
-{
-    focusListeners.add (listener);
-}
-
-void Desktop::removeFocusChangeListener (FocusChangeListener* const listener)
-{
-    focusListeners.remove (listener);
-}
-
-void Desktop::triggerFocusCallback()
-{
-    triggerAsyncUpdate();
-}
+void Desktop::addFocusChangeListener    (FocusChangeListener* const listener)   { focusListeners.add (listener); }
+void Desktop::removeFocusChangeListener (FocusChangeListener* const listener)   { focusListeners.remove (listener); }
+void Desktop::triggerFocusCallback()                                            { triggerAsyncUpdate(); }
 
 void Desktop::handleAsyncUpdate()
 {
@@ -390,9 +283,9 @@ const Desktop::Displays::Display& Desktop::Displays::getDisplayContaining (Point
     return *best;
 }
 
-RectangleList Desktop::Displays::getRectangleList (bool userAreasOnly) const
+RectangleList<int> Desktop::Displays::getRectangleList (bool userAreasOnly) const
 {
-    RectangleList rl;
+    RectangleList<int> rl;
 
     for (int i = 0; i < displays.size(); ++i)
     {
@@ -425,14 +318,14 @@ bool operator!= (const Desktop::Displays::Display& d1, const Desktop::Displays::
 
 void Desktop::Displays::init (Desktop& desktop)
 {
-    findDisplays (desktop.masterScaleFactor);
+    findDisplays (desktop.getGlobalScaleFactor());
     jassert (displays.size() > 0);
 }
 
 void Desktop::Displays::refresh()
 {
     Array<Display> oldDisplays;
-    oldDisplays.swapWithArray (displays);
+    oldDisplays.swapWith (displays);
 
     init (Desktop::getInstance());
 
@@ -455,7 +348,6 @@ void Desktop::setKioskModeComponent (Component* componentToUse, const bool allow
         if (kioskModeComponent != nullptr)
         {
             setKioskComponent (kioskModeComponent, false, allowMenusAndBars);
-
             kioskModeComponent->setBounds (kioskComponentOriginalBounds);
         }
 
@@ -467,7 +359,6 @@ void Desktop::setKioskModeComponent (Component* componentToUse, const bool allow
             jassert (ComponentPeer::getPeerFor (kioskModeComponent) != nullptr);
 
             kioskComponentOriginalBounds = kioskModeComponent->getBounds();
-
             setKioskComponent (kioskModeComponent, true, allowMenusAndBars);
         }
     }
@@ -485,7 +376,17 @@ void Desktop::setOrientationsEnabled (const int newOrientations)
 bool Desktop::isOrientationEnabled (const DisplayOrientation orientation) const noexcept
 {
     // Make sure you only pass one valid flag in here...
-    jassert (orientation == upright || orientation == upsideDown || orientation == rotatedClockwise || orientation ==  rotatedAntiClockwise);
+    jassert (orientation == upright || orientation == upsideDown
+              || orientation == rotatedClockwise || orientation == rotatedAntiClockwise);
 
     return (allowedOrientations & orientation) != 0;
+}
+
+void Desktop::setGlobalScaleFactor (float newScaleFactor) noexcept
+{
+    if (masterScaleFactor != newScaleFactor)
+    {
+        masterScaleFactor = newScaleFactor;
+        displays->refresh();
+    }
 }

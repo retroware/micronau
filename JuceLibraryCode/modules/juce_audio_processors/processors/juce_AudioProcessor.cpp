@@ -55,7 +55,7 @@ AudioProcessor::~AudioProcessor()
    #endif
 }
 
-void AudioProcessor::setPlayHead (AudioPlayHead* const newPlayHead) noexcept
+void AudioProcessor::setPlayHead (AudioPlayHead* const newPlayHead)
 {
     playHead = newPlayHead;
 }
@@ -114,11 +114,24 @@ void AudioProcessor::setLatencySamples (const int newLatency)
 void AudioProcessor::setParameterNotifyingHost (const int parameterIndex,
                                                 const float newValue)
 {
-    jassert (MessageManager::getInstance()->isThisTheMessageThread());
-
     setParameter (parameterIndex, newValue);
     sendParamChangeMessageToListeners (parameterIndex, newValue);
 }
+
+String AudioProcessor::getParameterName (int parameterIndex, int maximumStringLength)
+{
+    return getParameterName (parameterIndex).substring (0, maximumStringLength);
+}
+
+String AudioProcessor::getParameterText (int parameterIndex, int maximumStringLength)
+{
+    return getParameterText (parameterIndex).substring (0, maximumStringLength);
+}
+
+int AudioProcessor::getParameterNumSteps (int /*parameterIndex*/)        { return 0x7fffffff; }
+float AudioProcessor::getParameterDefaultValue (int /*parameterIndex*/)  { return 0.0f; }
+float AudioProcessor::getParameterMinValue (int /*parameterIndex*/)  { return 0.0f; }
+float AudioProcessor::getParameterMaxValue (int /*parameterIndex*/)  { return 1.0f; }
 
 AudioProcessorListener* AudioProcessor::getListenerLocked (const int index) const noexcept
 {
@@ -128,44 +141,59 @@ AudioProcessorListener* AudioProcessor::getListenerLocked (const int index) cons
 
 void AudioProcessor::sendParamChangeMessageToListeners (const int parameterIndex, const float newValue)
 {
-    jassert (isPositiveAndBelow (parameterIndex, getNumParameters()));
-
-    for (int i = listeners.size(); --i >= 0;)
-        if (AudioProcessorListener* l = getListenerLocked (i))
-            l->audioProcessorParameterChanged (this, parameterIndex, newValue);
+    if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+    {
+        for (int i = listeners.size(); --i >= 0;)
+            if (AudioProcessorListener* l = getListenerLocked (i))
+                l->audioProcessorParameterChanged (this, parameterIndex, newValue);
+    }
+    else
+    {
+        jassertfalse; // called with an out-of-range parameter index!
+    }
 }
 
 void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
 {
-    jassert (isPositiveAndBelow (parameterIndex, getNumParameters()));
+    if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+    {
+       #if JUCE_DEBUG
+        // This means you've called beginParameterChangeGesture twice in succession without a matching
+        // call to endParameterChangeGesture. That might be fine in most hosts, but better to avoid doing it.
+        jassert (! changingParams [parameterIndex]);
+        changingParams.setBit (parameterIndex);
+       #endif
 
-   #if JUCE_DEBUG
-    // This means you've called beginParameterChangeGesture twice in succession without a matching
-    // call to endParameterChangeGesture. That might be fine in most hosts, but better to avoid doing it.
-    jassert (! changingParams [parameterIndex]);
-    changingParams.setBit (parameterIndex);
-   #endif
-
-    for (int i = listeners.size(); --i >= 0;)
-        if (AudioProcessorListener* l = getListenerLocked (i))
-            l->audioProcessorParameterChangeGestureBegin (this, parameterIndex);
+        for (int i = listeners.size(); --i >= 0;)
+            if (AudioProcessorListener* l = getListenerLocked (i))
+                l->audioProcessorParameterChangeGestureBegin (this, parameterIndex);
+    }
+    else
+    {
+        jassertfalse; // called with an out-of-range parameter index!
+    }
 }
 
 void AudioProcessor::endParameterChangeGesture (int parameterIndex)
 {
-    jassert (isPositiveAndBelow (parameterIndex, getNumParameters()));
+    if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+    {
+       #if JUCE_DEBUG
+        // This means you've called endParameterChangeGesture without having previously called
+        // endParameterChangeGesture. That might be fine in most hosts, but better to keep the
+        // calls matched correctly.
+        jassert (changingParams [parameterIndex]);
+        changingParams.clearBit (parameterIndex);
+       #endif
 
-   #if JUCE_DEBUG
-    // This means you've called endParameterChangeGesture without having previously called
-    // endParameterChangeGesture. That might be fine in most hosts, but better to keep the
-    // calls matched correctly.
-    jassert (changingParams [parameterIndex]);
-    changingParams.clearBit (parameterIndex);
-   #endif
-
-    for (int i = listeners.size(); --i >= 0;)
-        if (AudioProcessorListener* l = getListenerLocked (i))
-            l->audioProcessorParameterChangeGestureEnd (this, parameterIndex);
+        for (int i = listeners.size(); --i >= 0;)
+            if (AudioProcessorListener* l = getListenerLocked (i))
+                l->audioProcessorParameterChangeGestureEnd (this, parameterIndex);
+    }
+    else
+    {
+        jassertfalse; // called with an out-of-range parameter index!
+    }
 }
 
 void AudioProcessor::updateHostDisplay()
@@ -178,26 +206,6 @@ void AudioProcessor::updateHostDisplay()
 String AudioProcessor::getParameterLabel (int) const        { return String::empty; }
 bool AudioProcessor::isParameterAutomatable (int) const     { return true; }
 bool AudioProcessor::isMetaParameter (int) const            { return false; }
-
-float AudioProcessor::getParameterMin (int parameterIndex)
-{
-    return 0.0f;
-}
-
-float AudioProcessor::getParameterMax (int parameterIndex)
-{
-    return 1.0f;
-}
-
-float AudioProcessor::getParameterDefault (int parameterIndex)
-{
-    return 1.0f;
-}
-
-int AudioProcessor::getParameterNumSteps (int parameterIndex)
-{
-    return 0x7fffffff;
-}
 
 void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
 {
@@ -256,16 +264,17 @@ const uint32 magicXmlNumber = 0x21324356;
 
 void AudioProcessor::copyXmlToBinary (const XmlElement& xml, juce::MemoryBlock& destData)
 {
-    const String xmlString (xml.createDocument (String::empty, true, false));
-    const size_t stringLength = xmlString.getNumBytesAsUTF8();
+    {
+        MemoryOutputStream out (destData, false);
+        out.writeInt (magicXmlNumber);
+        out.writeInt (0);
+        xml.writeToStream (out, String::empty, true, false);
+        out.writeByte (0);
+    }
 
-    destData.setSize (stringLength + 9);
-
-    uint32* const d = static_cast<uint32*> (destData.getData());
-    d[0] = ByteOrder::swapIfBigEndian ((const uint32) magicXmlNumber);
-    d[1] = ByteOrder::swapIfBigEndian ((const uint32) stringLength);
-
-    xmlString.copyToUTF8 ((CharPointer_UTF8::CharType*) (d + 2), stringLength + 1);
+    // go back and write the string length..
+    static_cast<uint32*> (destData.getData())[1]
+        = ByteOrder::swapIfBigEndian ((uint32) destData.getSize() - 9);
 }
 
 XmlElement* AudioProcessor::getXmlFromBinary (const void* data, const int sizeInBytes)
@@ -285,7 +294,7 @@ XmlElement* AudioProcessor::getXmlFromBinary (const void* data, const int sizeIn
 
 //==============================================================================
 void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioProcessor*, int) {}
-void AudioProcessorListener::audioProcessorParameterChangeGestureEnd (AudioProcessor*, int) {}
+void AudioProcessorListener::audioProcessorParameterChangeGestureEnd   (AudioProcessor*, int) {}
 
 //==============================================================================
 bool AudioPlayHead::CurrentPositionInfo::operator== (const CurrentPositionInfo& other) const noexcept

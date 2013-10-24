@@ -127,18 +127,18 @@ const String MicronauAudioProcessor::getParameterText (int index)
     return nrpns[index]->getTextValue();
 }
 
-float MicronauAudioProcessor::getParameterMin (int index)
+float MicronauAudioProcessor::getParameterMinValue (int index)
 {
     return nrpns[index]->getMin();
 }
 
-float MicronauAudioProcessor::getParameterMax (int index)
+float MicronauAudioProcessor::getParameterMaxValue (int index)
 {
     return nrpns[index]->getMax();
 ;
 }
 
-float MicronauAudioProcessor::getParameterDefault (int index)
+float MicronauAudioProcessor::getParameterDefaultValue (int index)
 {
     return nrpns[index]->getDefaultValue();
 }

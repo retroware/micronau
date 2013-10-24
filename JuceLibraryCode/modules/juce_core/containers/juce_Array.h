@@ -29,10 +29,6 @@
 #ifndef JUCE_ARRAY_H_INCLUDED
 #define JUCE_ARRAY_H_INCLUDED
 
-#include "juce_ArrayAllocationBase.h"
-#include "juce_ElementComparator.h"
-#include "../threads/juce_CriticalSection.h"
-
 
 //==============================================================================
 /**
@@ -89,7 +85,7 @@ public:
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     Array (Array<ElementType, TypeOfCriticalSectionToUse>&& other) noexcept
-        : data (static_cast <ArrayAllocationBase<ElementType, TypeOfCriticalSectionToUse>&&> (other.data)),
+        : data (static_cast<ArrayAllocationBase<ElementType, TypeOfCriticalSectionToUse>&&> (other.data)),
           numUsed (other.numUsed)
     {
         other.numUsed = 0;
@@ -137,7 +133,7 @@ public:
         if (this != &other)
         {
             Array<ElementType, TypeOfCriticalSectionToUse> otherCopy (other);
-            swapWithArray (otherCopy);
+            swapWith (otherCopy);
         }
 
         return *this;
@@ -147,7 +143,7 @@ public:
     Array& operator= (Array&& other) noexcept
     {
         const ScopedLockType lock (getLock());
-        data = static_cast <ArrayAllocationBase<ElementType, TypeOfCriticalSectionToUse>&&> (other.data);
+        data = static_cast<ArrayAllocationBase<ElementType, TypeOfCriticalSectionToUse>&&> (other.data);
         numUsed = other.numUsed;
         other.numUsed = 0;
         return *this;
@@ -204,7 +200,6 @@ public:
     }
 
     /** Removes all elements from the array without freeing the array's allocated storage.
-
         @see clear
     */
     void clearQuick()
@@ -284,8 +279,14 @@ public:
     inline ElementType getFirst() const
     {
         const ScopedLockType lock (getLock());
-        return (numUsed > 0) ? data.elements [0]
-                             : ElementType();
+
+        if (numUsed > 0)
+        {
+            jassert (data.elements != nullptr);
+            return data.elements[0];
+        }
+
+        return ElementType();
     }
 
     /** Returns the last element in the array, or a default value if the array is empty.
@@ -295,8 +296,14 @@ public:
     inline ElementType getLast() const
     {
         const ScopedLockType lock (getLock());
-        return (numUsed > 0) ? data.elements [numUsed - 1]
-                             : ElementType();
+
+        if (numUsed > 0)
+        {
+            jassert (data.elements != nullptr);
+            return data.elements[numUsed - 1];
+        }
+
+        return ElementType();
     }
 
     /** Returns a pointer to the actual array data.
@@ -322,6 +329,11 @@ public:
     */
     inline ElementType* end() const noexcept
     {
+       #if JUCE_DEBUG
+        if (data.elements == nullptr || numUsed <= 0) // (to keep static analysers happy)
+            return data.elements;
+       #endif
+
         return data.elements + numUsed;
     }
 
@@ -371,12 +383,26 @@ public:
         @param newElement       the new object to add to the array
         @see set, insert, addIfNotAlreadyThere, addSorted, addUsingDefaultSort, addArray
     */
-    void add (ParameterType newElement)
+    void add (const ElementType& newElement)
     {
         const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (numUsed + 1);
         new (data.elements + numUsed++) ElementType (newElement);
     }
+
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Appends a new element at the end of the array.
+
+        @param newElement       the new object to add to the array
+        @see set, insert, addIfNotAlreadyThere, addSorted, addUsingDefaultSort, addArray
+    */
+    void add (ElementType&& newElement)
+    {
+        const ScopedLockType lock (getLock());
+        data.ensureAllocatedSize (numUsed + 1);
+        new (data.elements + numUsed++) ElementType (static_cast<ElementType&&> (newElement));
+    }
+   #endif
 
     /** Inserts a new element into the array at a given position.
 
@@ -524,6 +550,7 @@ public:
 
         if (isPositiveAndBelow (indexToChange, numUsed))
         {
+            jassert (data.elements != nullptr);
             data.elements [indexToChange] = newValue;
         }
         else if (indexToChange >= 0)
@@ -551,11 +578,13 @@ public:
 
     /** Adds elements from an array to the end of this array.
 
-        @param elementsToAdd        the array of elements to add
+        @param elementsToAdd        an array of some kind of object from which elements
+                                    can be constructed.
         @param numElementsToAdd     how many elements are in this other array
         @see add
     */
-    void addArray (const ElementType* elementsToAdd, int numElementsToAdd)
+    template <typename Type>
+    void addArray (const Type* elementsToAdd, int numElementsToAdd)
     {
         const ScopedLockType lock (getLock());
 
@@ -571,16 +600,32 @@ public:
         }
     }
 
+    /** Adds elements from a null-terminated array of pointers to the end of this array.
+
+        @param elementsToAdd    an array of pointers to some kind of object from which elements
+                                can be constructed. This array must be terminated by a nullptr
+        @see addArray
+    */
+    template <typename Type>
+    void addNullTerminatedArray (const Type* const* elementsToAdd)
+    {
+        int num = 0;
+        for (const Type* const* e = elementsToAdd; *e != nullptr; ++e)
+            ++num;
+
+        addArray (elementsToAdd, num);
+    }
+
     /** This swaps the contents of this array with those of another array.
 
         If you need to exchange two arrays, this is vastly quicker than using copy-by-value
         because it just swaps their internal pointers.
     */
-    void swapWithArray (Array& otherArray) noexcept
+    template <class OtherArrayType>
+    void swapWith (OtherArrayType& otherArray) noexcept
     {
         const ScopedLockType lock1 (getLock());
-        const ScopedLockType lock2 (otherArray.getLock());
-
+        const typename OtherArrayType::ScopedLockType lock2 (otherArray.getLock());
         data.swapWith (otherArray.data);
         std::swap (numUsed, otherArray.numUsed);
     }
@@ -720,7 +765,7 @@ public:
 
         @param indexToRemove    the index of the element to remove
         @returns                the element that has been removed
-        @see removeValue, removeRange
+        @see removeFirstMatchingValue, removeAllInstancesOf, removeRange
     */
     ElementType remove (const int indexToRemove)
     {
@@ -787,7 +832,7 @@ public:
 
         @param startIndex       the index of the first element to remove
         @param numberToRemove   how many elements should be removed
-        @see remove, removeValue
+        @see remove, removeFirstMatchingValue, removeAllInstancesOf
     */
     void removeRange (int startIndex, int numberToRemove)
     {
@@ -815,7 +860,7 @@ public:
     /** Removes the last n elements from the array.
 
         @param howManyToRemove   how many elements to remove from the end of the array
-        @see remove, removeValue, removeRange
+        @see remove, removeFirstMatchingValue, removeAllInstancesOf, removeRange
     */
     void removeLast (int howManyToRemove = 1)
     {
@@ -834,7 +879,7 @@ public:
     /** Removes any elements which are also in another array.
 
         @param otherArray   the other array in which to look for elements to remove
-        @see removeValuesNotIn, remove, removeValue, removeRange
+        @see removeValuesNotIn, remove, removeFirstMatchingValue, removeAllInstancesOf, removeRange
     */
     template <class OtherArrayType>
     void removeValuesIn (const OtherArrayType& otherArray)
@@ -862,7 +907,7 @@ public:
         Only elements which occur in this other array will be retained.
 
         @param otherArray    the array in which to look for elements NOT to remove
-        @see removeValuesIn, remove, removeValue, removeRange
+        @see removeValuesIn, remove, removeFirstMatchingValue, removeAllInstancesOf, removeRange
     */
     template <class OtherArrayType>
     void removeValuesNotIn (const OtherArrayType& otherArray)
@@ -1024,6 +1069,13 @@ public:
     /** Returns the type of scoped lock to use for locking this array */
     typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
+
+    //==============================================================================
+   #ifndef DOXYGEN
+    // Note that the swapWithArray method has been replaced by a more flexible templated version,
+    // and renamed "swapWith" to be more consistent with the names used in other classes.
+    JUCE_DEPRECATED_WITH_BODY (void swapWithArray (Array& other) noexcept, { swapWith (other); })
+   #endif
 
 private:
     //==============================================================================

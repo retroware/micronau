@@ -175,8 +175,8 @@ namespace juce
     };@endcode
 */
 #define JUCE_DECLARE_NON_COPYABLE(className) \
-    className (const className&);\
-    className& operator= (const className&);
+    className (const className&) JUCE_DELETED_FUNCTION;\
+    className& operator= (const className&) JUCE_DELETED_FUNCTION;
 
 /** This is a shorthand way of writing both a JUCE_DECLARE_NON_COPYABLE and
     JUCE_LEAK_DETECTOR macro for a class.
@@ -190,8 +190,8 @@ namespace juce
 */
 #define JUCE_PREVENT_HEAP_ALLOCATION \
    private: \
-    static void* operator new (size_t); \
-    static void operator delete (void*);
+    static void* operator new (size_t) JUCE_DELETED_FUNCTION; \
+    static void operator delete (void*) JUCE_DELETED_FUNCTION;
 
 
 //==============================================================================
@@ -222,17 +222,17 @@ namespace juce
   #if ! JUCE_MODULE_AVAILABLE_juce_gui_basics
     #define JUCE_CATCH_EXCEPTION    JUCE_CATCH_ALL
   #else
-    /** Used in try-catch blocks, this macro will send exceptions to the JUCEApplication
+    /** Used in try-catch blocks, this macro will send exceptions to the JUCEApplicationBase
         object so they can be logged by the application if it wants to.
     */
     #define JUCE_CATCH_EXCEPTION \
       catch (const std::exception& e)  \
       { \
-          juce::JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__); \
+          juce::JUCEApplicationBase::sendUnhandledException (&e, __FILE__, __LINE__); \
       } \
       catch (...) \
       { \
-          juce::JUCEApplication::sendUnhandledException (nullptr, __FILE__, __LINE__); \
+          juce::JUCEApplicationBase::sendUnhandledException (nullptr, __FILE__, __LINE__); \
       }
   #endif
 
@@ -274,12 +274,16 @@ namespace juce
 #ifdef DOXYGEN
  /** This macro can be used to wrap a function which has been deprecated. */
  #define JUCE_DEPRECATED(functionDef)
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)
 #elif JUCE_MSVC && ! JUCE_NO_DEPRECATION_WARNINGS
- #define JUCE_DEPRECATED(functionDef)     __declspec(deprecated) functionDef
+ #define JUCE_DEPRECATED(functionDef)                   __declspec(deprecated) functionDef
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   __declspec(deprecated) functionDef body
 #elif JUCE_GCC && ! JUCE_NO_DEPRECATION_WARNINGS
- #define JUCE_DEPRECATED(functionDef)     functionDef __attribute__ ((deprecated))
+ #define JUCE_DEPRECATED(functionDef)                   functionDef __attribute__ ((deprecated))
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef __attribute__ ((deprecated)) body
 #else
- #define JUCE_DEPRECATED(functionDef)     functionDef
+ #define JUCE_DEPRECATED(functionDef)                   functionDef
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef body
 #endif
 
 //==============================================================================
@@ -301,13 +305,17 @@ namespace juce
 //==============================================================================
 // Here, we'll check for C++11 compiler support, and if it's not available, define
 // a few workarounds, so that we can still use some of the newer language features.
-#if defined (__GXX_EXPERIMENTAL_CXX0X__) && defined (__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__) >= 405
+#if (__cplusplus >= 201103L || defined (__GXX_EXPERIMENTAL_CXX0X__)) && (__GNUC__ * 100 + __GNUC_MINOR__) >= 405
  #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
  #define JUCE_COMPILER_SUPPORTS_NULLPTR 1
  #define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1
 
  #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && ! defined (JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL)
   #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
+ #endif
+
+ #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && ! defined (JUCE_DELETED_FUNCTION)
+  #define JUCE_DELETED_FUNCTION = delete
  #endif
 #endif
 
@@ -322,6 +330,10 @@ namespace juce
 
  #if __has_feature (cxx_rvalue_references)
   #define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1
+ #endif
+
+ #if __has_feature (cxx_deleted_functions)
+  #define JUCE_DELETED_FUNCTION = delete
  #endif
 
  #ifndef JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL
@@ -340,6 +352,10 @@ namespace juce
 
 #if defined (_MSC_VER) && _MSC_VER >= 1700
  #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
+#endif
+
+#ifndef JUCE_DELETED_FUNCTION
+ #define JUCE_DELETED_FUNCTION
 #endif
 
 //==============================================================================

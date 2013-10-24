@@ -25,9 +25,6 @@
 #ifndef JUCE_RECTANGLE_H_INCLUDED
 #define JUCE_RECTANGLE_H_INCLUDED
 
-#include "juce_Point.h"
-class RectangleList;
-
 
 //==============================================================================
 /**
@@ -291,7 +288,11 @@ public:
         return *this;
     }
 
-    /** Scales this rectangle by the given amount, centred around the origin. */
+    /** Returns a rectangle that has been scaled by the given amount, centred around the origin.
+        Note that if the rectangle has int coordinates and it's scaled by a
+        floating-point amount, then the result will be converted back to integer
+        coordinates using getSmallestIntegerContainer().
+    */
     template <typename FloatType>
     Rectangle operator* (FloatType scaleFactor) const noexcept
     {
@@ -300,13 +301,33 @@ public:
         return r;
     }
 
-    /** Scales this rectangle by the given amount, centred around the origin. */
+    /** Scales this rectangle by the given amount, centred around the origin.
+        Note that if the rectangle has int coordinates and it's scaled by a
+        floating-point amount, then the result will be converted back to integer
+        coordinates using getSmallestIntegerContainer().
+    */
     template <typename FloatType>
     Rectangle operator*= (FloatType scaleFactor) noexcept
     {
-        pos *= scaleFactor;
-        w = (ValueType) (w * scaleFactor);
-        h = (ValueType) (h * scaleFactor);
+        Rectangle<FloatType> (pos.x * scaleFactor,
+                              pos.y * scaleFactor,
+                              w * scaleFactor,
+                              h * scaleFactor).copyWithRounding (*this);
+        return *this;
+    }
+
+    /** Scales this rectangle by the given X and Y factors, centred around the origin.
+        Note that if the rectangle has int coordinates and it's scaled by a
+        floating-point amount, then the result will be converted back to integer
+        coordinates using getSmallestIntegerContainer().
+    */
+    template <typename FloatType>
+    Rectangle operator*= (Point<FloatType> scaleFactor) noexcept
+    {
+        Rectangle<FloatType> (pos.x * scaleFactor.x,
+                              pos.y * scaleFactor.y,
+                              w * scaleFactor.x,
+                              h * scaleFactor.y).copyWithRounding (*this);
         return *this;
     }
 
@@ -314,14 +335,31 @@ public:
     template <typename FloatType>
     Rectangle operator/ (FloatType scaleFactor) const noexcept
     {
-        return operator* (((FloatType) 1) / scaleFactor);
+        Rectangle r (*this);
+        r /= scaleFactor;
+        return r;
     }
 
     /** Scales this rectangle by the given amount, centred around the origin. */
     template <typename FloatType>
     Rectangle operator/= (FloatType scaleFactor) noexcept
     {
-        return operator*= (((FloatType) 1) / scaleFactor);
+        Rectangle<FloatType> (pos.x / scaleFactor,
+                              pos.y / scaleFactor,
+                              w / scaleFactor,
+                              h / scaleFactor).copyWithRounding (*this);
+        return *this;
+    }
+
+    /** Scales this rectangle by the given X and Y factors, centred around the origin. */
+    template <typename FloatType>
+    Rectangle operator/= (Point<FloatType> scaleFactor) noexcept
+    {
+        Rectangle<FloatType> (pos.x / scaleFactor.x,
+                              pos.y / scaleFactor.y,
+                              w / scaleFactor.x,
+                              h / scaleFactor.y).copyWithRounding (*this);
+        return *this;
     }
 
     /** Expands the rectangle by a given amount.
@@ -529,9 +567,9 @@ public:
         return Rectangle();
     }
 
-    /** Clips a rectangle so that it lies only within this one.
+    /** Clips a set of rectangle coordinates so that they lie only within this one.
         This is a non-static version of intersectRectangles().
-        Returns false if the two regions didn't overlap.
+        Returns false if the two rectangles didn't overlap.
     */
     bool intersectRectangle (ValueType& otherX, ValueType& otherY, ValueType& otherW, ValueType& otherH) const noexcept
     {
@@ -551,6 +589,15 @@ public:
         }
 
         return false;
+    }
+
+    /** Clips a rectangle so that it lies only within this one.
+        Returns false if the two rectangles didn't overlap.
+    */
+    bool intersectRectangle (Rectangle<ValueType>& rectangleToClip) const noexcept
+    {
+        return intersectRectangle (rectangleToClip.pos.x, rectangleToClip.pos.y,
+                                   rectangleToClip.w, rectangleToClip.h);
     }
 
     /** Returns the smallest rectangle that contains both this one and the one passed-in.
@@ -651,7 +698,7 @@ public:
 
         This should only be used on floating point rectangles.
     */
-    Rectangle transformed (const AffineTransform& transform) const noexcept
+    Rectangle transformedBy (const AffineTransform& transform) const noexcept
     {
         typedef typename TypeHelpers::SmallestFloatType<ValueType>::type FloatType;
 
@@ -679,26 +726,15 @@ public:
     */
     Rectangle<int> getSmallestIntegerContainer() const noexcept
     {
-        return getSmallestIntegerContainerWithType<int>();
-    }
+        const int x1 = floorAsInt (pos.x);
+        const int y1 = floorAsInt (pos.y);
+        const int x2 = ceilAsInt  (pos.x + w);
+        const int y2 = ceilAsInt  (pos.y + h);
 
-    /** Returns the smallest integer-aligned rectangle that completely contains this one.
-        This is only relevent for floating-point rectangles, of course.
-        @see toFloat()
-    */
-    template <typename IntType>
-    Rectangle<IntType> getSmallestIntegerContainerWithType() const noexcept
-    {
-        const IntType x1 = static_cast <IntType> (std::floor (static_cast<float> (pos.x)));
-        const IntType y1 = static_cast <IntType> (std::floor (static_cast<float> (pos.y)));
-        const IntType x2 = static_cast <IntType> (std::ceil  (static_cast<float> (pos.x + w)));
-        const IntType y2 = static_cast <IntType> (std::ceil  (static_cast<float> (pos.y + h)));
-
-        return Rectangle<IntType> (x1, y1, x2 - x1, y2 - y1);
+        return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
     }
 
     /** Casts this rectangle to a Rectangle<float>.
-        Obviously this is mainly useful for rectangles that use integer types.
         @see getSmallestIntegerContainer
     */
     Rectangle<float> toFloat() const noexcept
@@ -708,13 +744,24 @@ public:
     }
 
     /** Casts this rectangle to a Rectangle<double>.
-        Obviously this is mainly useful for rectangles that use integer types.
         @see getSmallestIntegerContainer
     */
     Rectangle<double> toDouble() const noexcept
     {
         return Rectangle<double> (static_cast<double> (pos.x), static_cast<double> (pos.y),
                                   static_cast<double> (w),     static_cast<double> (h));
+    }
+
+    /** Casts this rectangle to a Rectangle with the given type.
+        If the target type is a conversion from float to int, then the conversion
+        will be done using getSmallestIntegerContainer().
+    */
+    template <typename TargetType>
+    Rectangle<TargetType> toType() const noexcept
+    {
+        Rectangle<TargetType> r;
+        copyWithRounding (r);
+        return r;
     }
 
     /** Returns the smallest Rectangle that can contain a set of points. */
@@ -793,10 +840,10 @@ public:
 
         @see toString
     */
-    static Rectangle fromString (const String& stringVersion)
+    static Rectangle fromString (StringRef stringVersion)
     {
         StringArray toks;
-        toks.addTokens (stringVersion.trim(), ",; \t\r\n", String::empty);
+        toks.addTokens (stringVersion.text.findEndOfWhitespace(), ",; \t\r\n", String::empty);
 
         return Rectangle (parseIntAfterSpace (toks[0]),
                           parseIntAfterSpace (toks[1]),
@@ -804,21 +851,30 @@ public:
                           parseIntAfterSpace (toks[3]));
     }
 
-    typedef ValueType Type;
+   #ifndef DOXYGEN
+    // This has been renamed by transformedBy, in order to match the method names used in the Point class.
+    JUCE_DEPRECATED_WITH_BODY (Rectangle transformed (const AffineTransform& t) const noexcept, { return transformedBy (t); })
+   #endif
 
 private:
-    friend class RectangleList;
+    template <typename OtherType> friend class Rectangle;
+
     Point<ValueType> pos;
     ValueType w, h;
 
-    static int parseIntAfterSpace (const String& s) noexcept
-        { return s.getCharPointer().findEndOfWhitespace().getIntValue32(); }
-
-    template <typename OtherType> friend class Rectangle;
+    static int parseIntAfterSpace (StringRef s) noexcept
+        { return s.text.findEndOfWhitespace().getIntValue32(); }
 
     void copyWithRounding (Rectangle<int>& result) const noexcept    { result = getSmallestIntegerContainer(); }
     void copyWithRounding (Rectangle<float>& result) const noexcept  { result = toFloat(); }
     void copyWithRounding (Rectangle<double>& result) const noexcept { result = toDouble(); }
+
+    static int floorAsInt (int n) noexcept     { return n; }
+    static int floorAsInt (float n) noexcept   { return (int) std::floor (n); }
+    static int floorAsInt (double n) noexcept  { return (int) std::floor (n); }
+    static int ceilAsInt (int n) noexcept      { return n; }
+    static int ceilAsInt (float n) noexcept    { return (int) std::ceil (n); }
+    static int ceilAsInt (double n) noexcept   { return (int) std::ceil (n); }
 };
 
 

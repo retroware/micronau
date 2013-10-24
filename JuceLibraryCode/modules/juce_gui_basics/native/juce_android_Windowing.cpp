@@ -41,7 +41,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* en
 
     initialiseJuce_GUI();
 
-    JUCEApplication* app = dynamic_cast <JUCEApplication*> (JUCEApplicationBase::createInstance());
+    JUCEApplicationBase* app = JUCEApplicationBase::createInstance();
     if (! app->initialiseApp())
         exit (0);
 
@@ -111,7 +111,7 @@ public:
         // NB: must not put this in the initialiser list, as it invokes a callback,
         // which will fail if the peer is only half-constructed.
         view = GlobalRef (android.activity.callObjectMethod (JuceAppActivity.createNewView,
-                                                             component.isOpaque()));
+                                                             component.isOpaque(), (jlong) this));
 
         if (isFocused())
             handleFocusGain();
@@ -144,12 +144,12 @@ public:
         view.clear();
     }
 
-    void* getNativeHandle() const
+    void* getNativeHandle() const override
     {
         return (void*) view.get();
     }
 
-    void setVisible (bool shouldBeVisible)
+    void setVisible (bool shouldBeVisible) override
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
@@ -177,12 +177,12 @@ public:
         }
     }
 
-    void setTitle (const String& title)
+    void setTitle (const String& title) override
     {
         view.callVoidMethod (ComponentPeerView.setViewName, javaString (title).get());
     }
 
-    void setBounds (const Rectangle<int>& r, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& r, bool isNowFullScreen) override
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
@@ -212,7 +212,7 @@ public:
         }
     }
 
-    Rectangle<int> getBounds() const
+    Rectangle<int> getBounds() const override
     {
         return Rectangle<int> (view.callIntMethod (ComponentPeerView.getLeft),
                                view.callIntMethod (ComponentPeerView.getTop),
@@ -234,27 +234,27 @@ public:
                            view.callIntMethod (ComponentPeerView.getTop));
     }
 
-    Point<int> localToGlobal (const Point<int>& relativePosition)
+    Point<int> localToGlobal (Point<int> relativePosition) override
     {
         return relativePosition + getScreenPosition();
     }
 
-    Point<int> globalToLocal (const Point<int>& screenPosition)
+    Point<int> globalToLocal (Point<int> screenPosition) override
     {
         return screenPosition - getScreenPosition();
     }
 
-    void setMinimised (bool shouldBeMinimised)
+    void setMinimised (bool shouldBeMinimised) override
     {
         // n/a
     }
 
-    bool isMinimised() const
+    bool isMinimised() const override
     {
         return false;
     }
 
-    void setFullScreen (bool shouldBeFullScreen)
+    void setFullScreen (bool shouldBeFullScreen) override
     {
         Rectangle<int> r (shouldBeFullScreen ? Desktop::getInstance().getDisplays().getMainDisplay().userArea
                                              : lastNonFullscreenBounds);
@@ -269,37 +269,37 @@ public:
         component.repaint();
     }
 
-    bool isFullScreen() const
+    bool isFullScreen() const override
     {
         return fullScreen;
     }
 
-    void setIcon (const Image& newIcon)
+    void setIcon (const Image& newIcon) override
     {
         // n/a
     }
 
-    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
+    bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
-        return isPositiveAndBelow (position.x, component.getWidth())
-            && isPositiveAndBelow (position.y, component.getHeight())
+        return isPositiveAndBelow (localPos.x, component.getWidth())
+            && isPositiveAndBelow (localPos.y, component.getHeight())
             && ((! trueIfInAChildWindow) || view.callBooleanMethod (ComponentPeerView.containsPoint,
-                                                                    position.x, position.y));
+                                                                    localPos.x, localPos.y));
     }
 
-    BorderSize<int> getFrameSize() const
+    BorderSize<int> getFrameSize() const override
     {
         // TODO
         return BorderSize<int>();
     }
 
-    bool setAlwaysOnTop (bool alwaysOnTop)
+    bool setAlwaysOnTop (bool alwaysOnTop) override
     {
         // TODO
         return false;
     }
 
-    void toFront (bool makeActive)
+    void toFront (bool makeActive) override
     {
         view.callVoidMethod (ComponentPeerView.bringToFront);
 
@@ -309,7 +309,7 @@ public:
         handleBroughtToFront();
     }
 
-    void toBehind (ComponentPeer* other)
+    void toBehind (ComponentPeer* other) override
     {
         // TODO
     }
@@ -347,12 +347,12 @@ public:
     }
 
     //==============================================================================
-    bool isFocused() const
+    bool isFocused() const override
     {
         return view.callBooleanMethod (ComponentPeerView.hasFocus);
     }
 
-    void grabFocus()
+    void grabFocus() override
     {
         view.callBooleanMethod (ComponentPeerView.requestFocus);
     }
@@ -365,12 +365,12 @@ public:
             handleFocusLoss();
     }
 
-    void textInputRequired (const Point<int>&)
+    void textInputRequired (const Point<int>&) override
     {
         view.callVoidMethod (ComponentPeerView.showKeyboard, true);
     }
 
-    void dismissPendingTextInput()
+    void dismissPendingTextInput() override
     {
         view.callVoidMethod (ComponentPeerView.showKeyboard, false);
      }
@@ -403,7 +403,7 @@ public:
 
                 {
                     LowLevelGraphicsSoftwareRenderer g (temp);
-                    g.setOrigin (-clip.getX(), -clip.getY());
+                    g.setOrigin (-clip.getPosition());
                     handlePaint (g);
                 }
             }
@@ -416,7 +416,7 @@ public:
         }
     }
 
-    void repaint (const Rectangle<int>& area)
+    void repaint (const Rectangle<int>& area) override
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
@@ -444,31 +444,22 @@ public:
         }
     }
 
-    void performAnyPendingRepaintsNow()
+    void performAnyPendingRepaintsNow() override
     {
         // TODO
     }
 
-    void setAlpha (float newAlpha)
+    void setAlpha (float newAlpha) override
     {
         // TODO
+    }
+
+    StringArray getAvailableRenderingEngines() override
+    {
+        return StringArray ("Software Renderer");
     }
 
     //==============================================================================
-    static AndroidComponentPeer* findPeerForJavaView (JNIEnv* env, jobject viewToFind)
-    {
-        for (int i = getNumPeers(); --i >= 0;)
-        {
-            AndroidComponentPeer* const ap = static_cast <AndroidComponentPeer*> (getPeer(i));
-            jassert (dynamic_cast <AndroidComponentPeer*> (getPeer(i)) != nullptr);
-
-            if (env->IsSameObject (ap->view.get(), viewToFind))
-                return ap;
-        }
-
-        return nullptr;
-    }
-
     static ModifierKeys currentModifiers;
     static Point<int> lastMousePos;
 
@@ -503,8 +494,8 @@ private:
             }
         }
 
-        ImageType* createType() const                       { return new SoftwareImageType(); }
-        LowLevelGraphicsContext* createLowLevelContext()    { return new LowLevelGraphicsSoftwareRenderer (Image (this)); }
+        ImageType* createType() const override                      { return new SoftwareImageType(); }
+        LowLevelGraphicsContext* createLowLevelContext() override   { return new LowLevelGraphicsSoftwareRenderer (Image (this)); }
 
         void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode mode)
         {
@@ -541,18 +532,18 @@ Point<int> AndroidComponentPeer::lastMousePos;
 #define JUCE_VIEW_CALLBACK(returnType, javaMethodName, params, juceMethodInvocation) \
   JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024ComponentPeerView), javaMethodName, returnType, params) \
   { \
-      if (AndroidComponentPeer* const peer = AndroidComponentPeer::findPeerForJavaView (env, view)) \
+      if (AndroidComponentPeer* peer = (AndroidComponentPeer*) (pointer_sized_uint) host) \
           peer->juceMethodInvocation; \
   }
 
-JUCE_VIEW_CALLBACK (void, handlePaint,      (JNIEnv* env, jobject view, jobject canvas),                          handlePaintCallback (env, canvas))
-JUCE_VIEW_CALLBACK (void, handleMouseDown,  (JNIEnv* env, jobject view, jint i, jfloat x, jfloat y, jlong time),  handleMouseDownCallback (i, (float) x, (float) y, (int64) time))
-JUCE_VIEW_CALLBACK (void, handleMouseDrag,  (JNIEnv* env, jobject view, jint i, jfloat x, jfloat y, jlong time),  handleMouseDragCallback (i, (float) x, (float) y, (int64) time))
-JUCE_VIEW_CALLBACK (void, handleMouseUp,    (JNIEnv* env, jobject view, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback (i, (float) x, (float) y, (int64) time))
-JUCE_VIEW_CALLBACK (void, viewSizeChanged,  (JNIEnv* env, jobject view),                                          handleMovedOrResized())
-JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv* env, jobject view, jboolean hasFocus),                       handleFocusChangeCallback (hasFocus))
-JUCE_VIEW_CALLBACK (void, handleKeyDown,    (JNIEnv* env, jobject view, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
-JUCE_VIEW_CALLBACK (void, handleKeyUp,      (JNIEnv* env, jobject view, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
+JUCE_VIEW_CALLBACK (void, handlePaint,      (JNIEnv* env, jobject view, jlong host, jobject canvas),                          handlePaintCallback (env, canvas))
+JUCE_VIEW_CALLBACK (void, handleMouseDown,  (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDownCallback (i, (float) x, (float) y, (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseDrag,  (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDragCallback (i, (float) x, (float) y, (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseUp,    (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback (i, (float) x, (float) y, (int64) time))
+JUCE_VIEW_CALLBACK (void, viewSizeChanged,  (JNIEnv* env, jobject view, jlong host),                                          handleMovedOrResized())
+JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv* env, jobject view, jlong host, jboolean hasFocus),                       handleFocusChangeCallback (hasFocus))
+JUCE_VIEW_CALLBACK (void, handleKeyDown,    (JNIEnv* env, jobject view, jlong host, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
+JUCE_VIEW_CALLBACK (void, handleKeyUp,      (JNIEnv* env, jobject view, jlong host, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
@@ -572,15 +563,20 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
+double Desktop::getDefaultMasterScale()
+{
+    return 1.0;
+}
+
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
     // TODO
     return upright;
 }
 
-bool Desktop::addMouseInputSource()
+bool MouseInputSource::SourceList::addSource()
 {
-    mouseSources.add (new MouseInputSource (mouseSources.size(), false));
+    addSource (sources.size(), false);
     return true;
 }
 
@@ -612,14 +608,10 @@ ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 }
 
 //==============================================================================
-bool Process::isForegroundProcess()
-{
-    return true;      // TODO
-}
-
-void Process::makeForegroundProcess()
-{
-}
+// TODO
+JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess() { return true; }
+JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess() {}
+JUCE_API void JUCE_CALLTYPE Process::hide() {}
 
 //==============================================================================
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
@@ -659,7 +651,10 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, alertDismissed, void, (JNIEn
                                                                            jlong callbackAsLong, jint result))
 {
     if (ModalComponentManager::Callback* callback = (ModalComponentManager::Callback*) callbackAsLong)
+    {
         callback->modalStateFinished (result);
+        delete callback;
+    }
 }
 
 //==============================================================================
@@ -701,7 +696,6 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv
                                                                           jint screenWidth, jint screenHeight,
                                                                           jint dpi))
 {
-    const bool isSystemInitialised = android.screenWidth != 0;
     android.screenWidth = screenWidth;
     android.screenHeight = screenHeight;
     android.dpi = dpi;

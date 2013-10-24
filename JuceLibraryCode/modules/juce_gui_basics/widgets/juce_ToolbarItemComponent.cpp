@@ -22,13 +22,8 @@
   ==============================================================================
 */
 
-ToolbarItemFactory::ToolbarItemFactory()
-{
-}
-
-ToolbarItemFactory::~ToolbarItemFactory()
-{
-}
+ToolbarItemFactory::ToolbarItemFactory() {}
+ToolbarItemFactory::~ToolbarItemFactory() {}
 
 //==============================================================================
 class ToolbarItemComponent::ItemDragAndDropOverlayComponent    : public Component
@@ -192,7 +187,7 @@ void ToolbarItemComponent::paintButton (Graphics& g, const bool over, const bool
         Graphics::ScopedSaveState ss (g);
 
         g.reduceClipRegion (contentArea);
-        g.setOrigin (contentArea.getX(), contentArea.getY());
+        g.setOrigin (contentArea.getPosition());
 
         paintButtonArea (g, contentArea.getWidth(), contentArea.getHeight(), over, down);
     }

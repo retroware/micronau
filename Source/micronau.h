@@ -57,9 +57,9 @@ public:
     const String getParameterName (int index);
     const String getParameterText (int index);
 
-    float getParameterMin (int parameterIndex);
-    float getParameterMax (int parameterIndex);
-    float getParameterDefault (int parameterIndex);
+    float getParameterMinValue (int parameterIndex);
+    float getParameterMaxValue (int parameterIndex);
+    float getParameterDefaultValue (int parameterIndex);
     int getParameterNumSteps (int parameterIndex);
 
     const String getInputChannelName (int channelIndex) const;

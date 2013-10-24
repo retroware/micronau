@@ -67,12 +67,12 @@ public:
         imageData.allocate ((size_t) (lineStride * jmax (1, h)), clearImage);
     }
 
-    LowLevelGraphicsContext* createLowLevelContext()
+    LowLevelGraphicsContext* createLowLevelContext() override
     {
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode)
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode) override
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
@@ -80,14 +80,14 @@ public:
         bitmap.pixelStride = pixelStride;
     }
 
-    ImagePixelData* clone()
+    ImagePixelData* clone() override
     {
         SoftwarePixelData* s = new SoftwarePixelData (pixelFormat, width, height, false);
         memcpy (s->imageData, imageData, (size_t) (lineStride * height));
         return s;
     }
 
-    ImageType* createType() const    { return new SoftwareImageType(); }
+    ImageType* createType() const override    { return new SoftwareImageType(); }
 
 private:
     HeapBlock<uint8> imageData;
@@ -135,20 +135,20 @@ public:
     {
     }
 
-    LowLevelGraphicsContext* createLowLevelContext()
+    LowLevelGraphicsContext* createLowLevelContext() override
     {
         LowLevelGraphicsContext* g = image->createLowLevelContext();
         g->clipToRectangle (area);
-        g->setOrigin (area.getX(), area.getY());
+        g->setOrigin (area.getPosition());
         return g;
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode)
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
         image->initialiseBitmapData (bitmap, x + area.getX(), y + area.getY(), mode);
     }
 
-    ImagePixelData* clone()
+    ImagePixelData* clone() override
     {
         jassert (getReferenceCount() > 0); // (This method can't be used on an unowned pointer, as it will end up self-deleting)
         const ScopedPointer<ImageType> type (image->createType());
@@ -164,7 +164,7 @@ public:
         return newImage.getPixelData();
     }
 
-    ImageType* createType() const    { return image->createType(); }
+    ImageType* createType() const override    { return image->createType(); }
 
 private:
     const ImagePixelData::Ptr image;
@@ -256,7 +256,10 @@ void Image::duplicateIfShared()
 
 Image Image::createCopy() const
 {
-    return Image (image != nullptr ? image->clone() : nullptr);
+    if (image != nullptr)
+        return Image (image->clone());
+
+    return Image();
 }
 
 Image Image::rescaled (const int newWidth, const int newHeight, const Graphics::ResamplingQuality quality) const
@@ -269,8 +272,8 @@ Image Image::rescaled (const int newWidth, const int newHeight, const Graphics::
 
     Graphics g (newImage);
     g.setImageResamplingQuality (quality);
-    g.drawImage (*this, 0, 0, newWidth, newHeight, 0, 0, image->width, image->height, false);
-
+    g.drawImageTransformed (*this, AffineTransform::scale (newWidth  / (float) image->width,
+                                                           newHeight / (float) image->height), false);
     return newImage;
 }
 
@@ -522,7 +525,7 @@ void Image::desaturate()
     }
 }
 
-void Image::createSolidAreaMask (RectangleList& result, const float alphaThreshold) const
+void Image::createSolidAreaMask (RectangleList<int>& result, const float alphaThreshold) const
 {
     if (hasAlphaChannel())
     {

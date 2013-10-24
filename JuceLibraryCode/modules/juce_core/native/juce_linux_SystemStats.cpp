@@ -96,13 +96,13 @@ int SystemStats::getPageSize()
 //==============================================================================
 String SystemStats::getLogonName()
 {
-    const char* user = getenv ("USER");
+    if (const char* user = getenv ("USER"))
+        return CharPointer_UTF8 (user);
 
-    if (user == nullptr)
-        if (passwd* const pw = getpwuid (getuid()))
-            user = pw->pw_name;
+    if (struct passwd* const pw = getpwuid (getuid()))
+        return CharPointer_UTF8 (pw->pw_name);
 
-    return CharPointer_UTF8 (user);
+    return String::empty;
 }
 
 String SystemStats::getFullUserName()
@@ -132,12 +132,13 @@ String SystemStats::getUserRegion()      { return getLocaleValue (_NL_IDENTIFICA
 String SystemStats::getDisplayLanguage() { return getUserLanguage(); }
 
 //==============================================================================
-SystemStats::CPUFlags::CPUFlags()
+void CPUInformation::initialise() noexcept
 {
     const String flags (LinuxStatsHelpers::getCpuInfo ("flags"));
     hasMMX   = flags.contains ("mmx");
     hasSSE   = flags.contains ("sse");
     hasSSE2  = flags.contains ("sse2");
+    hasSSE3  = flags.contains ("sse3");
     has3DNow = flags.contains ("3dnow");
 
     numCpus = LinuxStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;

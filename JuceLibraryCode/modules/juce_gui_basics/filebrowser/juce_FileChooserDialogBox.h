@@ -25,11 +25,6 @@
 #ifndef JUCE_FILECHOOSERDIALOGBOX_H_INCLUDED
 #define JUCE_FILECHOOSERDIALOGBOX_H_INCLUDED
 
-#include "juce_FileBrowserComponent.h"
-#include "../windows/juce_ResizableWindow.h"
-#include "../buttons/juce_TextButton.h"
-#include "../windows/juce_AlertWindow.h"
-
 
 //==============================================================================
 /**
@@ -140,12 +135,13 @@ private:
     ContentComponent* content;
     const bool warnAboutOverwritingExistingFiles;
 
-    void buttonClicked (Button*);
+    void buttonClicked (Button*) override;
     void closeButtonPressed();
-    void selectionChanged();
-    void fileClicked (const File&, const MouseEvent&);
-    void fileDoubleClicked (const File&);
-    void browserRootChanged (const File&);
+    void selectionChanged() override;
+    void fileClicked (const File&, const MouseEvent&) override;
+    void fileDoubleClicked (const File&) override;
+    void browserRootChanged (const File&) override;
+    int getDefaultWidth() const;
 
     void okButtonPressed();
     void createNewFolder();

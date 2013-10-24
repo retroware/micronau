@@ -25,8 +25,6 @@
 #ifndef JUCE_MIDIBUFFER_H_INCLUDED
 #define JUCE_MIDIBUFFER_H_INCLUDED
 
-#include "juce_MidiMessage.h"
-
 
 //==============================================================================
 /**
@@ -53,10 +51,10 @@ public:
     explicit MidiBuffer (const MidiMessage& message) noexcept;
 
     /** Creates a copy of another MidiBuffer. */
-    MidiBuffer (const MidiBuffer& other) noexcept;
+    MidiBuffer (const MidiBuffer&) noexcept;
 
     /** Makes a copy of another MidiBuffer. */
-    MidiBuffer& operator= (const MidiBuffer& other) noexcept;
+    MidiBuffer& operator= (const MidiBuffer&) noexcept;
 
     /** Destructor */
     ~MidiBuffer();
@@ -178,7 +176,7 @@ public:
     public:
         //==============================================================================
         /** Creates an Iterator for this MidiBuffer. */
-        Iterator (const MidiBuffer& buffer) noexcept;
+        Iterator (const MidiBuffer&) noexcept;
 
         /** Destructor. */
         ~Iterator() noexcept;

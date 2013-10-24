@@ -29,8 +29,6 @@
 #ifndef JUCE_WAITABLEEVENT_H_INCLUDED
 #define JUCE_WAITABLEEVENT_H_INCLUDED
 
-#include "../text/juce_String.h"
-
 
 //==============================================================================
 /**
@@ -45,6 +43,8 @@ class JUCE_API  WaitableEvent
 public:
     //==============================================================================
     /** Creates a WaitableEvent object.
+
+        The object is initially in an unsignalled state.
 
         @param manualReset  If this is false, the event will be reset automatically when the wait()
                             method is called. If manualReset is true, then once the event is signalled,
@@ -96,7 +96,6 @@ public:
 
     //==============================================================================
     /** Resets the event to an unsignalled state.
-
         If it's not already signalled, this does nothing.
     */
     void reset() const noexcept;
@@ -105,7 +104,7 @@ public:
 private:
     //==============================================================================
    #if JUCE_WINDOWS
-    void* internal;
+    void* handle;
    #else
     mutable pthread_cond_t condition;
     mutable pthread_mutex_t mutex;

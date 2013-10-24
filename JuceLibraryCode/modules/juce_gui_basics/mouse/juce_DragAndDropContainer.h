@@ -25,8 +25,6 @@
 #ifndef JUCE_DRAGANDDROPCONTAINER_H_INCLUDED
 #define JUCE_DRAGANDDROPCONTAINER_H_INCLUDED
 
-#include "juce_DragAndDropTarget.h"
-
 
 //==============================================================================
 /**
@@ -88,7 +86,7 @@ public:
     */
     void startDragging (const var& sourceDescription,
                         Component* sourceComponent,
-                        const Image& dragImage = Image::null,
+                        Image dragImage = Image::null,
                         bool allowDraggingToOtherJuceWindows = false,
                         const Point<int>* imageOffsetFromMouse = nullptr);
 
