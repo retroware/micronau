@@ -25,9 +25,6 @@
 #ifndef JUCE_TOOLBAR_H_INCLUDED
 #define JUCE_TOOLBAR_H_INCLUDED
 
-#include "../mouse/juce_DragAndDropContainer.h"
-#include "../layout/juce_ComponentAnimator.h"
-#include "../buttons/juce_Button.h"
 class ToolbarItemComponent;
 class ToolbarItemFactory;
 
@@ -124,9 +121,11 @@ public:
                   int itemId,
                   int insertIndex = -1);
 
-    /** Deletes one of the items from the bar.
-    */
+    /** Deletes one of the items from the bar. */
     void removeToolbarItem (int itemIndex);
+
+    /** Removes an item from the bar and returns it. */
+    ToolbarItemComponent* removeAndReturnItem (int itemIndex);
 
     /** Returns the number of items currently on the toolbar.
 

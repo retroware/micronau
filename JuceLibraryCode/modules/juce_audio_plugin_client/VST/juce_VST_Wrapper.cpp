@@ -76,6 +76,8 @@
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wconversion"
  #pragma clang diagnostic ignored "-Wshadow"
+ #pragma clang diagnostic ignored "-Wunused-parameter"
+ #pragma clang diagnostic ignored "-Wdeprecated-writable-strings"
 #endif
 
 // VSTSDK V2.4 includes..
@@ -115,11 +117,14 @@ namespace juce
 {
  #if JUCE_MAC
   extern void initialiseMac();
-  extern void* attachComponentToWindowRef (Component* component, void* windowRef);
-  extern void detachComponentFromWindowRef (Component* component, void* nsWindow);
-  extern void setNativeHostWindowSize (void* nsWindow, Component* editorComp, int newWidth, int newHeight);
-  extern void checkWindowVisibility (void* nsWindow, Component* component);
-  extern bool forwardCurrentKeyEventToHost (Component* component);
+  extern void* attachComponentToWindowRef (Component*, void* windowRef);
+  extern void detachComponentFromWindowRef (Component*, void* nsWindow);
+  extern void setNativeHostWindowSize (void* nsWindow, Component*, int newWidth, int newHeight);
+  extern void checkWindowVisibility (void* nsWindow, Component*);
+  extern bool forwardCurrentKeyEventToHost (Component*);
+ #if ! JUCE_64BIT
+  extern void updateEditorCompBounds (Component*);
+ #endif
  #endif
 
  #if JUCE_LINUX
@@ -205,52 +210,6 @@ namespace
         }
     }
 
-    //==============================================================================
-    static HHOOK keyboardHook = 0;
-    static int keyboardHookUsers = 0;
-
-    LRESULT CALLBACK keyboardHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
-    {
-        if (nCode == 0)
-        {
-            const MSG& msg = *(const MSG*) lParam;
-
-            if (msg.message == WM_CHAR)
-            {
-                Desktop& desktop = Desktop::getInstance();
-                HWND focused = GetFocus();
-
-                for (int i = desktop.getNumComponents(); --i >= 0;)
-                {
-                    if ((HWND) desktop.getComponent (i)->getWindowHandle() == focused)
-                    {
-                        SendMessage (focused, msg.message, msg.wParam, msg.lParam);
-                        break;
-                    }
-                }
-            }
-        }
-
-        return CallNextHookEx (mouseWheelHook, nCode, wParam, lParam);
-    }
-
-    void registerKeyboardHook()
-    {
-        if (keyboardHookUsers++ == 0)
-            keyboardHook = SetWindowsHookEx (WH_GETMESSAGE, keyboardHookCallback,
-                                             (HINSTANCE) Process::getCurrentModuleInstanceHandle(),
-                                             GetCurrentThreadId());
-    }
-
-    void unregisterKeyboardHook()
-    {
-        if (--keyboardHookUsers == 0 && keyboardHook != 0)
-        {
-            UnhookWindowsHookEx (keyboardHook);
-            keyboardHook = 0;
-        }
-    }
-
    #if JUCE_WINDOWS
     static bool messageThreadIsDefinitelyCorrect = false;
    #endif
@@ -275,7 +234,7 @@ public:
     ~SharedMessageThread()
     {
         signalThreadShouldExit();
-        JUCEApplication::quit();
+        JUCEApplicationBase::quit();
         waitForThreadToExit (5000);
         clearSingletonInstance();
     }
@@ -1336,9 +1295,6 @@ public:
                 addMouseListener (this, true);
 
             registerMouseWheelHook();
-
-            if (PluginHostType().isAbletonLive())
-                registerKeyboardHook();
            #endif
         }
 
@@ -1346,7 +1302,6 @@ public:
         {
            #if JUCE_WINDOWS
             unregisterMouseWheelHook();
-            unregisterKeyboardHook();
            #endif
 
             deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
@@ -1375,13 +1330,17 @@ public:
 
         AudioProcessorEditor* getEditorComp() const
         {
-            return dynamic_cast <AudioProcessorEditor*> (getChildComponent (0));
+            return dynamic_cast<AudioProcessorEditor*> (getChildComponent(0));
         }
 
         void resized() override
         {
             if (Component* const editor = getChildComponent(0))
                 editor->setBounds (getLocalBounds());
+
+           #if JUCE_MAC && ! JUCE_64BIT
+            updateEditorCompBounds (this);
+           #endif
         }
 
         void childBoundsChanged (Component* child) override
@@ -1423,9 +1382,7 @@ public:
         {
             // for hosts like nuendo, need to also pop the MDI container to the
             // front when our comp is clicked on.
-            HWND parent = findMDIParentOf ((HWND) getWindowHandle());
-
-            if (parent != 0)
+            if (HWND parent = findMDIParentOf ((HWND) getWindowHandle()))
                 SetWindowPos (parent, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
         }
        #endif

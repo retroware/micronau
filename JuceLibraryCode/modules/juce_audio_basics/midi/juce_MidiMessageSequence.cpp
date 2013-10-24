@@ -43,7 +43,7 @@ MidiMessageSequence& MidiMessageSequence::operator= (const MidiMessageSequence& 
 
 void MidiMessageSequence::swapWith (MidiMessageSequence& other) noexcept
 {
-    list.swapWithArray (other.list);
+    list.swapWith (other.list);
 }
 
 MidiMessageSequence::~MidiMessageSequence()
@@ -284,7 +284,7 @@ void MidiMessageSequence::createControllerUpdatesForTime (const int channelNumbe
 {
     bool doneProg = false;
     bool donePitchWheel = false;
-    Array <int> doneControllers;
+    Array<int> doneControllers;
     doneControllers.ensureStorageAllocated (32);
 
     for (int i = list.size(); --i >= 0;)
@@ -324,8 +324,7 @@ void MidiMessageSequence::createControllerUpdatesForTime (const int channelNumbe
 
 //==============================================================================
 MidiMessageSequence::MidiEventHolder::MidiEventHolder (const MidiMessage& mm)
-   : message (mm),
-     noteOffObject (nullptr)
+   : message (mm), noteOffObject (nullptr)
 {
 }
 

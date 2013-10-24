@@ -25,10 +25,6 @@
 #ifndef JUCE_DOCUMENTWINDOW_H_INCLUDED
 #define JUCE_DOCUMENTWINDOW_H_INCLUDED
 
-#include "juce_ResizableWindow.h"
-#include "../buttons/juce_Button.h"
-#include "../menus/juce_MenuBarModel.h"
-
 
 //==============================================================================
 /**
@@ -177,8 +173,8 @@ public:
 
         If your app is centred around this window such that the whole app should quit when
         the window is closed, then you will probably want to use this method as an opportunity
-        to call JUCEApplication::quit(), and leave the window to be deleted later by your
-        JUCEApplication::shutdown() method. (Doing it this way means that your window will
+        to call JUCEApplicationBase::quit(), and leave the window to be deleted later by your
+        JUCEApplicationBase::shutdown() method. (Doing it this way means that your window will
         still get cleaned-up if the app is quit by some other means (e.g. a cmd-Q on the mac
         or closing it via the taskbar icon on Windows).
 
@@ -263,8 +259,8 @@ private:
     MenuBarModel* menuBarModel;
 
     class ButtonListenerProxy;
-    friend class ScopedPointer <ButtonListenerProxy>;
-    ScopedPointer <ButtonListenerProxy> buttonListener;
+    friend struct ContainerDeletePolicy<ButtonListenerProxy>;
+    ScopedPointer<ButtonListenerProxy> buttonListener;
 
     void repaintTitleBar();
 

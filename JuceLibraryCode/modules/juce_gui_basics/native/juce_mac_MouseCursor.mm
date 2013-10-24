@@ -27,6 +27,7 @@
 //==============================================================================
 namespace MouseCursorHelpers
 {
+    NSImage* createNSImage (const Image&);
     NSImage* createNSImage (const Image& image)
     {
         JUCE_AUTORELEASEPOOL
@@ -51,7 +52,7 @@ namespace MouseCursorHelpers
 
     static void* fromWebKitFile (const char* filename, float hx, float hy)
     {
-        FileInputStream fileStream (String ("/System/Library/Frameworks/WebKit.framework/Frameworks/WebCore.framework/Resources/") + filename);
+        FileInputStream fileStream (File ("/System/Library/Frameworks/WebKit.framework/Frameworks/WebCore.framework/Resources").getChildFile (filename));
         BufferedInputStream buf (fileStream, 4096);
 
         PNGImageFormat pngFormat;
@@ -145,8 +146,8 @@ void MouseCursor::showInWindow (ComponentPeer*) const
 #else
 
 void* CustomMouseCursorInfo::create() const                                              { return nullptr; }
-void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType type)      { return nullptr; }
-void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool isStandard)    {}
+void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType)           { return nullptr; }
+void MouseCursor::deleteMouseCursor (void*, bool)                                        {}
 void MouseCursor::showInAllWindows() const                                               {}
 void MouseCursor::showInWindow (ComponentPeer*) const                                    {}
 

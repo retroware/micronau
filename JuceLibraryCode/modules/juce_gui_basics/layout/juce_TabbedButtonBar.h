@@ -25,7 +25,6 @@
 #ifndef JUCE_TABBEDBUTTONBAR_H_INCLUDED
 #define JUCE_TABBEDBUTTONBAR_H_INCLUDED
 
-#include "../buttons/juce_Button.h"
 class TabbedButtonBar;
 
 
@@ -296,6 +295,8 @@ public:
 
     //==============================================================================
     /** @internal */
+    void paint (Graphics&) override;
+    /** @internal */
     void resized() override;
     /** @internal */
     void lookAndFeelChanged() override;
@@ -326,7 +327,7 @@ private:
 
     class BehindFrontTabComp;
     friend class BehindFrontTabComp;
-    friend class ScopedPointer<BehindFrontTabComp>;
+    friend struct ContainerDeletePolicy<BehindFrontTabComp>;
     ScopedPointer<BehindFrontTabComp> behindFrontTab;
     ScopedPointer<Button> extraTabsButton;
 

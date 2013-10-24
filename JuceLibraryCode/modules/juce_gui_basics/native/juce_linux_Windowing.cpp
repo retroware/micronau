@@ -615,12 +615,12 @@ public:
         }
     }
 
-    LowLevelGraphicsContext* createLowLevelContext()
+    LowLevelGraphicsContext* createLowLevelContext() override
     {
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode)
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode) override
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
@@ -628,13 +628,13 @@ public:
         bitmap.pixelStride = pixelStride;
     }
 
-    ImagePixelData* clone()
+    ImagePixelData* clone() override
     {
         jassertfalse;
         return nullptr;
     }
 
-    ImageType* createType() const     { return new NativeImageType(); }
+    ImageType* createType() const override     { return new NativeImageType(); }
 
     void blitToWindow (Window window, int dx, int dy, int dw, int dh, int sx, int sy)
     {
@@ -853,7 +853,7 @@ public:
     }
 
     //==============================================================================
-    void* getNativeHandle() const
+    void* getNativeHandle() const override
     {
         return (void*) windowH;
     }
@@ -870,7 +870,7 @@ public:
         return reinterpret_cast <LinuxComponentPeer*> (peer);
     }
 
-    void setVisible (bool shouldBeVisible)
+    void setVisible (bool shouldBeVisible) override
     {
         ScopedXLock xlock;
         if (shouldBeVisible)
@@ -879,7 +879,7 @@ public:
             XUnmapWindow (display, windowH);
     }
 
-    void setTitle (const String& title)
+    void setTitle (const String& title) override
     {
         XTextProperty nameProperty;
         char* strings[] = { const_cast <char*> (title.toRawUTF8()) };
@@ -894,7 +894,7 @@ public:
         }
     }
 
-    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override
     {
         if (fullScreen && ! isNowFullScreen)
         {
@@ -965,24 +965,29 @@ public:
         }
     }
 
-    Rectangle<int> getBounds() const          { return bounds; }
+    Rectangle<int> getBounds() const override          { return bounds; }
 
-    Point<int> localToGlobal (const Point<int>& relativePosition)
+    Point<int> localToGlobal (Point<int> relativePosition) override
     {
         return relativePosition + bounds.getPosition();
     }
 
-    Point<int> globalToLocal (const Point<int>& screenPosition)
+    Point<int> globalToLocal (Point<int> screenPosition) override
     {
         return screenPosition - bounds.getPosition();
     }
 
-    void setAlpha (float /* newAlpha */)
+    void setAlpha (float /* newAlpha */) override
     {
         //xxx todo!
     }
 
-    void setMinimised (bool shouldBeMinimised)
+    StringArray getAvailableRenderingEngines() override
+    {
+        return StringArray ("Software Renderer");
+    }
+
+    void setMinimised (bool shouldBeMinimised) override
     {
         if (shouldBeMinimised)
         {
@@ -1005,7 +1010,7 @@ public:
         }
     }
 
-    bool isMinimised() const
+    bool isMinimised() const override
     {
         ScopedXLock xlock;
         const Atoms& atoms = Atoms::get();
@@ -1018,7 +1023,7 @@ public:
                 && ((unsigned long*) prop.data)[0] == IconicState;
     }
 
-    void setFullScreen (const bool shouldBeFullScreen)
+    void setFullScreen (const bool shouldBeFullScreen) override
     {
         Rectangle<int> r (lastNonFullscreenBounds); // (get a copy of this before de-minimising)
 
@@ -1036,7 +1041,7 @@ public:
         }
     }
 
-    bool isFullScreen() const
+    bool isFullScreen() const override
     {
         return fullScreen;
     }
@@ -1088,9 +1093,9 @@ public:
         return result;
     }
 
-    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
+    bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
-        if (! bounds.withZeroOrigin().contains (position))
+        if (! bounds.withZeroOrigin().contains (localPos))
             return false;
 
         for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
@@ -1100,7 +1105,8 @@ public:
             if (c == &component)
                 break;
 
-            if (c->contains (position + bounds.getPosition() - c->getScreenPosition()))
+            // TODO: needs scaling correctly
+            if (c->contains (localPos + bounds.getPosition() - c->getScreenPosition()))
                 return false;
         }
 
@@ -1114,21 +1120,21 @@ public:
         ScopedXLock xlock;
 
         return XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &depth)
-                && XTranslateCoordinates (display, windowH, windowH, position.getX(), position.getY(), &wx, &wy, &child)
+                && XTranslateCoordinates (display, windowH, windowH, localPos.getX(), localPos.getY(), &wx, &wy, &child)
                 && child == None;
     }
 
-    BorderSize<int> getFrameSize() const
+    BorderSize<int> getFrameSize() const override
     {
         return BorderSize<int>();
     }
 
-    bool setAlwaysOnTop (bool /* alwaysOnTop */)
+    bool setAlwaysOnTop (bool /* alwaysOnTop */) override
     {
         return false;
     }
 
-    void toFront (bool makeActive)
+    void toFront (bool makeActive) override
     {
         if (makeActive)
         {
@@ -1166,7 +1172,7 @@ public:
         handleBroughtToFront();
     }
 
-    void toBehind (ComponentPeer* other)
+    void toBehind (ComponentPeer* other) override
     {
         LinuxComponentPeer* const otherPeer = dynamic_cast <LinuxComponentPeer*> (other);
         jassert (otherPeer != nullptr); // wrong type of window?
@@ -1182,7 +1188,7 @@ public:
         }
     }
 
-    bool isFocused() const
+    bool isFocused() const override
     {
         int revert = 0;
         Window focusedWindow = 0;
@@ -1192,7 +1198,7 @@ public:
         return focusedWindow == windowH;
     }
 
-    void grabFocus()
+    void grabFocus() override
     {
         XWindowAttributes atts;
         ScopedXLock xlock;
@@ -1207,21 +1213,19 @@ public:
         }
     }
 
-    void textInputRequired (const Point<int>&)
-    {
-    }
+    void textInputRequired (const Point<int>&) override {}
 
-    void repaint (const Rectangle<int>& area)
+    void repaint (const Rectangle<int>& area) override
     {
         repainter->repaint (area.getIntersection (component.getLocalBounds()));
     }
 
-    void performAnyPendingRepaintsNow()
+    void performAnyPendingRepaintsNow() override
     {
         repainter->performAnyPendingRepaintsNow();
     }
 
-    void setIcon (const Image& newIcon)
+    void setIcon (const Image& newIcon) override
     {
         const int dataSize = newIcon.getWidth() * newIcon.getHeight() + 2;
         HeapBlock <unsigned long> data (dataSize);
@@ -1341,10 +1345,12 @@ public:
             ScopedXLock xlock;
             updateKeyStates (keyEvent.keycode, true);
 
-            const char* oldLocale = ::setlocale (LC_ALL, 0);
+            String oldLocale (::setlocale (LC_ALL, 0));
             ::setlocale (LC_ALL, "");
             XLookupString (&keyEvent, utf8, sizeof (utf8), &sym, 0);
-            ::setlocale (LC_ALL, oldLocale);
+
+            if (oldLocale.isNotEmpty())
+                ::setlocale (LC_ALL, oldLocale.toRawUTF8());
 
             unicodeChar = *CharPointer_UTF8 (utf8);
             keyCode = (int) unicodeChar;
@@ -1362,26 +1368,38 @@ public:
         {
             switch (sym)  // Translate keypad
             {
+                case XK_KP_Add:         keyCode = XK_plus; break;
+                case XK_KP_Subtract:    keyCode = XK_hyphen; break;
                 case XK_KP_Divide:      keyCode = XK_slash; break;
                 case XK_KP_Multiply:    keyCode = XK_asterisk; break;
-                case XK_KP_Subtract:    keyCode = XK_hyphen; break;
-                case XK_KP_Add:         keyCode = XK_plus; break;
                 case XK_KP_Enter:       keyCode = XK_Return; break;
-                case XK_KP_Decimal:     keyCode = Keys::numLock ? XK_period : XK_Delete; break;
-                case XK_KP_0:           keyCode = Keys::numLock ? XK_0 : XK_Insert; break;
-                case XK_KP_1:           keyCode = Keys::numLock ? XK_1 : XK_End; break;
-                case XK_KP_2:           keyCode = Keys::numLock ? XK_2 : XK_Down; break;
-                case XK_KP_3:           keyCode = Keys::numLock ? XK_3 : XK_Page_Down; break;
-                case XK_KP_4:           keyCode = Keys::numLock ? XK_4 : XK_Left; break;
+                case XK_KP_Insert:      keyCode = XK_Insert; break;
+                case XK_Delete:
+                case XK_KP_Delete:      keyCode = XK_Delete; break;
+                case XK_KP_Left:        keyCode = XK_Left; break;
+                case XK_KP_Right:       keyCode = XK_Right; break;
+                case XK_KP_Up:          keyCode = XK_Up; break;
+                case XK_KP_Down:        keyCode = XK_Down; break;
+                case XK_KP_Home:        keyCode = XK_Home; break;
+                case XK_KP_End:         keyCode = XK_End; break;
+                case XK_KP_Page_Down:   keyCode = XK_Page_Down; break;
+                case XK_KP_Page_Up:     keyCode = XK_Page_Up; break;
+
+                case XK_KP_0:           keyCode = XK_0; break;
+                case XK_KP_1:           keyCode = XK_1; break;
+                case XK_KP_2:           keyCode = XK_2; break;
+                case XK_KP_3:           keyCode = XK_3; break;
+                case XK_KP_4:           keyCode = XK_4; break;
                 case XK_KP_5:           keyCode = XK_5; break;
-                case XK_KP_6:           keyCode = Keys::numLock ? XK_6 : XK_Right; break;
-                case XK_KP_7:           keyCode = Keys::numLock ? XK_7 : XK_Home; break;
-                case XK_KP_8:           keyCode = Keys::numLock ? XK_8 : XK_Up; break;
-                case XK_KP_9:           keyCode = Keys::numLock ? XK_9 : XK_Page_Up; break;
+                case XK_KP_6:           keyCode = XK_6; break;
+                case XK_KP_7:           keyCode = XK_7; break;
+                case XK_KP_8:           keyCode = XK_8; break;
+                case XK_KP_9:           keyCode = XK_9; break;
+
                 default:                break;
             }
 
-            switch (sym)
+            switch (keyCode)
             {
                 case XK_Left:
                 case XK_Right:
@@ -1394,7 +1412,7 @@ public:
                 case XK_Delete:
                 case XK_Insert:
                     keyPressed = true;
-                    keyCode = (sym & 0xff) | Keys::extendedKeyModifier;
+                    keyCode = (keyCode & 0xff) | Keys::extendedKeyModifier;
                     break;
 
                 case XK_Tab:
@@ -1513,7 +1531,7 @@ public:
         updateKeyModifiers (buttonRelEvent.state);
 
         if (parentWindow != 0)
-            updateBounds();
+            updateWindowBounds();
 
         switch (pointerMap [buttonRelEvent.button - Button1])
         {
@@ -1546,7 +1564,7 @@ public:
     void handleEnterNotifyEvent (const XEnterWindowEvent& enterEvent)
     {
         if (parentWindow != 0)
-            updateBounds();
+            updateWindowBounds();
 
         clearLastMousePos();
 
@@ -1616,7 +1634,7 @@ public:
 
     void handleConfigureNotifyEvent (XConfigureEvent& confEvent)
     {
-        updateBounds();
+        updateWindowBounds();
         updateBorderSize();
         handleMovedOrResized();
 
@@ -1656,7 +1674,7 @@ public:
 
     void handleGravityNotify()
     {
-        updateBounds();
+        updateWindowBounds();
         updateBorderSize();
         handleMovedOrResized();
     }
@@ -1842,9 +1860,7 @@ private:
             }
            #endif
 
-            peer.clearMaskedRegion();
-
-            RectangleList originalRepaintRegion (regionsNeedingRepaint);
+            RectangleList<int>  originalRepaintRegion (regionsNeedingRepaint);
             regionsNeedingRepaint.clear();
             const Rectangle<int> totalArea (originalRepaintRegion.getBounds());
 
@@ -1866,7 +1882,7 @@ private:
 
                 startTimer (repaintTimerPeriod);
 
-                RectangleList adjustedList (originalRepaintRegion);
+                RectangleList<int> adjustedList (originalRepaintRegion);
                 adjustedList.offsetAll (-totalArea.getX(), -totalArea.getY());
 
                 if (peer.depth == 32)
@@ -1878,9 +1894,6 @@ private:
                                                                       .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
                     peer.handlePaint (*context);
                 }
-
-                if (! peer.maskedRegion.isEmpty())
-                    originalRepaintRegion.subtract (peer.maskedRegion);
 
                 for (const Rectangle<int>* i = originalRepaintRegion.begin(), * const e = originalRepaintRegion.end(); i != e; ++i)
                 {
@@ -1909,7 +1922,7 @@ private:
         LinuxComponentPeer& peer;
         Image image;
         uint32 lastTimeImageUsed;
-        RectangleList regionsNeedingRepaint;
+        RectangleList<int> regionsNeedingRepaint;
 
        #if JUCE_USE_XSHM
         bool useARGBImagesForRendering;
@@ -2327,7 +2340,7 @@ private:
         }
     }
 
-    void updateBounds()
+    void updateWindowBounds()
     {
         jassert (windowH != 0);
         if (windowH != 0)
@@ -2917,14 +2930,14 @@ bool LinuxComponentPeer::isActiveApplication = false;
 Point<int> LinuxComponentPeer::lastMousePos;
 
 //==============================================================================
-bool Process::isForegroundProcess()
+JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess()
 {
     return LinuxComponentPeer::isActiveApplication;
 }
 
-void Process::makeForegroundProcess()
-{
-}
+// N/A on Linux as far as I know.
+JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess() {}
+JUCE_API void JUCE_CALLTYPE Process::hide() {}
 
 //==============================================================================
 void ModifierKeys::updateCurrentModifiers() noexcept
@@ -3084,11 +3097,11 @@ void Desktop::Displays::findDisplays (float masterScale)
 }
 
 //==============================================================================
-bool Desktop::addMouseInputSource()
+bool MouseInputSource::SourceList::addSource()
 {
-    if (mouseSources.size() == 0)
+    if (sources.size() == 0)
     {
-        mouseSources.add (new MouseInputSource (0, true));
+        addSource (0, true);
         return true;
     }
 
@@ -3129,6 +3142,11 @@ void MouseInputSource::setRawMousePosition (Point<int> newPosition)
     ScopedXLock xlock;
     Window root = RootWindow (display, DefaultScreen (display));
     XWarpPointer (display, None, root, 0, 0, 0, 0, newPosition.getX(), newPosition.getY());
+}
+
+double Desktop::getDefaultMasterScale()
+{
+    return 1.0;
 }
 
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
@@ -3397,12 +3415,14 @@ void LookAndFeel::playAlertSound()
 
 
 //==============================================================================
+#if JUCE_MODAL_LOOPS_PERMITTED
 void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
                                                      const String& title, const String& message,
                                                      Component* /* associatedComponent */)
 {
     AlertWindow::showMessageBox (iconType, title, message);
 }
+#endif
 
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
                                                           const String& title, const String& message,

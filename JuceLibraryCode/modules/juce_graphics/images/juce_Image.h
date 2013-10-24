@@ -25,9 +25,6 @@
 #ifndef JUCE_IMAGE_H_INCLUDED
 #define JUCE_IMAGE_H_INCLUDED
 
-#include "../colour/juce_Colour.h"
-#include "../contexts/juce_GraphicsContext.h"
-
 class ImageType;
 class ImagePixelData;
 
@@ -383,7 +380,7 @@ public:
         @param alphaThreshold   for a semi-transparent image, any pixels whose alpha is
                                 above this level will be considered opaque
     */
-    void createSolidAreaMask (RectangleList& result, float alphaThreshold) const;
+    void createSolidAreaMask (RectangleList<int>& result, float alphaThreshold) const;
 
     //==============================================================================
     /** Returns a NamedValueSet that is attached to the image and which can be used for
@@ -499,8 +496,8 @@ public:
     SoftwareImageType();
     ~SoftwareImageType();
 
-    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const;
-    int getTypeID() const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
+    int getTypeID() const override;
 };
 
 //==============================================================================
@@ -515,8 +512,8 @@ public:
     NativeImageType();
     ~NativeImageType();
 
-    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const;
-    int getTypeID() const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
+    int getTypeID() const override;
 };
 
 

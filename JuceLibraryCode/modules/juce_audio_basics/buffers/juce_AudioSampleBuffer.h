@@ -96,32 +96,27 @@ public:
     AudioSampleBuffer (const AudioSampleBuffer& other) noexcept;
 
     /** Copies another buffer onto this one.
-
         This buffer's size will be changed to that of the other buffer.
     */
     AudioSampleBuffer& operator= (const AudioSampleBuffer& other) noexcept;
 
     /** Destructor.
-
         This will free any memory allocated by the buffer.
     */
-    virtual ~AudioSampleBuffer() noexcept;
+    ~AudioSampleBuffer() noexcept;
 
     //==============================================================================
     /** Returns the number of channels of audio data that this buffer contains.
-
         @see getSampleData
     */
     int getNumChannels() const noexcept     { return numChannels; }
 
     /** Returns the number of samples allocated in each of the buffer's channels.
-
         @see getSampleData
     */
     int getNumSamples() const noexcept      { return size; }
 
     /** Returns a pointer one of the buffer's channels.
-
         For speed, this doesn't check whether the channel number is out of range,
         so be careful when using it!
     */
@@ -411,22 +406,25 @@ public:
                      float& minVal,
                      float& maxVal) const noexcept;
 
-    /** Finds the highest absolute sample value within a region of a channel.
-    */
+    /** Finds the highest absolute sample value within a region of a channel. */
     float getMagnitude (int channel,
                         int startSample,
                         int numSamples) const noexcept;
 
-    /** Finds the highest absolute sample value within a region on all channels.
-    */
+    /** Finds the highest absolute sample value within a region on all channels. */
     float getMagnitude (int startSample,
                         int numSamples) const noexcept;
 
-    /** Returns the root mean squared level for a region of a channel.
-    */
+    /** Returns the root mean squared level for a region of a channel. */
     float getRMSLevel (int channel,
                        int startSample,
                        int numSamples) const noexcept;
+
+    /** Reverses a part of a channel. */
+    void reverse (int channel, int startSample, int numSamples) const noexcept;
+
+    /** Reverses a part of the buffer. */
+    void reverse (int startSample, int numSamples) const noexcept;
 
 private:
     //==============================================================================

@@ -25,8 +25,6 @@
 #ifndef JUCE_COMBOBOX_H_INCLUDED
 #define JUCE_COMBOBOX_H_INCLUDED
 
-#include "juce_Label.h"
-
 
 //==============================================================================
 /**
@@ -161,9 +159,7 @@ public:
     String getItemText (int index) const;
 
     /** Returns the ID for one of the items in the list.
-
         Note that this doesn't include headers or separators.
-
         @param index    the item's index from 0 to (getNumItems() - 1)
     */
     int getItemId (int index) const noexcept;
@@ -291,17 +287,14 @@ public:
 
     //==============================================================================
     /** Sets a message to display when there is no item currently selected.
-
         @see getTextWhenNothingSelected
     */
     void setTextWhenNothingSelected (const String& newMessage);
 
     /** Returns the text that is shown when no item is selected.
-
         @see setTextWhenNothingSelected
     */
     String getTextWhenNothingSelected() const;
-
 
     /** Sets the message to show when there are no items in the list, and the user clicks
         on the drop-down box.
@@ -318,7 +311,7 @@ public:
 
     //==============================================================================
     /** Gives the ComboBox a tooltip. */
-    void setTooltip (const String& newTooltip);
+    void setTooltip (const String& newTooltip) override;
 
 
     //==============================================================================
@@ -362,6 +355,8 @@ public:
     /** @internal */
     void mouseUp (const MouseEvent&) override;
     /** @internal */
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
+    /** @internal */
     void lookAndFeelChanged() override;
     /** @internal */
     void paint (Graphics&) override;
@@ -384,7 +379,7 @@ private:
     //==============================================================================
     struct ItemInfo
     {
-        ItemInfo (const String& name, int itemId, bool isEnabled, bool isHeading);
+        ItemInfo (const String&, int itemId, bool isEnabled, bool isHeading);
         bool isSeparator() const noexcept;
         bool isRealItem() const noexcept;
 
@@ -396,14 +391,15 @@ private:
     OwnedArray <ItemInfo> items;
     Value currentId;
     int lastCurrentId;
-    bool isButtonDown, separatorPending, menuActive, textIsCustom;
+    bool isButtonDown, separatorPending, menuActive;
     ListenerList <Listener> listeners;
     ScopedPointer<Label> label;
     String textWhenNothingSelected, noChoicesMessage;
 
-    ItemInfo* getItemForId (int itemId) const noexcept;
-    ItemInfo* getItemForIndex (int index) const noexcept;
+    ItemInfo* getItemForId (int) const noexcept;
+    ItemInfo* getItemForIndex (int) const noexcept;
     bool selectIfEnabled (int index);
+    bool nudgeSelectedItem (int delta);
     void sendChange (NotificationType);
     static void popupMenuFinishedCallback (int, ComboBox*);
 

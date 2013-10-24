@@ -25,6 +25,7 @@
 #ifndef JUCE_CONCERTINAPANEL_H_INCLUDED
 #define JUCE_CONCERTINAPANEL_H_INCLUDED
 
+
 //==============================================================================
 /**
     A panel which holds a vertical stack of components which can be expanded
@@ -99,8 +100,8 @@ private:
     struct PanelSizes;
     friend class PanelHolder;
     friend struct PanelSizes;
-    friend class ScopedPointer<PanelSizes>;
-    friend class OwnedArray<PanelHolder>;
+    friend struct ContainerDeletePolicy<PanelSizes>;
+    friend struct ContainerDeletePolicy<PanelHolder>;
 
     ScopedPointer<PanelSizes> currentSizes;
     OwnedArray<PanelHolder> holders;

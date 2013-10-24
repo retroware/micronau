@@ -29,10 +29,6 @@
 #ifndef JUCE_OWNEDARRAY_H_INCLUDED
 #define JUCE_OWNEDARRAY_H_INCLUDED
 
-#include "juce_ArrayAllocationBase.h"
-#include "juce_ElementComparator.h"
-#include "../threads/juce_CriticalSection.h"
-
 
 //==============================================================================
 /** An array designed for holding objects.
@@ -98,7 +94,7 @@ public:
 
     //==============================================================================
     /** Clears the array, optionally deleting the objects inside it first. */
-    void clear (const bool deleteObjects = true)
+    void clear (bool deleteObjects = true)
     {
         const ScopedLockType lock (getLock());
 
@@ -106,6 +102,18 @@ public:
             deleteAllObjects();
 
         data.setAllocatedSize (0);
+        numUsed = 0;
+    }
+
+    //==============================================================================
+    /** Clears the array, optionally deleting the objects inside it first. */
+    void clearQuick (bool deleteObjects)
+    {
+        const ScopedLockType lock (getLock());
+
+        if (deleteObjects)
+            deleteAllObjects();
+
         numUsed = 0;
     }
 
@@ -158,8 +166,14 @@ public:
     inline ObjectClass* getFirst() const noexcept
     {
         const ScopedLockType lock (getLock());
-        return numUsed > 0 ? data.elements [0]
-                           : static_cast <ObjectClass*> (nullptr);
+
+        if (numUsed > 0)
+        {
+            jassert (data.elements != nullptr);
+            return data.elements [0];
+        }
+
+        return nullptr;
     }
 
     /** Returns a pointer to the last object in the array.
@@ -170,8 +184,14 @@ public:
     inline ObjectClass* getLast() const noexcept
     {
         const ScopedLockType lock (getLock());
-        return numUsed > 0 ? data.elements [numUsed - 1]
-                           : static_cast <ObjectClass*> (nullptr);
+
+        if (numUsed > 0)
+        {
+            jassert (data.elements != nullptr);
+            return data.elements [numUsed - 1];
+        }
+
+        return nullptr;
     }
 
     /** Returns a pointer to the actual array data.
@@ -197,6 +217,11 @@ public:
     */
     inline ObjectClass** end() const noexcept
     {
+       #if JUCE_DEBUG
+        if (data.elements == nullptr || numUsed <= 0) // (to keep static analysers happy)
+            return data.elements;
+       #endif
+
         return data.elements + numUsed;
     }
 
@@ -377,7 +402,7 @@ public:
     {
         if (indexToChange >= 0)
         {
-            ObjectClass* toDelete = nullptr;
+            ScopedPointer<ObjectClass> toDelete;
 
             {
                 const ScopedLockType lock (getLock());
@@ -389,7 +414,7 @@ public:
                         toDelete = data.elements [indexToChange];
 
                         if (toDelete == newObject)
-                            toDelete = nullptr;
+                            toDelete.release();
                     }
 
                     data.elements [indexToChange] = const_cast <ObjectClass*> (newObject);
@@ -400,10 +425,6 @@ public:
                     data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
                 }
             }
-
-            delete toDelete; // don't want to use a ScopedPointer here because if the
-                             // object has a private destructor, both OwnedArray and
-                             // ScopedPointer would need to be friend classes..
         }
         else
         {
@@ -563,7 +584,7 @@ public:
     void remove (const int indexToRemove,
                  const bool deleteObject = true)
     {
-        ObjectClass* toDelete = nullptr;
+        ScopedPointer<ObjectClass> toDelete;
 
         {
             const ScopedLockType lock (getLock());
@@ -582,10 +603,6 @@ public:
                     memmove (e, e + 1, sizeof (ObjectClass*) * (size_t) numToShift);
             }
         }
-
-        delete toDelete; // don't want to use a ScopedPointer here because if the
-                         // object has a private destructor, both OwnedArray and
-                         // ScopedPointer would need to be friend classes..
 
         if ((numUsed << 1) < data.numAllocated)
             minimiseStorageOverheads();
@@ -674,7 +691,7 @@ public:
             {
                 for (int i = startIndex; i < endIndex; ++i)
                 {
-                    delete data.elements [i];
+                    ContainerDeletePolicy<ObjectClass>::destroy (data.elements [i]);
                     data.elements [i] = nullptr; // (in case one of the destructors accesses this array and hits a dangling pointer)
                 }
             }
@@ -780,11 +797,11 @@ public:
         If you need to exchange two arrays, this is vastly quicker than using copy-by-value
         because it just swaps their internal pointers.
     */
-    void swapWithArray (OwnedArray& otherArray) noexcept
+    template <class OtherArrayType>
+    void swapWith (OtherArrayType& otherArray) noexcept
     {
         const ScopedLockType lock1 (getLock());
-        const ScopedLockType lock2 (otherArray.getLock());
-
+        const typename OtherArrayType::ScopedLockType lock2 (otherArray.getLock());
         data.swapWith (otherArray.data);
         std::swap (numUsed, otherArray.numUsed);
     }
@@ -862,6 +879,13 @@ public:
     typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
 
+    //==============================================================================
+   #ifndef DOXYGEN
+    // Note that the swapWithArray method has been replaced by a more flexible templated version,
+    // and renamed "swapWith" to be more consistent with the names used in other classes.
+    JUCE_DEPRECATED_WITH_BODY (void swapWithArray (OwnedArray& other) noexcept, { swapWith (other); })
+   #endif
+
 private:
     //==============================================================================
     ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse> data;
@@ -870,7 +894,7 @@ private:
     void deleteAllObjects()
     {
         while (numUsed > 0)
-            delete data.elements [--numUsed];
+            ContainerDeletePolicy<ObjectClass>::destroy (data.elements [--numUsed]);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OwnedArray)

@@ -100,8 +100,11 @@ public:
         }
 
         g.setOpacity (1.0f);
-        g.drawImage (colours, edge, edge, getWidth() - edge * 2, getHeight() - edge * 2,
-                     0, 0, colours.getWidth(), colours.getHeight());
+        g.drawImageTransformed (colours,
+                                RectanglePlacement (RectanglePlacement::stretchToFit)
+                                    .getTransformToFit (colours.getBounds().toFloat(),
+                                                        getLocalBounds().reduced (edge).toFloat()),
+                                false);
     }
 
     void mouseDown (const MouseEvent& e) override
@@ -193,8 +196,8 @@ private:
 class ColourSelector::HueSelectorComp  : public Component
 {
 public:
-    HueSelectorComp (ColourSelector& cs, float& hue, float& sat, float& val, const int edgeSize)
-        : owner (cs), h (hue), s (sat), v (val), edge (edgeSize)
+    HueSelectorComp (ColourSelector& cs, float& hue, const int edgeSize)
+        : owner (cs), h (hue), edge (edgeSize)
     {
         addAndMakeVisible (&marker);
     }
@@ -236,8 +239,6 @@ public:
 private:
     ColourSelector& owner;
     float& h;
-    float& s;
-    float& v;
     HueSelectorMarker marker;
     const int edge;
 
@@ -332,7 +333,7 @@ ColourSelector::ColourSelector (const int sectionsToShow, const int edge, const 
     if ((flags & showColourspace) != 0)
     {
         addAndMakeVisible (colourSpace = new ColourSpaceView (*this, h, s, v, gapAroundColourSpaceComponent));
-        addAndMakeVisible (hueSelector = new HueSelectorComp (*this, h, s, v, gapAroundColourSpaceComponent));
+        addAndMakeVisible (hueSelector = new HueSelectorComp (*this, h,  gapAroundColourSpaceComponent));
     }
 
     update();

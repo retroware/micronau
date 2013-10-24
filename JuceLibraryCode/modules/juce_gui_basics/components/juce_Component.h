@@ -25,22 +25,6 @@
 #ifndef JUCE_COMPONENT_H_INCLUDED
 #define JUCE_COMPONENT_H_INCLUDED
 
-#include "../mouse/juce_MouseCursor.h"
-#include "../mouse/juce_MouseListener.h"
-#include "../mouse/juce_MouseEvent.h"
-#include "juce_ComponentListener.h"
-#include "../keyboard/juce_KeyListener.h"
-#include "../keyboard/juce_KeyboardFocusTraverser.h"
-#include "juce_ModalComponentManager.h"
-
-class LookAndFeel;
-class MouseInputSource;
-class MouseInputSourceInternal;
-class ComponentPeer;
-class MarkerList;
-class RelativeRectangle;
-class CachedComponentImage;
-
 
 //==============================================================================
 /**
@@ -215,6 +199,15 @@ public:
     */
     virtual void minimisationStateChanged (bool isNowMinimised);
 
+    /** Returns the default scale factor to use for this component when it is placed
+        on the desktop.
+        The default implementation of this method just returns the value from
+        Desktop::getGlobalScaleFactor(), but it can be overridden if a particular component
+        has different requirements. The method only used if this component is added
+        to the desktop - it has no effect for child components.
+    */
+    virtual float getDesktopScaleFactor() const;
+
     //==============================================================================
     /** Brings the component to the front of its siblings.
 
@@ -330,7 +323,7 @@ public:
         If includeSiblings is true, it will also take into account any siblings
         that may be overlapping the component.
     */
-    void getVisibleArea (RectangleList& result, bool includeSiblings) const;
+    void getVisibleArea (RectangleList<int>& result, bool includeSiblings) const;
 
     //==============================================================================
     /** Returns this component's x coordinate relative the the screen's top-left origin.
@@ -690,7 +683,7 @@ public:
     /** Looks for a child component with the specified ID.
         @see setComponentID, getComponentID
     */
-    Component* findChildWithID (const String& componentID) const noexcept;
+    Component* findChildWithID (StringRef componentID) const noexcept;
 
     /** Adds a child component to this one.
 
@@ -1240,6 +1233,9 @@ public:
         @returns the focused component, or null if nothing is focused.
     */
     static Component* JUCE_CALLTYPE getCurrentlyFocusedComponent() noexcept;
+
+    /** If any component has keyboard focus, this will defocus it. */
+    static void JUCE_CALLTYPE unfocusAllComponents();
 
     //==============================================================================
     /** Tries to move the keyboard focus to one of this component's siblings.
@@ -2242,7 +2238,7 @@ private:
 
     class MouseListenerList;
     friend class MouseListenerList;
-    friend class ScopedPointer <MouseListenerList>;
+    friend struct ContainerDeletePolicy<MouseListenerList>;
     ScopedPointer <MouseListenerList> mouseListeners;
     ScopedPointer <Array <KeyListener*> > keyListeners;
     ListenerList <ComponentListener> componentListeners;
@@ -2284,14 +2280,14 @@ private:
     uint8 componentTransparency;
 
     //==============================================================================
-    void internalMouseEnter (MouseInputSource&, Point<int>, Time);
-    void internalMouseExit  (MouseInputSource&, Point<int>, Time);
-    void internalMouseDown  (MouseInputSource&, Point<int>, Time);
-    void internalMouseUp    (MouseInputSource&, Point<int>, Time, const ModifierKeys oldModifiers);
-    void internalMouseDrag  (MouseInputSource&, Point<int>, Time);
-    void internalMouseMove  (MouseInputSource&, Point<int>, Time);
-    void internalMouseWheel (MouseInputSource&, Point<int>, Time, const MouseWheelDetails&);
-    void internalMagnifyGesture (MouseInputSource&, Point<int>, Time, float);
+    void internalMouseEnter (MouseInputSource, Point<int>, Time);
+    void internalMouseExit  (MouseInputSource, Point<int>, Time);
+    void internalMouseDown  (MouseInputSource, Point<int>, Time);
+    void internalMouseUp    (MouseInputSource, Point<int>, Time, const ModifierKeys oldModifiers);
+    void internalMouseDrag  (MouseInputSource, Point<int>, Time);
+    void internalMouseMove  (MouseInputSource, Point<int>, Time);
+    void internalMouseWheel (MouseInputSource, Point<int>, Time, const MouseWheelDetails&);
+    void internalMagnifyGesture (MouseInputSource, Point<int>, Time, float);
     void internalBroughtToFront();
     void internalFocusGain (const FocusChangeType, const WeakReference<Component>&);
     void internalFocusGain (const FocusChangeType);
@@ -2334,7 +2330,7 @@ private:
 
     // This is included here to cause an error if you use or overload it - it has been deprecated in
     // favour of contains (Point<int>)
-    void contains (int, int);
+    void contains (int, int) JUCE_DELETED_FUNCTION;
    #endif
 
 protected:

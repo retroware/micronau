@@ -73,7 +73,6 @@ public:
         e.g. @code
         AffineTransform myTransform = AffineTransform::identity.rotated (.5f)
                                                                .scaled (2.0f);
-
         @endcode
     */
     static const AffineTransform identity;
@@ -128,9 +127,23 @@ public:
     AffineTransform translated (float deltaX,
                                 float deltaY) const noexcept;
 
+    /** Returns a new transform which is the same as this one followed by a translation. */
+    template <typename PointType>
+    AffineTransform translated (PointType delta) const noexcept
+    {
+        return translated ((float) delta.x, (float) delta.y);
+    }
+
     /** Returns a new transform which is a translation. */
     static AffineTransform translation (float deltaX,
                                         float deltaY) noexcept;
+
+    /** Returns a new transform which is a translation. */
+    template <typename PointType>
+    static AffineTransform translation (PointType delta) noexcept
+    {
+        return translation ((float) delta.x, (float) delta.y);
+    }
 
     /** Returns a copy of this transform with the specified translation matrix values. */
     AffineTransform withAbsoluteTranslation (float translationX,
@@ -165,6 +178,11 @@ public:
     */
     AffineTransform scaled (float factorX,
                             float factorY) const noexcept;
+
+    /** Returns a transform which is the same as this one followed by a re-scaling.
+        The scaling is centred around the origin (0, 0).
+    */
+    AffineTransform scaled (float factor) const noexcept;
 
     /** Returns a transform which is the same as this one followed by a re-scaling.
         The scaling is centred around the origin provided.

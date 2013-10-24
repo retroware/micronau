@@ -133,7 +133,7 @@ public:
                                     the command's registered name
     */
     void addCommandItem (ApplicationCommandManager* commandManager,
-                         int commandID,
+                         CommandID commandID,
                          const String& displayName = String::empty);
 
 
@@ -482,21 +482,12 @@ public:
 
 private:
     //==============================================================================
-    class Item;
-    class ItemComponent;
-    class HeaderItemComponent;
-    class NormalComponentWrapper;
-
-    friend class MenuItemIterator;
-    friend class ItemComponent;
-    friend class Window;
-    friend class CustomComponent;
+    JUCE_PUBLIC_IN_DLL_BUILD (class Item)
+    JUCE_PUBLIC_IN_DLL_BUILD (struct HelperClasses)
+    friend struct HelperClasses;
     friend class MenuBarComponent;
-    friend class OwnedArray <Item>;
-    friend class OwnedArray <ItemComponent>;
-    friend class ScopedPointer <Window>;
 
-    OwnedArray <Item> items;
+    OwnedArray<Item> items;
     LookAndFeel* lookAndFeel;
 
     Component* createWindow (const Options&, ApplicationCommandManager**) const;
