@@ -764,7 +764,7 @@ public:
         else if (style == Slider::RotaryHorizontalVerticalDrag)
         {
 			const double dragAmount = (e.x - mouseDragStartPos.x) + (mouseDragStartPos.y - e.y);
-            const double mouseDiff = dragAmount / (mouseFineAdjust ? 30.0 : 1.0);
+            const double mouseDiff = dragAmount / (mouseFineAdjust ? fineAdjustFactor : 1.0);
 
             newPos = owner.valueToProportionOfLength (valueOnMouseDown) + mouseDiff * (1.0 / pixelsForFullDragExtent);
         }
@@ -775,7 +775,7 @@ public:
 				if (mouseFineAdjust)
 				{
 					const double dragAmount = mouseDragStartPos.y - e.y;
-					const double mouseDiff = dragAmount / (mouseFineAdjust ? 30.0 : 1.0);
+					const double mouseDiff = dragAmount / (mouseFineAdjust ? fineAdjustFactor : 1.0);
 
 					newPos = owner.valueToProportionOfLength (valueOnMouseDown) + mouseDiff * (1.0 / pixelsForFullDragExtent);
 				}
@@ -789,7 +789,7 @@ public:
 				if (mouseFineAdjust)
 				{
 					const double dragAmount = e.x - mouseDragStartPos.x;
-					const double mouseDiff = dragAmount / (mouseFineAdjust ? 30.0 : 1.0);
+					const double mouseDiff = dragAmount / (mouseFineAdjust ? fineAdjustFactor : 1.0);
 
 					newPos = owner.valueToProportionOfLength (valueOnMouseDown) + mouseDiff * (1.0 / pixelsForFullDragExtent);
 				}

@@ -29,7 +29,10 @@ public:
     int get_max() { return param->getMax();}
     const String get_name () { return param->getName();}
     const String get_txt_value (int v) { return param->getConvertedValue(v);}
-    
+
+	// this setRange override adjusts mouse drag sensitivity so that smaller ranges are more sensitive than larger ranges.
+	void setRange (double newMin, double newMax, double newInt) { MicronSlider::setRange (newMin, newMax, newInt); setMouseDragSensitivity( 20.0*(4.0+log10(newMax - newMin)) ); }
+
 private:
     IonSysexParam *param;
     MicronauAudioProcessor *plugin;
