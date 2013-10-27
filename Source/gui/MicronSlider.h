@@ -790,7 +790,8 @@ private:
 	friend class SliderBank;
 	void resetDoubleClickTimer(); // ensures that next mouseDown does not trigger a double-click
 	constexpr static const double doubleClickDuration = 0.25;
-	
+	constexpr static const double fineAdjustFactor = 50.0;
+
     ScopedPointer<Pimpl> pimpl;
 
     void init (Slider::SliderStyle, Slider::TextEntryBoxPosition);
