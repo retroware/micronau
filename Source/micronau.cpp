@@ -258,9 +258,11 @@ AudioProcessorEditor* MicronauAudioProcessor::createEditor()
 //==============================================================================
 void MicronauAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    unsigned char sysex_buf[434];
+    
+    memset(sysex_buf, 0, 434);
+	params->getAsSysexMessage(sysex_buf);
+    destData.append(sysex_buf+1, 432);
 }
 
 int MicronauAudioProcessor::index_of_nrpn(int nrpn)
@@ -345,8 +347,9 @@ void MicronauAudioProcessor::send_nrpn(int nrpn, int value)
 
 void MicronauAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+	if (!params->parseParamsFromContent((unsigned char *) data, 432)) {
+		return;
+	}
 }
 
 void MicronauAudioProcessor::sync_via_sysex()
@@ -363,16 +366,14 @@ void MicronauAudioProcessor::sync_via_sysex()
 void MicronauAudioProcessor::init_from_sysex(unsigned char *sysex)
 {
 	int i;
-	if (params->parseParamsFromContent(sysex, 432)) {
+	if (!params->parseParamsFromContent(sysex, 432)) {
 		return;
 	}
 
-	for (i = 0; i < params->numParams(); i++) {
-        IonSysexParam *param;
+	for (i = 0; i < nrpns.size(); i++) {
+        IonSysexParam *param = nrpns[i];
 		param = params->getParam(i);
-		if ((param->getNrpn() != -1)  && (param->getNrpn() > 150)) {
-//			SetParameter(param->getNrpn(), kAudioUnitScope_Global, 0, param->getValue(), 0);
-		}
+        sendParamChangeMessageToListeners(i, param->getValue());
 	}
 }
     

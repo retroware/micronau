@@ -20,3 +20,7 @@
 
 #misc
 *~
+Builds/MacOSX/micronau.xcodeproj/project.pbxproj
+Builds/MacOSX/micronau.xcodeproj/project.xcworkspace/xcuserdata/
+JuceLibraryCode/BinaryData.cpp
+JuceLibraryCode/BinaryData.h
