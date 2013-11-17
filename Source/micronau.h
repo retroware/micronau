@@ -90,12 +90,13 @@ public:
     // micronau specific from here on down
     void sync_via_nrpn();
     void sync_via_sysex();
-    int get_midi_index(int in_out);
-    void set_midi_index(int in_out, int idx);
+    String get_midi_port(int in_out);
+    void set_midi_port(int in_out, String p);
 
     int index_of_nrpn(int nrpn);
     IonSysexParam *param_of_nrpn(int nrpn);
 
+    static int midi_find_port_by_name(int idx, String nm);
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MicronauAudioProcessor)
@@ -109,10 +110,9 @@ private:
 
     MidiOutput *midi_out;
     unsigned int out_channel;
-    int midi_out_idx;
+    String midi_out_port;
 
     MidiInput *midi_in;
-    int midi_in_idx;
+    String midi_in_port;
 };
-
 #endif  // __PLUGINPROCESSOR_H_CCAD67E2__

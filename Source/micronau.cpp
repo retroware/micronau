@@ -35,18 +35,20 @@ MicronauAudioProcessor::MicronauAudioProcessor()
     }
 
     midi_out = NULL;
-    midi_out_idx = -1;
-    set_midi_index(MIDI_OUT_IDX, MidiOutput::getDefaultDeviceIndex());
+    midi_out_port = "None";
+    set_midi_port(MIDI_OUT_IDX, midi_out_port);
     out_channel = 0;
     
     midi_in = NULL;
-    midi_in_idx = -1;
-    set_midi_index(MIDI_IN_IDX, MidiInput::getDefaultDeviceIndex());
+    midi_in_port = "None";
+    set_midi_port(MIDI_IN_IDX, midi_in_port);
 }
 
 MicronauAudioProcessor::~MicronauAudioProcessor()
 {
-    midi_in->stop();
+    if (midi_in != NULL) {
+        midi_in->stop();
+    }
 }
 
 //==============================================================================
@@ -383,48 +385,73 @@ void MicronauAudioProcessor::handleIncomingMidiMessage (MidiInput* source, const
         return;
     }
     if (message.isSysEx()) {
-        int x = message.getSysExDataSize();
         const uint8 *data = message.getSysExData();
         init_from_sysex((unsigned char *) data);
     }
 }
 
-void MicronauAudioProcessor::set_midi_index(int in_out, int idx)
+void MicronauAudioProcessor::set_midi_port(int in_out, String p)
 {
+    int idx;
     switch (in_out) {
         case MIDI_OUT_IDX:
-            if (idx != midi_out_idx) {
+            if (p != midi_out_port) {
                 if (midi_out != NULL) {
                     delete midi_out;
                 }
-                midi_out = MidiOutput::openDevice(idx);
-                midi_out_idx = idx;
+                midi_out_port = p;
+//                midi_out = MidiOutput::openDevice(idx);
             }
             break;
         case MIDI_IN_IDX:
-            if (idx != midi_in_idx) {
+            if (p != midi_in_port) {
                 if (midi_in != NULL) {
                     midi_in->stop();
                     delete midi_in;
                 }
-                midi_in = MidiInput::openDevice(idx, this);
-                midi_in_idx = idx;
-                midi_in->start();
+                midi_in_port = p;
+                idx = midi_find_port_by_name(in_out, midi_in_port);
+                if (idx == -1) {
+                    midi_in = NULL;
+                } else {
+                    midi_in = MidiInput::openDevice(idx, this);
+                    midi_in->start();
+                }
             }
             break;
     }
     return;
 }
 
-int MicronauAudioProcessor::get_midi_index(int in_out)
+String MicronauAudioProcessor::get_midi_port(int in_out)
 {
     switch (in_out) {
         case MIDI_OUT_IDX:
-            return midi_out_idx;
+            return midi_out_port;
             break;
         case MIDI_IN_IDX:
-            return midi_in_idx;
+            return midi_in_port;
             break;
+    }
+    return "None";
+}
+
+int MicronauAudioProcessor::midi_find_port_by_name(int in_out, String nm)
+{
+    StringArray devices;
+    int i;
+    switch (in_out) {
+        case MIDI_OUT_IDX:
+            devices = MidiOutput::getDevices();
+            break;
+        case MIDI_IN_IDX:
+            devices = MidiInput::getDevices();
+            break;
+    }
+    for (i = 0; i < devices.size(); i++) {
+        if (devices[i] == nm) {
+            return i;
+        }
     }
     return -1;
 }

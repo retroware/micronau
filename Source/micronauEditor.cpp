@@ -58,21 +58,15 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
 
     midi_in_menu = new StdComboBox ();
     midi_in_menu->setEditableText (false);
-    StringArray x = MidiInput::getDevices();
-    for (int i = 0; i < x.size(); i++) {
-        midi_in_menu->addItem(x[i], i+1);
-    }
-    midi_in_menu->setSelectedItemIndex(owner->get_midi_index(MIDI_IN_IDX));
     midi_in_menu->addListener(this);
     addAndMakeVisible (midi_in_menu);
 
     midi_out_menu = new StdComboBox ();
     midi_out_menu->setEditableText (false);
-    x = MidiOutput::getDevices();
+    StringArray x = MidiOutput::getDevices();
     for (int i = 0; i < x.size(); i++) {
         midi_out_menu->addItem(x[i], i+1);
     }
-    midi_out_menu->setSelectedItemIndex(owner->get_midi_index(MIDI_OUT_IDX));
     midi_out_menu->addListener(this);
     addAndMakeVisible (midi_out_menu);
     
@@ -118,6 +112,35 @@ void MicronauAudioProcessorEditor::timerCallback()
     }
 
     // update midi menus
+    StringArray x = MidiInput::getDevices();
+    bool midi_changed = false;
+    if (x.size() + 1 != midi_in_menu->getNumItems()) {
+        midi_changed = true;
+    } else {
+        for (int i = 0; i < x.size(); i++) {
+            if (x[i] != midi_in_menu->getItemText(i+1)) {
+                midi_changed = true;
+                break;
+            }
+        }
+    }
+    if (midi_changed) {
+        int idx = midi_in_menu->getSelectedItemIndex();
+        String current_midi;
+        if (idx == -1) {
+            current_midi = "None";
+        } else {
+            current_midi = midi_in_menu->getItemText(idx);
+        }
+        midi_in_menu->clear();
+        midi_in_menu->addItem("None", 1000);
+        for (int i = 0; i < x.size(); i++) {
+            midi_in_menu->addItem(x[i], i+1);
+        }
+        select_item_by_name(MIDI_IN_IDX, current_midi);
+    } else {
+        select_item_by_name(MIDI_IN_IDX, owner->get_midi_port(MIDI_IN_IDX));
+    }
 }
 
 void MicronauAudioProcessorEditor::sliderValueChanged (Slider *slider)
@@ -149,11 +172,35 @@ void MicronauAudioProcessorEditor::buttonClicked (Button* button)
 
 void MicronauAudioProcessorEditor::comboBoxChanged (ComboBox* box)
 {
-    if (box == midi_out_menu) {
+    int idx = box->getSelectedItemIndex();
+    /*    if (box == midi_out_menu) {
         owner->set_midi_index(MIDI_OUT_IDX, box->getSelectedItemIndex());
-    }
+    } */
     if (box == midi_in_menu) {
-        owner->set_midi_index(MIDI_IN_IDX, box->getSelectedItemIndex());
+        owner->set_midi_port(MIDI_IN_IDX, box->getItemText(idx));
     }
+}
+
+void MicronauAudioProcessorEditor::select_item_by_name(int in_out, String nm)
+{
+    int i;
+    ComboBox *menu;
+    switch (in_out) {
+        case MIDI_IN_IDX:
+            menu = midi_in_menu;
+            break;
+        case MIDI_OUT_IDX:
+            menu = midi_out_menu;
+            break;
+        default:
+            return;
+    }
+    for (i = 0; i < menu->getNumItems(); i++) {
+        if (menu->getItemText(i) == nm) {
+            menu->setSelectedItemIndex(i);
+            return;
+        }
+    }
+    menu->setSelectedItemIndex(0);
 }
 
