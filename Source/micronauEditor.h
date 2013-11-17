@@ -62,7 +62,9 @@ public:
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
     
 private:
+    void update_midi_menu(int in_out);
     void select_item_by_name(int in_out, String nm);
+
 	Image background;
 
     ScopedPointer<TextButton> sync_nrpn;

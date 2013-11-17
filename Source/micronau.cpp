@@ -325,6 +325,10 @@ void MicronauAudioProcessor::send_nrpn(int nrpn, int value)
     unsigned char dataLSB;
     MidiMessage *msg;
     
+    if (midi_out == NULL) {
+        return;
+    }
+    
     nrpnMSB = (nrpn >> 7) & (0x7f);
     nrpnLSB = (nrpn & 0xff) & (0x7f);
     dataMSB = (value >> 7) & (0x7f);
@@ -358,6 +362,10 @@ void MicronauAudioProcessor::sync_via_sysex()
 {
     unsigned char sysex_buf[434];
 
+    if (midi_out == NULL) {
+        return;
+    }
+    
     memset(sysex_buf, 0, 434);
 	params->getAsSysexMessage(sysex_buf);
 
@@ -400,7 +408,12 @@ void MicronauAudioProcessor::set_midi_port(int in_out, String p)
                     delete midi_out;
                 }
                 midi_out_port = p;
-//                midi_out = MidiOutput::openDevice(idx);
+                idx = midi_find_port_by_name(in_out, midi_out_port);
+                if (idx == -1) {
+                    midi_out = NULL;
+                } else {
+                    midi_out = MidiOutput::openDevice(idx);
+                }
             }
             break;
         case MIDI_IN_IDX:
