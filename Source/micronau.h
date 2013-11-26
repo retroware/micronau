@@ -101,6 +101,13 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MicronauAudioProcessor)
 
+    static const int MAX_MIDI_PORT_NAME = 80;
+    static const int SYSEX_LEN = 432;
+   typedef struct {
+        unsigned char sysex[SYSEX_LEN];
+        unsigned char midi_in_port[MAX_MIDI_PORT_NAME];
+        unsigned char midi_out_port[MAX_MIDI_PORT_NAME];
+    } preset;
     void send_nrpn(int nrpn, int value);
     void init_from_sysex(unsigned char *sysex);
 

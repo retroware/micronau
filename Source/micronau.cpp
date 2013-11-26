@@ -258,15 +258,6 @@ AudioProcessorEditor* MicronauAudioProcessor::createEditor()
 }
 
 //==============================================================================
-void MicronauAudioProcessor::getStateInformation (MemoryBlock& destData)
-{
-    unsigned char sysex_buf[434];
-    
-    memset(sysex_buf, 0, 434);
-	params->getAsSysexMessage(sysex_buf);
-    destData.append(sysex_buf+1, 432);
-}
-
 int MicronauAudioProcessor::index_of_nrpn(int nrpn)
 {
     return param_by_nrpn[nrpn]->index;
@@ -353,20 +344,46 @@ void MicronauAudioProcessor::send_nrpn(int nrpn, int value)
 
 void MicronauAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-	if (!params->parseParamsFromContent((unsigned char *) data, 432)) {
+    preset *p = (preset *) data;
+    String s;
+
+	if (!params->parseParamsFromContent(p->sysex, SYSEX_LEN)) {
 		return;
 	}
+
+    s = String(CharPointer_UTF8((const char *) p->midi_in_port));
+    set_midi_port(MIDI_IN_IDX, s);
+    s = String(CharPointer_UTF8((const char *) p->midi_out_port));
+    set_midi_port(MIDI_OUT_IDX, s);
+}
+
+void MicronauAudioProcessor::getStateInformation (MemoryBlock& destData)
+{
+    unsigned char sysex_buf[SYSEX_LEN + 2];
+    preset p;
+    String s;
+    
+    memset(sysex_buf, 0, SYSEX_LEN + 2);
+	params->getAsSysexMessage(sysex_buf);
+    memcpy(p.sysex, sysex_buf+1, SYSEX_LEN);
+
+    s = get_midi_port(MIDI_IN_IDX);
+    s.copyToUTF8(((CharPointer_UTF8::CharType *) p.midi_in_port), MAX_MIDI_PORT_NAME);
+    s = get_midi_port(MIDI_OUT_IDX);
+    s.copyToUTF8(((CharPointer_UTF8::CharType *) p.midi_out_port), MAX_MIDI_PORT_NAME);
+
+    destData.append(&p, sizeof(p));
 }
 
 void MicronauAudioProcessor::sync_via_sysex()
 {
-    unsigned char sysex_buf[434];
+    unsigned char sysex_buf[SYSEX_LEN + 2];
 
     if (midi_out == NULL) {
         return;
     }
     
-    memset(sysex_buf, 0, 434);
+    memset(sysex_buf, 0, SYSEX_LEN + 2);
 	params->getAsSysexMessage(sysex_buf);
 
     MidiMessage sysexe_msg(sysex_buf, sizeof(sysex_buf));
@@ -376,7 +393,7 @@ void MicronauAudioProcessor::sync_via_sysex()
 void MicronauAudioProcessor::init_from_sysex(unsigned char *sysex)
 {
 	int i;
-	if (!params->parseParamsFromContent(sysex, 432)) {
+	if (!params->parseParamsFromContent(sysex, SYSEX_LEN)) {
 		return;
 	}
 
