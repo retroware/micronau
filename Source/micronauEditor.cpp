@@ -27,19 +27,9 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     owner = ownerFilter;
     
     // create all of the gui elements and hook them up to the processor
-    for (int i = 0; i < 5; i++) {
-        ext_slider *s;
-        float min, max;
-        
-        sliders[i] = s = new ext_slider(owner, i+523);
-        s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
-        s->addListener (this);
-        min = s->get_min();
-        max = s->get_max();
-        s->setRange (min, max, 1);
-        addAndMakeVisible(s);
-    }
-
+    create_osc(0);
+    
+    
     sync_nrpn = new TextButton("sync nrpn");
     sync_nrpn->addListener(this);
     addAndMakeVisible(sync_nrpn);
@@ -77,6 +67,33 @@ MicronauAudioProcessorEditor::~MicronauAudioProcessorEditor()
 {
 }
 
+void MicronauAudioProcessorEditor::create_osc(int n)
+{
+    float min, max;
+    for (int i = 0; i < 5; i++) {
+        ext_slider *s;
+        
+        sliders[i] = s = new ext_slider(owner, i+524);
+        s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
+        s->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+        s->addListener (this);
+        min = s->get_min();
+        max = s->get_max();
+        s->setRange (min, max, 1);
+        addAndMakeVisible(s);
+    }
+    ext_combo *c = new ext_combo(owner, 523);
+    boxes[0] = c;
+
+/*    vector<ListItemParameter> list_items = c->get_list_item_names();
+    vector<ListItemParameter>::const_iterator i;
+    for (int i = 0; i != list_items.size(); i++) {
+        c->addItem(list_items[i].getName(), i+1);
+    } */
+    c->addListener(this);
+    addAndMakeVisible(c);
+}
+
 //==============================================================================
 void MicronauAudioProcessorEditor::paint (Graphics& g)
 {
@@ -88,9 +105,9 @@ void MicronauAudioProcessorEditor::resized()
 {
     for (int i = 0; i < 5; i++) {
         Slider *s = sliders[i];
-        s->setBounds(20+i*180, 60, 150, 40);
+        s->setBounds(i*40+5, 25, 40, 40);
     }
-
+    boxes[0]->setBounds(5, 10, 100, 15);
 	param_display->setBounds(360,110,150,45);
 
     sync_nrpn->setBounds(20, 120, 30, 20);

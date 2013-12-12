@@ -13,6 +13,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "micronau.h"
 #include "gui/MicronSlider.h"
+#include "gui/LcdComboBox.h"
 class LcdLabel;
 class StdComboBox;
 
@@ -29,10 +30,37 @@ public:
     int get_max() { return param->getMax();}
     const String get_name () { return param->getName();}
     const String get_txt_value (int v) { return param->getConvertedValue(v);}
-
 	// this setRange override adjusts mouse drag sensitivity so that smaller ranges are more sensitive than larger ranges.
 	void setRange (double newMin, double newMax, double newInt) { MicronSlider::setRange (newMin, newMax, newInt); setMouseDragSensitivity( 20.0*(4.0+log10(newMax - newMin)) ); }
 
+private:
+    IonSysexParam *param;
+    MicronauAudioProcessor *plugin;
+    int idx;
+};
+
+class ext_combo : public LcdComboBox
+{
+public:
+    ext_combo(MicronauAudioProcessor *owner, int nrpn_num) : plugin(owner) {
+        param = owner->param_of_nrpn(nrpn_num);
+        idx = owner->index_of_nrpn(nrpn_num);
+ 
+        vector<ListItemParameter> list_items = param->getList();
+        vector<ListItemParameter>::const_iterator i;
+        for (int i = 0; i != list_items.size(); i++) {
+            addItem(list_items[i].getName(), i+1);
+        }
+        
+    }
+    void set_value(int v){plugin->setParameterNotifyingHost(idx, v);}
+    int get_value(){ return param->getValue();}
+    int get_min() { return param->getMin();}
+    int get_max() { return param->getMax();}
+    const String get_name () { return param->getName();}
+    const String get_txt_value (int v) { return param->getConvertedValue(v);}
+    vector<ListItemParameter> & get_list_item_names() {return param->getList();}
+    
 private:
     IonSysexParam *param;
     MicronauAudioProcessor *plugin;
@@ -62,6 +90,9 @@ public:
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
     
 private:
+    void create_osc(int n);
+    void layout_osc(int n, int x, int y);
+    
     void update_midi_menu(int in_out);
     void select_item_by_name(int in_out, String nm);
 
@@ -78,6 +109,7 @@ private:
 
     // prototype
     ext_slider *sliders[5];
+    ext_combo *boxes[5];
 };
 
 

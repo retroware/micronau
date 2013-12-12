@@ -103,7 +103,7 @@ private:
 
     static const int MAX_MIDI_PORT_NAME = 80;
     static const int SYSEX_LEN = 432;
-   typedef struct {
+    typedef struct {
         unsigned char sysex[SYSEX_LEN];
         unsigned char midi_in_port[MAX_MIDI_PORT_NAME];
         unsigned char midi_out_port[MAX_MIDI_PORT_NAME];
