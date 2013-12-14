@@ -92,6 +92,8 @@ public:
 private:
     void create_osc(int n);
     void layout_osc(int n, int x, int y);
+    int osc_box_offset[3];
+    int osc_sliders_offset[3];
     
     void update_midi_menu(int in_out);
     void select_item_by_name(int in_out, String nm);
@@ -108,8 +110,8 @@ private:
     MicronauAudioProcessor *owner;
 
     // prototype
-    ext_slider *sliders[5];
-    ext_combo *boxes[5];
+    Array<ext_slider *> sliders;
+    Array<ext_combo *> boxes;
 };
 
 

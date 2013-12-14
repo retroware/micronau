@@ -27,8 +27,9 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     owner = ownerFilter;
     
     // create all of the gui elements and hook them up to the processor
-    create_osc(0);
-    
+    for (int i = 0; i < 3; i++) {
+        create_osc(i);
+    }
     
     sync_nrpn = new TextButton("sync nrpn");
     sync_nrpn->addListener(this);
@@ -57,7 +58,7 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     addAndMakeVisible (midi_out_menu);
     
     // This is where our plugin's editor size is set.
-    setSize (1000, 300);
+    setSize (1060, 670);
 
     //
     startTimer (50);
@@ -70,10 +71,13 @@ MicronauAudioProcessorEditor::~MicronauAudioProcessorEditor()
 void MicronauAudioProcessorEditor::create_osc(int n)
 {
     float min, max;
+    osc_sliders_offset[n] = sliders.size();
+    osc_box_offset[n] = boxes.size();
     for (int i = 0; i < 5; i++) {
         ext_slider *s;
         
-        sliders[i] = s = new ext_slider(owner, i+524);
+        s = new ext_slider(owner, (n*6)+i+524);
+        sliders.add(s);
         s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
         s->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
         s->addListener (this);
@@ -82,16 +86,21 @@ void MicronauAudioProcessorEditor::create_osc(int n)
         s->setRange (min, max, 1);
         addAndMakeVisible(s);
     }
-    ext_combo *c = new ext_combo(owner, 523);
-    boxes[0] = c;
+    ext_combo *c = new ext_combo(owner, (n*6)+523);
+    boxes.add(c);
 
-/*    vector<ListItemParameter> list_items = c->get_list_item_names();
-    vector<ListItemParameter>::const_iterator i;
-    for (int i = 0; i != list_items.size(); i++) {
-        c->addItem(list_items[i].getName(), i+1);
-    } */
     c->addListener(this);
     addAndMakeVisible(c);
+}
+
+void MicronauAudioProcessorEditor::layout_osc(int n, int x, int y)
+{
+    int y_base = y + n * 65;
+    for (int i = 0; i < 5; i++) {
+        Slider *s = sliders[i + osc_sliders_offset[n]];
+        s->setBounds(x + (i*40), y_base + 10, 40, 40);
+    }
+    boxes[osc_box_offset[n]]->setBounds(x+50, y_base, 75, 15);
 }
 
 //==============================================================================
@@ -103,27 +112,30 @@ void MicronauAudioProcessorEditor::paint (Graphics& g)
 
 void MicronauAudioProcessorEditor::resized()
 {
-    for (int i = 0; i < 5; i++) {
-        Slider *s = sliders[i];
-        s->setBounds(i*40+5, 25, 40, 40);
+    for (int i = 0; i < 3; i++) {
+        layout_osc(i, 15, 130);
     }
-    boxes[0]->setBounds(5, 10, 100, 15);
-	param_display->setBounds(360,110,150,45);
 
-    sync_nrpn->setBounds(20, 120, 30, 20);
-    sync_sysex->setBounds(70, 120, 30, 20);
+	param_display->setBounds(885,15,150,45);
 
-    midi_in_menu->setBounds(120, 120, 100, 20);
-    midi_out_menu->setBounds(240, 120, 100, 20);
+    sync_nrpn->setBounds(910, 120, 30, 20);
+    sync_sysex->setBounds(960, 120, 30, 20);
+
+    midi_in_menu->setBounds(910, 70, 100, 20);
+    midi_out_menu->setBounds(910, 95, 100, 20);
 }
 
 void MicronauAudioProcessorEditor::timerCallback()
 {
     // update gui if parameters have changed
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < sliders.size(); i++) {
         sliders[i]->setValue(sliders[i]->get_value(), dontSendNotification);
     }
 
+    for (int i = 0; i < boxes.size(); i++) {
+        boxes[i]->setSelectedItemIndex(boxes[i]->get_value(), dontSendNotification);
+    }
+    
     update_midi_menu(MIDI_IN_IDX);
     update_midi_menu(MIDI_OUT_IDX);
 }
@@ -180,7 +192,6 @@ void MicronauAudioProcessorEditor::sliderValueChanged (Slider *slider)
     ext_slider *s = dynamic_cast<ext_slider*>( slider );
 	if (s)
 	{
-		// NOTE: must use the down-casted pointer for getValue/setValue, as they aren't virtual in JUCE's Slider base class.
 		s->set_value(s->getValue());
 		param_display->setText(s->get_name() + "\n" + s->get_txt_value(s->getValue()), dontSendNotification);
 	}
@@ -211,6 +222,11 @@ void MicronauAudioProcessorEditor::comboBoxChanged (ComboBox* box)
     if (box == midi_in_menu) {
         owner->set_midi_port(MIDI_IN_IDX, box->getItemText(idx));
     }
+    ext_combo *b = dynamic_cast<ext_combo *>( box );
+	if (b)
+	{
+		b->set_value(b->getSelectedItemIndex());
+	}
 }
 
 void MicronauAudioProcessorEditor::select_item_by_name(int in_out, String nm)
