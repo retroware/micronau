@@ -97,7 +97,8 @@ public:
         @param newStyle         the type of interface
         @see setRotaryParameters, setVelocityBasedMode,
     */
-    void setSliderStyle (Slider::SliderStyle newStyle);
+   void setLabel(String l);
+   void setSliderStyle (Slider::SliderStyle newStyle);
 
     /** Returns the slider's current style.
         @see setSliderStyle
@@ -719,7 +720,7 @@ public:
         (Not normally needed, as this is done automatically).
     */
     void updateText();
-
+    
     /** True if the slider moves horizontally. */
     bool isHorizontal() const noexcept;
     /** True if the slider moves vertically. */

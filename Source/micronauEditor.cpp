@@ -71,36 +71,68 @@ MicronauAudioProcessorEditor::~MicronauAudioProcessorEditor()
 void MicronauAudioProcessorEditor::create_osc(int n)
 {
     float min, max;
-    osc_sliders_offset[n] = sliders.size();
-    osc_box_offset[n] = boxes.size();
+    int x, y, y_base;
+    Label *l;
+    
+    x = 15;
+    y = 130;
+    y_base = y + n * 65;
+    
     for (int i = 0; i < 5; i++) {
         ext_slider *s;
         
         s = new ext_slider(owner, (n*6)+i+524);
         sliders.add(s);
         s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
-        s->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+        s->setTextBoxStyle(Slider::TextBoxBelow, true, 40, 15);
         s->addListener (this);
         min = s->get_min();
         max = s->get_max();
         s->setRange (min, max, 1);
+ 
+        switch (i) {
+            case 0:
+                s->setLabel("shape");
+                break;
+            case 1:
+                s->setLabel("octave");
+                break;
+            case 2:
+                s->setLabel("semi");
+                break;
+            case 3:
+                s->setLabel("fine");
+                break;
+            case 4:
+                s->setLabel("wheel");
+                break;
+        }
+
+        s->setBounds(x + (i*40), y_base + 20, 40, 40);
+
         addAndMakeVisible(s);
     }
+
+    String s = "osc";
+    s += (n+1);
+    l = new Label();
+    l->setText(s, dontSendNotification);
+    l->setFont (Font ("Arial", 12.00f, Font::bold));
+    l->setBounds(x, y_base, 55, 15);
+    addAndMakeVisible(l);
+
+    l = new Label();
+    l->setText("waveform", dontSendNotification);
+    l->setFont (Font ("Arial", 12.00f, Font::bold));
+    l->setBounds(x+105, y_base, 55, 15);
+    addAndMakeVisible(l);
+
     ext_combo *c = new ext_combo(owner, (n*6)+523);
-    boxes.add(c);
-
+    c->setBounds(x + 50, y_base, 55, 15);
     c->addListener(this);
+    boxes.add(c);
+    
     addAndMakeVisible(c);
-}
-
-void MicronauAudioProcessorEditor::layout_osc(int n, int x, int y)
-{
-    int y_base = y + n * 65;
-    for (int i = 0; i < 5; i++) {
-        Slider *s = sliders[i + osc_sliders_offset[n]];
-        s->setBounds(x + (i*40), y_base + 10, 40, 40);
-    }
-    boxes[osc_box_offset[n]]->setBounds(x+50, y_base, 75, 15);
 }
 
 //==============================================================================
@@ -112,10 +144,6 @@ void MicronauAudioProcessorEditor::paint (Graphics& g)
 
 void MicronauAudioProcessorEditor::resized()
 {
-    for (int i = 0; i < 3; i++) {
-        layout_osc(i, 15, 130);
-    }
-
 	param_display->setBounds(885,15,150,45);
 
     sync_nrpn->setBounds(910, 120, 30, 20);

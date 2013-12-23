@@ -59,6 +59,10 @@ public:
     }
 
     //==============================================================================
+    void setLabel(String l)
+    {
+        textBox->setText(l, dontSendNotification);
+    }
     void registerListeners()
     {
         currentValue.addListener (this);
@@ -559,7 +563,11 @@ public:
                                                                      : owner.getTextFromValue (currentValue.getValue()));
 
             valueBox = nullptr;
-            owner.addAndMakeVisible (valueBox = lf.createSliderTextBox (owner));
+//            owner.addAndMakeVisible (valueBox = lf.createSliderTextBox (owner));
+owner.addAndMakeVisible (textBox = new Label());
+            textBox->setFont (Font ("Arial", 12.00f, Font::bold));
+            textBox->setJustificationType (Justification::centredTop);
+            valueBox = lf.createSliderTextBox (owner);
 
             valueBox->setWantsKeyboardFocus (false);
             valueBox->setText (previousTextBoxContent, dontSendNotification);
@@ -1173,7 +1181,7 @@ public:
             }
             else if (textBoxPos == Slider::TextBoxBelow)
             {
-                valueBox->setBounds ((localBounds.getWidth() - tbw) / 2, localBounds.getHeight() - tbh, tbw, tbh);
+                textBox->setBounds ((localBounds.getWidth() - tbw) / 2, localBounds.getHeight() - tbh, tbw, tbh);
                 sliderRect.setBounds (0, 0, localBounds.getWidth(), localBounds.getHeight() - tbh);
             }
         }
@@ -1294,6 +1302,7 @@ public:
     bool snapsToMousePos;
 
     ScopedPointer<Label> valueBox;
+    ScopedPointer<Label> textBox;
     ScopedPointer<Button> incButton, decButton;
 
     //==============================================================================
@@ -1640,3 +1649,9 @@ void MicronSlider::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails&
     if (! (isEnabled() && pimpl->mouseWheelMove (e, wheel)))
         Component::mouseWheelMove (e, wheel);
 }
+
+void MicronSlider::setLabel(String l) {
+    pimpl->setLabel(l);
+}
+
+
