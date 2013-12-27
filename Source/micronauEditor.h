@@ -23,11 +23,10 @@ public:
     ext_slider(MicronauAudioProcessor *owner, int nrpn_num) : plugin(owner) {
         param = owner->param_of_nrpn(nrpn_num);
         idx = owner->index_of_nrpn(nrpn_num);
+        setRange (param->getMin(), param->getMax(), 1);
     }
     void set_value(int v){plugin->setParameterNotifyingHost(idx, v);}
     int get_value(){ return param->getValue();}
-    int get_min() { return param->getMin();}
-    int get_max() { return param->getMax();}
     const String get_name () { return param->getName();}
     const String get_txt_value (int v) { return param->getConvertedValue(v);}
 	// this setRange override adjusts mouse drag sensitivity so that smaller ranges are more sensitive than larger ranges.
@@ -67,9 +66,18 @@ private:
     int idx;
 };
 
+class back_label : public Label
+{
+public:
+    back_label(String s, int x, int y, int w, int h) : Label() {
+        setText(s, dontSendNotification);
+        setFont (Font ("Arial", 12.00f, Font::bold));
+        setBounds(x, y, w, h);
+        setJustificationType(Justification::centred);
+    }
+};
+
 //==============================================================================
-/**
-*/
 class MicronauAudioProcessorEditor  : public AudioProcessorEditor,
                                         public SliderListener,
                                         public ButtonListener,
@@ -91,9 +99,8 @@ public:
     
 private:
     void create_osc(int n);
-    void layout_osc(int n, int x, int y);
-    int osc_box_offset[3];
-    int osc_sliders_offset[3];
+    void create_prefilt(int x, int y);
+    void create_mod(int n, int x, int y);
     
     void update_midi_menu(int in_out);
     void select_item_by_name(int in_out, String nm);

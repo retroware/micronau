@@ -31,6 +31,10 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
         create_osc(i);
     }
     
+    create_prefilt(290, 140);
+    
+    create_mod(0, 55, 25);
+    
     sync_nrpn = new TextButton("sync nrpn");
     sync_nrpn->addListener(this);
     addAndMakeVisible(sync_nrpn);
@@ -68,9 +72,52 @@ MicronauAudioProcessorEditor::~MicronauAudioProcessorEditor()
 {
 }
 
+void MicronauAudioProcessorEditor::create_mod(int n, int x, int y)
+{
+    for (int i = 0; i < 6; i++) {
+        ext_slider *s;
+
+        s = new ext_slider(owner, (i*4)+(n*24)+694);
+        sliders.add(s);
+        s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
+        s->setTextBoxStyle(Slider::TextBoxBelow, true, 40, 15);
+        s->setLabel("level");
+        s->addListener (this);
+        s->setBounds(x + (i*118), y, 40, 40);
+        addAndMakeVisible(s);
+
+        s = new ext_slider(owner, (i*4)+(n*24)+695);
+        sliders.add(s);
+        s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
+        s->setTextBoxStyle(Slider::TextBoxBelow, true, 40, 15);
+        s->setLabel("offset");
+        s->addListener (this);
+        s->setBounds(x + (i*118), y+40, 40, 40);
+        addAndMakeVisible(s);
+        
+        ext_combo *c;
+        Label *l;
+        
+        c = new ext_combo(owner, (i*4) + (n*6) + 692);
+        c->setBounds(x + 40 + (i*118), y+4, 75, 15);
+        c->addListener(this);
+        addAndMakeVisible(c);
+        boxes.add(c);
+        l = new back_label("source", x + 40 + (i*118), y + 4 + 15, 75, 15);
+        addAndMakeVisible(l);
+
+        c = new ext_combo(owner, (i*4) + (n*6) + 693);
+        c->setBounds(x + 40 + (i*118), y + 4 + 40, 75, 15);
+        c->addListener(this);
+        addAndMakeVisible(c);
+        boxes.add(c);
+        l = new back_label("destination", x + 40 + (i*118), y + 4 + 15 + 40, 75, 15);
+        addAndMakeVisible(l);
+    }
+}
+
 void MicronauAudioProcessorEditor::create_osc(int n)
 {
-    float min, max;
     int x, y, y_base;
     Label *l;
     
@@ -86,9 +133,6 @@ void MicronauAudioProcessorEditor::create_osc(int n)
         s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
         s->setTextBoxStyle(Slider::TextBoxBelow, true, 40, 15);
         s->addListener (this);
-        min = s->get_min();
-        max = s->get_max();
-        s->setRange (min, max, 1);
  
         switch (i) {
             case 0:
@@ -109,22 +153,15 @@ void MicronauAudioProcessorEditor::create_osc(int n)
         }
 
         s->setBounds(x + (i*40), y_base + 20, 40, 40);
-
         addAndMakeVisible(s);
     }
 
     String s = "osc";
     s += (n+1);
-    l = new Label();
-    l->setText(s, dontSendNotification);
-    l->setFont (Font ("Arial", 12.00f, Font::bold));
-    l->setBounds(x, y_base, 55, 15);
+    l = new back_label(s, x, y_base, 55, 15);
     addAndMakeVisible(l);
 
-    l = new Label();
-    l->setText("waveform", dontSendNotification);
-    l->setFont (Font ("Arial", 12.00f, Font::bold));
-    l->setBounds(x+105, y_base, 55, 15);
+    l = new back_label("waveform", x+105, y_base, 55, 15);
     addAndMakeVisible(l);
 
     ext_combo *c = new ext_combo(owner, (n*6)+523);
@@ -133,6 +170,60 @@ void MicronauAudioProcessorEditor::create_osc(int n)
     boxes.add(c);
     
     addAndMakeVisible(c);
+}
+
+void MicronauAudioProcessorEditor::create_prefilt(int x, int y)
+{
+    Label *l;
+    for (int i = 0; i < 6; i++) {
+        ext_slider *s;
+        String sl;
+        
+        s = new ext_slider(owner, 541 + i);
+        sliders.add(s);
+        s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
+        s->setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
+        s->addListener (this);
+        s->setBounds(x, y + i*40, 40, 40);
+        addAndMakeVisible(s);
+
+        s = new ext_slider(owner, 547 + i);
+        sliders.add(s);
+        s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
+        s->setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
+        s->addListener (this);        
+        s->setBounds(x + 50, y + i*40, 40, 40);
+        addAndMakeVisible(s);
+        
+        switch (i) {
+            case 0:
+                sl = String("osc1");
+                break;
+            case 1:
+                sl = String("osc2");
+                break;
+            case 2:
+                sl = String("osc2");
+                break;
+            case 3:
+                sl = String("ring");
+                break;
+            case 4:
+                sl = String("noise");
+                break;
+            case 5:
+                sl = String("ext in");
+                break;
+        };
+        l = new back_label(sl, x-40, y + i*40 + 12, 40, 15);
+        addAndMakeVisible(l);
+    }
+
+    l = new back_label("level", x, y - 15, 40, 15);
+    addAndMakeVisible(l);
+
+    l = new back_label("balance", x+40, y - 15, 60, 15);
+    addAndMakeVisible(l);
 }
 
 //==============================================================================
