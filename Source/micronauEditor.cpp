@@ -32,7 +32,7 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     }
     
     create_prefilt(290, 140);
-    
+    create_filter(410, 135);
     create_mod(0, 55, 25);
     
     sync_nrpn = new TextButton("sync nrpn");
@@ -70,6 +70,32 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
 
 MicronauAudioProcessorEditor::~MicronauAudioProcessorEditor()
 {
+}
+
+void MicronauAudioProcessorEditor::add_knob(int nprn, int x, int y, const char *text){
+    ext_slider *s;
+    s = new ext_slider(owner, nprn);
+    sliders.add(s);
+    s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
+
+    if (text) {
+        s->setTextBoxStyle(Slider::TextBoxBelow, true, 40, 15);
+        s->setLabel(text);
+    }
+
+    s->addListener (this);
+    s->setBounds(x, y, 40, 40);
+    addAndMakeVisible(s);
+}
+
+void MicronauAudioProcessorEditor::add_box(int nrpn, int x, int y, int width){
+    ext_combo *c;
+    
+    c = new ext_combo(owner, nrpn);
+    c->setBounds(x, y, width, 15);
+    c->addListener(this);
+    addAndMakeVisible(c);
+    boxes.add(c);
 }
 
 void MicronauAudioProcessorEditor::create_mod(int n, int x, int y)
@@ -224,6 +250,20 @@ void MicronauAudioProcessorEditor::create_prefilt(int x, int y)
 
     l = new back_label("balance", x+40, y - 15, 60, 15);
     addAndMakeVisible(l);
+}
+
+void MicronauAudioProcessorEditor::create_filter(int x, int y)
+{
+    for (int i = 0; i < 2; i++) {
+        int x_offset = 50;
+        
+        add_knob((i*6)+556, x + x_offset, y+(i*80), "cutoff");
+        add_knob((i*6)+557, x + x_offset + 40, y+(i*80), "cutoff");
+        add_knob((i*6)+559, x + x_offset + 80, y+(i*80), "envamt");
+        add_knob((i*6)+558, x + x_offset + 120, y+(i*80), "keytrk");
+
+        add_box((i*6)+555, x + 88, y + 42 + (i * 80), 135);
+    }
 }
 
 //==============================================================================
