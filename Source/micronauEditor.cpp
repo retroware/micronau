@@ -10,6 +10,7 @@
 #include "micronau.h"
 #include "micronauEditor.h"
 #include "gui/MicronSlider.h"
+#include "gui/MicronToggleButton.h"
 #include "gui/LcdLabel.h"
 #include "gui/StdComboBox.h"
 #include "gui/LookAndFeel.h"
@@ -101,42 +102,16 @@ void MicronauAudioProcessorEditor::add_box(int nrpn, int x, int y, int width){
 void MicronauAudioProcessorEditor::create_mod(int n, int x, int y)
 {
     for (int i = 0; i < 6; i++) {
-        ext_slider *s;
-
-        s = new ext_slider(owner, (i*4)+(n*24)+694);
-        sliders.add(s);
-        s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
-        s->setTextBoxStyle(Slider::TextBoxBelow, true, 40, 15);
-        s->setLabel("level");
-        s->addListener (this);
-        s->setBounds(x + (i*118), y, 40, 40);
-        addAndMakeVisible(s);
-
-        s = new ext_slider(owner, (i*4)+(n*24)+695);
-        sliders.add(s);
-        s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
-        s->setTextBoxStyle(Slider::TextBoxBelow, true, 40, 15);
-        s->setLabel("offset");
-        s->addListener (this);
-        s->setBounds(x + (i*118), y+40, 40, 40);
-        addAndMakeVisible(s);
-        
-        ext_combo *c;
         Label *l;
-        
-        c = new ext_combo(owner, (i*4) + (n*6) + 692);
-        c->setBounds(x + 40 + (i*118), y+4, 75, 15);
-        c->addListener(this);
-        addAndMakeVisible(c);
-        boxes.add(c);
+
+        add_knob((i*4)+(n*24)+694, x + (i*118), y, "level");
+        add_knob((i*4)+(n*24)+695, x + (i*118), y + 40, "offset");
+
+        add_box((i*4) + (n*6) + 692, x + 40 + (i*118), y + 4, 75);
         l = new back_label("source", x + 40 + (i*118), y + 4 + 15, 75, 15);
         addAndMakeVisible(l);
 
-        c = new ext_combo(owner, (i*4) + (n*6) + 693);
-        c->setBounds(x + 40 + (i*118), y + 4 + 40, 75, 15);
-        c->addListener(this);
-        addAndMakeVisible(c);
-        boxes.add(c);
+        add_box((i*4) + (n*6) + 693, x + 40 + (i*118), y + 4 + 40, 75);
         l = new back_label("destination", x + 40 + (i*118), y + 4 + 15 + 40, 75, 15);
         addAndMakeVisible(l);
     }
@@ -145,6 +120,7 @@ void MicronauAudioProcessorEditor::create_mod(int n, int x, int y)
 void MicronauAudioProcessorEditor::create_osc(int n)
 {
     int x, y, y_base;
+    const char *labels[] = {"shape","octave", "semi", "fine", "wheel"};
     Label *l;
     
     x = 15;
@@ -152,35 +128,10 @@ void MicronauAudioProcessorEditor::create_osc(int n)
     y_base = y + n * 65;
     
     for (int i = 0; i < 5; i++) {
-        ext_slider *s;
-        
-        s = new ext_slider(owner, (n*6)+i+524);
-        sliders.add(s);
-        s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
-        s->setTextBoxStyle(Slider::TextBoxBelow, true, 40, 15);
-        s->addListener (this);
- 
-        switch (i) {
-            case 0:
-                s->setLabel("shape");
-                break;
-            case 1:
-                s->setLabel("octave");
-                break;
-            case 2:
-                s->setLabel("semi");
-                break;
-            case 3:
-                s->setLabel("fine");
-                break;
-            case 4:
-                s->setLabel("wheel");
-                break;
-        }
-
-        s->setBounds(x + (i*40), y_base + 20, 40, 40);
-        addAndMakeVisible(s);
+        add_knob((n*6)+i+524, x + (i*40), y_base + 20, labels[i]);
     }
+
+    add_box((n*6)+523, x + 50, y_base, 55);
 
     String s = "osc";
     s += (n+1);
@@ -190,58 +141,16 @@ void MicronauAudioProcessorEditor::create_osc(int n)
     l = new back_label("waveform", x+105, y_base, 55, 15);
     addAndMakeVisible(l);
 
-    ext_combo *c = new ext_combo(owner, (n*6)+523);
-    c->setBounds(x + 50, y_base, 55, 15);
-    c->addListener(this);
-    boxes.add(c);
-    
-    addAndMakeVisible(c);
 }
 
 void MicronauAudioProcessorEditor::create_prefilt(int x, int y)
 {
+    const char *labels[] = {"osc1", "osc2", "osc3", "ring", "noise", "ext in"};
     Label *l;
     for (int i = 0; i < 6; i++) {
-        ext_slider *s;
-        String sl;
-        
-        s = new ext_slider(owner, 541 + i);
-        sliders.add(s);
-        s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
-        s->setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
-        s->addListener (this);
-        s->setBounds(x, y + i*40, 40, 40);
-        addAndMakeVisible(s);
-
-        s = new ext_slider(owner, 547 + i);
-        sliders.add(s);
-        s->setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
-        s->setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
-        s->addListener (this);        
-        s->setBounds(x + 50, y + i*40, 40, 40);
-        addAndMakeVisible(s);
-        
-        switch (i) {
-            case 0:
-                sl = String("osc1");
-                break;
-            case 1:
-                sl = String("osc2");
-                break;
-            case 2:
-                sl = String("osc2");
-                break;
-            case 3:
-                sl = String("ring");
-                break;
-            case 4:
-                sl = String("noise");
-                break;
-            case 5:
-                sl = String("ext in");
-                break;
-        };
-        l = new back_label(sl, x-40, y + i*40 + 12, 40, 15);
+        add_knob(541 + i, x, y + (i * 40), NULL);
+        add_knob(547 + i, x + 50, y + (i * 40), NULL);
+        l = new back_label(labels[i], x-40, y + i*40 + 12, 40, 15);
         addAndMakeVisible(l);
     }
 
@@ -264,6 +173,13 @@ void MicronauAudioProcessorEditor::create_filter(int x, int y)
 
         add_box((i*6)+555, x + 88, y + 42 + (i * 80), 135);
     }
+    add_knob(553, x, y+17, "f1>f2");
+    add_knob(670, x, y+62, "offset");
+
+    MicronToggleButton *b = new MicronToggleButton("");
+    b->setBounds(x + 10, y+100, 20, 20);
+    addAndMakeVisible(b);
+    // add_button(560);
 }
 
 //==============================================================================
