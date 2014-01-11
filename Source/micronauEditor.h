@@ -99,13 +99,17 @@ public:
     
 private:
     void add_knob(int nrpn, int x, int y, const char *text);
-    void add_box(int nprn, int x, int y, int width);
+    void add_box(int nprn, int x, int y, int width, const char *text, int loc);
     void create_osc(int n);
     void create_prefilt(int x, int y);
+    void create_postfilt(int x, int y);
     void create_mod(int n, int x, int y);
     void create_filter(int x, int y);
     void create_env(int n, int x, int y);
-    
+    void create_fm(int x, int y);
+    void create_xyz(int x, int y);
+    void create_lfo(int x, int y);
+
     void update_midi_menu(int in_out);
     void select_item_by_name(int in_out, String nm);
 
