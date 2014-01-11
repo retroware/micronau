@@ -30,6 +30,7 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     // create all of the gui elements and hook them up to the processor
     for (int i = 0; i < 3; i++) {
         create_osc(i);
+        create_env(i, 455, 310);
     }
     
     create_prefilt(290, 140);
@@ -182,6 +183,32 @@ void MicronauAudioProcessorEditor::create_filter(int x, int y)
     // add_button(560);
 }
 
+void MicronauAudioProcessorEditor::create_env(int n, int x, int y)
+{
+    int v_space  = 65;
+    const char *labels[] = {"attack", "decay", "sustain", "time", "release"};
+    int base_nrpns[] = {578, 580, 583, 582, 584};
+    int x_offset = x + 35;
+    for (int i = 0; i < 5; i++) {
+        add_knob(base_nrpns[i] + (n * 13), x_offset + (i * 40), y + (n * v_space), labels[i]);
+    }
+
+    add_box(579 + (n*13), x_offset, y + 40 + (n * v_space), 35);
+    add_box(581 + (n*13), x_offset + 40, y + 40 + (n * v_space), 35);
+    add_box(585 + (n*13), x_offset + 160, y + 40 + (n * v_space), 35);
+
+    add_box(588 + (n*13), x + 255 + 57, y + (n * v_space), 28);
+    add_box(587 + (n*13), x + 255 + 33, y + 19 + (n * v_space), 52);
+    add_box(589 + (n*13), x + 255 + 40, y + 38 + (n * v_space), 45);
+
+    Label *l;
+    l = new back_label("amp", x, y+6, 40, 15);
+    addAndMakeVisible(l);
+    l = new back_label("filter", x, y+6+v_space, 40, 15);
+    addAndMakeVisible(l);
+    l = new back_label("env3", x, y+6+(v_space * 2), 40, 15);
+    addAndMakeVisible(l);
+}
 //==============================================================================
 void MicronauAudioProcessorEditor::paint (Graphics& g)
 {

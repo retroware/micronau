@@ -104,6 +104,7 @@ private:
     void create_prefilt(int x, int y);
     void create_mod(int n, int x, int y);
     void create_filter(int x, int y);
+    void create_env(int n, int x, int y);
     
     void update_midi_menu(int in_out);
     void select_item_by_name(int in_out, String nm);
