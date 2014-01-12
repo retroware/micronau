@@ -118,24 +118,111 @@ public:
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
     
 private:
+
+	// layout of all the major component groups
+	enum
+	{
+		// group box margins
+		GROUP_BOX_MARGIN_X = 10,
+		GROUP_BOX_MARGIN_Y = 20,
+
+		// top and left edges
+		LEFT_X = 15,
+		TOP_Y = 20,
+
+		// component groups...
+		
+		MODMAT_X = LEFT_X,
+		MODMAT_Y = TOP_Y,
+		MODMAT_W = 755,
+		MODMAT_H = 100,
+
+		OSCS_X = MODMAT_X,
+		OSCS_Y = 145,
+		OSCS_W = 210,
+		OSCS_H = 200,
+
+		ENVS_X = 460,
+		ENVS_Y = 315,
+		ENVS_W = 400,
+		ENVS_H = 200,
+
+		PREFILT_X = 255,
+		PREFILT_Y = OSCS_Y,
+		PREFILT_W = 140,
+		PREFILT_H = 250,
+
+		FILT_X = 420,
+		FILT_Y = PREFILT_Y,
+		FILT_W = 230,
+		FILT_H = 145,
+
+		POSTFILT_X = 680,
+		POSTFILT_Y = FILT_Y,
+		POSTFILT_W = 200,
+		POSTFILT_H = FILT_H,
+
+		LFO_X = PREFILT_X,
+		LFO_Y = 440,
+		LFO_W = 185,
+		LFO_H = 225,
+		
+		FM_X = OSCS_X,
+		FM_Y = 377,
+		FM_W = OSCS_W,
+		FM_H = 76,
+
+		VOICE_X = FM_X,
+		VOICE_Y = FM_Y + 107,
+		VOICE_W = FM_W,
+		VOICE_H = 77,
+
+		PORTA_X = VOICE_X,
+		PORTA_Y = VOICE_Y + 107,
+		PORTA_W = VOICE_W,
+		PORTA_H = 55,
+		
+		XYZ_X = 900,
+		XYZ_Y = 270,
+		XYZ_W = 150,
+		XYZ_H = 70,
+
+		OUTPUT_X = XYZ_X,
+		OUTPUT_Y = XYZ_Y + 115,
+		OUTPUT_W = XYZ_W,
+		OUTPUT_H = 135,
+
+		TRACKING_X = 930,
+		TRACKING_Y = OUTPUT_Y + 175,
+		TRACKING_W = 120,
+		TRACKING_H = 70,
+	};
+
     void add_knob(int nrpn, int x, int y, const char *text, Component *parent);
     void add_box(int nprn, int x, int y, int width, const char *text, int loc, Component *parent);
     void add_button(int nrpn, int x, int y, const char *text);
     
-    void create_osc(int n);
+	void create_group_box(const char* labelText, int x, int y, int w, int h);
+    void create_osc(int x, int y);
     void create_prefilt(int x, int y);
     void create_postfilt(int x, int y);
-    void create_mod(int n, int x, int y);
+    void create_mod(int x, int y);
     void create_filter(int x, int y);
-    void create_env(int n, int x, int y);
+    void create_env(int x, int y);
     void create_fm(int x, int y);
+    void create_voice(int x, int y);
+    void create_portamento(int x, int y);
     void create_xyz(int x, int y);
+    void create_output(int x, int y);
+    void create_tracking(int x, int y);
     void create_lfo(int x, int y);
 
     void update_midi_menu(int in_out);
     void select_item_by_name(int in_out, String nm);
 
 	Image background;
+    ScopedPointer<Drawable> logo;
+    OwnedArray<GroupComponent> group_boxes;
 
     ScopedPointer<TextButton> sync_nrpn;
     ScopedPointer<TextButton> sync_sysex;
@@ -146,15 +233,13 @@ private:
 
     ScopedPointer<LcdLabel> param_display;
 
-    ScopedPointer<Drawable> logo;
-
     MicronauAudioProcessor *owner;
     ScopedPointer<Component> mods[2];
 
     // prototype
-    Array<ext_slider *> sliders;
-    Array<ext_combo *> boxes;
-    Array<ext_button *> buttons;
+    OwnedArray<ext_slider> sliders;
+    OwnedArray<ext_combo> boxes;
+    OwnedArray<ext_button> buttons;
 };
 
 

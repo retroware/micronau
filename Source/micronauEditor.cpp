@@ -29,18 +29,20 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     owner = ownerFilter;
     
     // create all of the gui elements and hook them up to the processor
-    for (int i = 0; i < 3; i++) {
-        create_osc(i);
-        create_env(i, 455, 310);
-    }
-    
-    create_prefilt(290, 140);
-    create_postfilt(713, 140);
-    create_filter(410, 135);
-    create_mod(0, 55, 25);
-    create_fm(0, 377);
-    create_xyz(900, 270);
-    create_lfo(270, 440);
+
+	create_osc(OSCS_X, OSCS_Y);
+	create_env(ENVS_X, ENVS_Y);
+	create_prefilt(PREFILT_X, PREFILT_Y);
+	create_postfilt(POSTFILT_X, POSTFILT_Y);
+	create_filter(FILT_X, FILT_Y);
+	create_mod(MODMAT_X, MODMAT_Y);
+	create_fm(FM_X, FM_Y);
+	create_voice(VOICE_X, VOICE_Y);
+	create_portamento(PORTA_X, PORTA_Y);
+	create_xyz(XYZ_X, XYZ_Y);
+	create_output(OUTPUT_X, OUTPUT_Y);
+	create_tracking(TRACKING_X, TRACKING_Y);
+	create_lfo(LFO_X, LFO_Y);
     
     sync_nrpn = new TextButton("sync nrpn");
     sync_nrpn->addListener(this);
@@ -51,15 +53,6 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     sync_sysex->addListener(this);
     sync_sysex->setBounds(960, 120, 30, 20);
     addAndMakeVisible(sync_sysex);
-    
-    mod1_6 = new TextButton("7 - 12");
-    mod1_6->addListener(this);
-    mod1_6->setBounds(10, 65, 40, 15);
-    addAndMakeVisible(mod1_6);
-    mod7_12 = new TextButton("1 - 6");
-    mod7_12->addListener(this);
-    mod7_12->setBounds(10, 65, 40, 15);
-    addChildComponent(mod7_12);
     
 	param_display = new LcdLabel("panel", "micronAU\nretroware");
     param_display->setJustificationType (Justification::centredLeft);
@@ -84,6 +77,7 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     // This is where our plugin's editor size is set.
     setSize (1060, 670);
 
+	timerCallback(); // call the timer callback once now to update all gui components, so user does not see them jump.
     startTimer (50);
 }
 
@@ -164,10 +158,27 @@ void MicronauAudioProcessorEditor::add_button(int nrpn, int x, int y, const char
     }
 }
 
-void MicronauAudioProcessorEditor::create_mod(int n, int x, int y)
+void MicronauAudioProcessorEditor::create_mod(int x, int y)
 {
+	create_group_box("modulation matrix", x, y, MODMAT_W, MODMAT_H);
+
+	x += 3;
+	y += 0;
+
+    mod1_6 = new TextButton("7 - 12");
+    mod1_6->addListener(this);
+    mod1_6->setBounds(x, y+30, 40, 15);
+    addAndMakeVisible(mod1_6);
+    mod7_12 = new TextButton("1 - 6");
+    mod7_12->addListener(this);
+    mod7_12->setBounds(x, y+30, 40, 15);
+    addChildComponent(mod7_12);
+
+	x += 40;
+	y -= 2;
+
     int y_off = 12;
-    for (n = 0; n < 2; n++) {
+    for (int n = 0; n < 2; n++) {
         Component *c = new Component();
         mods[n] = c;
         for (int i = 0; i < 6; i++) {
@@ -187,34 +198,54 @@ void MicronauAudioProcessorEditor::create_mod(int n, int x, int y)
     addChildComponent(mods[1]);
 }
 
-void MicronauAudioProcessorEditor::create_osc(int n)
+void MicronauAudioProcessorEditor::create_group_box(const char* labelText, int x, int y, int w, int h)
 {
-    int x, y, y_base;
-    const char *labels[] = {"shape","octave", "semi", "fine", "wheel"};
-    Label *l;
-    
-    x = 15;
-    y = 130;
-    y_base = y + n * 65;
-    
-    for (int i = 0; i < 5; i++) {
-        add_knob((n*6)+i+524, x + (i*40), y_base + 20, labels[i]);
-    }
+	GroupComponent* groupBox = new GroupComponent(labelText,labelText);
+	group_boxes.add(groupBox);
 
-    add_box((n*6)+523, x + 50, y_base, 55, "waveform", 0);
+    groupBox->setColour (GroupComponent::outlineColourId, Colour (0xffdf0000));
+    groupBox->setColour (GroupComponent::textColourId, Colour (0xffdf0000));
 
-    String s = "osc";
-    s += (n+1);
-    l = new back_label(s, x, y_base, 55, 15);
-    addAndMakeVisible(l);
+    groupBox->setBounds (x - GROUP_BOX_MARGIN_X, y - GROUP_BOX_MARGIN_Y, w + GROUP_BOX_MARGIN_X, h + GROUP_BOX_MARGIN_Y);
 
-//    l = new back_label("waveform", x+105, y_base, 55, 15);
-//    addAndMakeVisible(l);
+	addAndMakeVisible(groupBox);
+}
 
+void MicronauAudioProcessorEditor::create_osc(int x, int y)
+{
+	create_group_box("oscillators", x, y, OSCS_W, OSCS_H);
+
+	for (int n = 0; n < 3; ++n)
+	{
+		int y_base;
+		const char *labels[] = {"shape","octave", "semi", "fine", "wheel"};
+		Label *l;
+		
+		y_base = y + n * 65;
+		
+		for (int i = 0; i < 5; i++) {
+			add_knob((n*6)+i+524, x + (i*40), y_base + 20, labels[i]);
+		}
+
+		add_box((n*6)+523, x + 50, y_base, 55, "waveform", 0);
+
+		String s = "osc";
+		s += (n+1);
+		l = new back_label(s, x, y_base, 55, 15);
+		addAndMakeVisible(l);
+
+	//    l = new back_label("waveform", x+105, y_base, 55, 15);
+	//    addAndMakeVisible(l);
+	}
 }
 
 void MicronauAudioProcessorEditor::create_prefilt(int x, int y)
 {
+	create_group_box("pre filter mix", x, y, PREFILT_W, PREFILT_H);
+
+	x += 35;
+	y += 10;
+
     const char *labels[] = {"osc1", "osc2", "osc3", "ring", "noise", "ext in"};
     Label *l;
     for (int i = 0; i < 6; i++) {
@@ -233,6 +264,11 @@ void MicronauAudioProcessorEditor::create_prefilt(int x, int y)
 
 void MicronauAudioProcessorEditor::create_postfilt(int x, int y)
 {
+	create_group_box("post filter mix", x, y, POSTFILT_W, POSTFILT_H);
+
+	x += 35;
+	y += 10;
+
     const char *labels[] = {"filter1", "filter2", "prefilter"};
     Label *l;
     for (int i = 0; i < 3; i++) {
@@ -253,6 +289,8 @@ void MicronauAudioProcessorEditor::create_postfilt(int x, int y)
 
 void MicronauAudioProcessorEditor::create_filter(int x, int y)
 {
+	create_group_box("filters", x, y, FILT_W, FILT_H);
+
     for (int i = 0; i < 2; i++) {
         int x_offset = 50;
         
@@ -269,52 +307,73 @@ void MicronauAudioProcessorEditor::create_filter(int x, int y)
     add_button(560, x + 10, y + 100, NULL);
 }
 
-void MicronauAudioProcessorEditor::create_env(int n, int x, int y)
+void MicronauAudioProcessorEditor::create_env(int x, int y)
 {
-    int v_space  = 65;
-    const char *labels[] = {"attack", "decay", "sustain", "time", "release"};
-    int base_nrpns[] = {578, 580, 583, 582, 584};
-    int x_offset = x + 35;
-    for (int i = 0; i < 5; i++) {
-        add_knob(base_nrpns[i] + (n * 13), x_offset + (i * 40), y + (n * v_space), labels[i]);
-    }
+	create_group_box("envelopes", ENVS_X, ENVS_Y, ENVS_W, ENVS_H);
 
-    add_box(579 + (n*13), x_offset, y + 40 + (n * v_space), 35, NULL, 0);
-    add_box(581 + (n*13), x_offset + 40, y + 40 + (n * v_space), 35, NULL, 0);
-    add_box(585 + (n*13), x_offset + 160, y + 40 + (n * v_space), 35, NULL, 0);
-    add_button(590 + (n*13), x_offset + 80,  y + 35 + (n * v_space), "pedal");
-    
-    add_box(588 + (n*13), x + 255 + 57, y + (n * v_space), 28, "free run", 0);
-    add_box(587 + (n*13), x + 255 + 33, y + 19 + (n * v_space), 52, "reset", 0);
-    add_box(589 + (n*13), x + 255 + 40, y + 38 + (n * v_space), 45, "loop", 0);
+	for (int n = 0; n < 3; ++n)
+	{
+		int v_space  = 65;
+		const char *labels[] = {"attack", "decay", "sustain", "time", "release"};
+		int base_nrpns[] = {578, 580, 583, 582, 584};
+		int x_offset = x + 35;
+		for (int i = 0; i < 5; i++) {
+			add_knob(base_nrpns[i] + (n * 13), x_offset + (i * 40), y + (n * v_space), labels[i]);
+		}
 
-    Label *l;
-    l = new back_label("amp", x, y+6, 40, 15);
-    addAndMakeVisible(l);
-    l = new back_label("filter", x, y+6+v_space, 40, 15);
-    addAndMakeVisible(l);
-    l = new back_label("env3", x, y+6+(v_space * 2), 40, 15);
-    addAndMakeVisible(l);
+		add_box(579 + (n*13), x_offset, y + 40 + (n * v_space), 35, NULL, 0);
+		add_box(581 + (n*13), x_offset + 40, y + 40 + (n * v_space), 35, NULL, 0);
+		add_box(585 + (n*13), x_offset + 160, y + 40 + (n * v_space), 35, NULL, 0);
+		add_button(590 + (n*13), x_offset + 80,  y + 35 + (n * v_space), "pedal");
+		
+		add_box(588 + (n*13), x + 255 + 57, y + (n * v_space), 28, "free run", 0);
+		add_box(587 + (n*13), x + 255 + 33, y + 19 + (n * v_space), 52, "reset", 0);
+		add_box(589 + (n*13), x + 255 + 40, y + 38 + (n * v_space), 45, "loop", 0);
+
+		Label *l;
+		l = new back_label("amp", x, y+6, 40, 15);
+		addAndMakeVisible(l);
+		l = new back_label("filter", x, y+6+v_space, 40, 15);
+		addAndMakeVisible(l);
+		l = new back_label("env3", x, y+6+(v_space * 2), 40, 15);
+		addAndMakeVisible(l);
+	}
 }
 
 void MicronauAudioProcessorEditor::create_fm(int x, int y)
 {
-    // fm
+	create_group_box("fm", x, y, FM_W, FM_H);
+
+	x -= 15;
+	y += 0;
+
     add_box(520, x + 20, y + 0, 90, "sync", 1);
     add_box(522, x + 20, y + 35, 90, "algorithm", 1);
     add_box(554, x + 123, y + 20, 45, "noise", 1);
     add_knob(521, x + 180, y + 14, "amount");
+}
 
-    // voice
-    y += 107;
+void MicronauAudioProcessorEditor::create_voice(int x, int y)
+{
+	create_group_box("voice", x, y, VOICE_W, VOICE_H);
+
+	x -= 15;
+	y += 0;
+
     add_box(512, x + 20, y + 0, 60, "poly", 0);
     add_box(513, x + 20, y + 25, 60, "unison", 0);
     add_box(518, x + 20, y + 50, 105, "pitch wheel", 0);
     add_knob(519, x + 145, y, "drift");
     add_knob(514, x + 180, y, "detune");
+}
 
-    // portamento
-    y += 120;
+void MicronauAudioProcessorEditor::create_portamento(int x, int y)
+{
+	create_group_box("portamento", x, y, PORTA_W, PORTA_H);
+
+	x -= 15;
+	y += 0;
+
     add_box(515, x + 20, y + 0, 60, "mode", 0);
     add_box(516, x + 20, y + 25, 90, "type", 0);
     add_knob(517, x + 180, y, "time");
@@ -323,26 +382,39 @@ void MicronauAudioProcessorEditor::create_fm(int x, int y)
 
 void MicronauAudioProcessorEditor::create_xyz(int x, int y)
 {
-    Label *l;
-    // x, y, z
+	create_group_box("xyz assign", x, y, XYZ_W, XYZ_H);
+
+	x += 5;
+	y += 2;
+
     add_box(411, x, y + 0, 110, "X", 0);
     add_box(412, x, y + 20, 110, "Y", 0);
     add_box(413, x, y + 40, 110, "Z", 0);
-    
-    y += 115;
-    // output
+}
+
+void MicronauAudioProcessorEditor::create_output(int x, int y)
+{
+	create_group_box("output", x, y, OUTPUT_W, OUTPUT_H);
+
+	x += 19;
+	y += 0;
+
     add_knob(742, x + 35, y, "fx1/fx2");
     add_knob(577, x + 75, y, "wet/dry");
     add_knob(575, x + 75, y+45, "level");
     add_knob(576, x + 75, y+90, "level");
     add_box(574, x-15, y + 50, 85, "drive", 1);
-    l = new back_label("effects", x - 8, y + 7, 50, 15);
-    addAndMakeVisible(l);
-    l = new back_label("program", x + 28, y + 95, 50, 15);
-    addAndMakeVisible(l);
-    
-    y += 175;
-    // tracking
+    addAndMakeVisible( new back_label("effects", x - 8, y + 7, 50, 15) );
+    addAndMakeVisible( new back_label("program", x + 28, y + 95, 50, 15) );
+}
+
+void MicronauAudioProcessorEditor::create_tracking(int x, int y)
+{
+	create_group_box("tracking", x, y, TRACKING_W, TRACKING_H);
+
+	x += 5;
+	y += 0;
+
     add_box(630, x, y, 60, "input", 0);
     add_box(631, x, y + 20, 60, "preset", 0);
     add_box(632, x, y + 40, 25, "points", 0);
@@ -350,6 +422,11 @@ void MicronauAudioProcessorEditor::create_xyz(int x, int y)
 
 void MicronauAudioProcessorEditor::create_lfo(int x, int y)
 {
+	create_group_box("lfos", x, y, LFO_W, LFO_H);
+
+	x += 30;
+	y += 0;
+
     const char *labels[] = {"lfo1", "lfo2", "s&h"};
     
     for (int i = 0; i < 3; i++) {
