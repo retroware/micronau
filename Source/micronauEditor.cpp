@@ -79,6 +79,8 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     midi_out_menu->addListener(this);
     addAndMakeVisible (midi_out_menu);
     
+    logo = Drawable::createFromImageData (BinaryData::logo_svg, BinaryData::logo_svgSize);
+
     // This is where our plugin's editor size is set.
     setSize (1060, 670);
 
@@ -365,6 +367,10 @@ void MicronauAudioProcessorEditor::paint (Graphics& g)
 {
 	g.drawImageWithin(background, 0, 0, getWidth(), getHeight(), RectanglePlacement(RectanglePlacement::stretchToFit));
     g.setColour (Colours::black);
+
+    jassert (logo != 0);
+    if (logo != 0)
+        logo->drawWithin (g, Rectangle<float> (790, 20, 68, 40), RectanglePlacement::stretchToFit, 1.000f);
 }
 
 void MicronauAudioProcessorEditor::resized()

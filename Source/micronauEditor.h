@@ -146,6 +146,8 @@ private:
 
     ScopedPointer<LcdLabel> param_display;
 
+    ScopedPointer<Drawable> logo;
+
     MicronauAudioProcessor *owner;
     ScopedPointer<Component> mods[2];
 
