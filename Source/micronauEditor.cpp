@@ -255,7 +255,7 @@ void MicronauAudioProcessorEditor::create_filter(int x, int y)
         int x_offset = 50;
         
         add_knob((i*6)+556, x + x_offset, y+(i*80), "cutoff");
-        add_knob((i*6)+557, x + x_offset + 40, y+(i*80), "cutoff");
+        add_knob((i*6)+557, x + x_offset + 40, y+(i*80), "res");
         add_knob((i*6)+559, x + x_offset + 80, y+(i*80), "envamt");
         add_knob((i*6)+558, x + x_offset + 120, y+(i*80), "keytrk");
 
