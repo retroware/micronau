@@ -14,6 +14,8 @@
 #include "micronau.h"
 #include "gui/MicronSlider.h"
 #include "gui/LcdComboBox.h"
+#include "gui/MicronToggleButton.h"
+
 class LcdLabel;
 class StdComboBox;
 
@@ -66,6 +68,24 @@ private:
     int idx;
 };
 
+class ext_button : public MicronToggleButton
+{
+public:
+    ext_button(MicronauAudioProcessor *owner, int nrpn_num) : MicronToggleButton(""), plugin(owner) {
+        param = owner->param_of_nrpn(nrpn_num);
+        idx = owner->index_of_nrpn(nrpn_num);
+    }
+    void set_value(int v){plugin->setParameterNotifyingHost(idx, v);}
+    int get_value(){ return param->getValue();}
+    const String get_name () { return param->getName();}
+    const String get_txt_value (int v) { return param->getConvertedValue(v);}
+    
+private:
+    IonSysexParam *param;
+    MicronauAudioProcessor *plugin;
+    int idx;
+};
+
 class back_label : public Label
 {
 public:
@@ -98,8 +118,10 @@ public:
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
     
 private:
-    void add_knob(int nrpn, int x, int y, const char *text);
-    void add_box(int nprn, int x, int y, int width, const char *text, int loc);
+    void add_knob(int nrpn, int x, int y, const char *text, Component *parent);
+    void add_box(int nprn, int x, int y, int width, const char *text, int loc, Component *parent);
+    void add_button(int nrpn, int x, int y, const char *text);
+    
     void create_osc(int n);
     void create_prefilt(int x, int y);
     void create_postfilt(int x, int y);
@@ -117,16 +139,20 @@ private:
 
     ScopedPointer<TextButton> sync_nrpn;
     ScopedPointer<TextButton> sync_sysex;
+    ScopedPointer<TextButton> mod1_6;
+    ScopedPointer<TextButton> mod7_12;
     ScopedPointer<StdComboBox> midi_in_menu;
     ScopedPointer<StdComboBox> midi_out_menu;
 
     ScopedPointer<LcdLabel> param_display;
 
     MicronauAudioProcessor *owner;
+    ScopedPointer<Component> mods[2];
 
     // prototype
     Array<ext_slider *> sliders;
     Array<ext_combo *> boxes;
+    Array<ext_button *> buttons;
 };
 
 

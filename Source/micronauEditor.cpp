@@ -11,6 +11,7 @@
 #include "micronauEditor.h"
 #include "gui/MicronSlider.h"
 #include "gui/MicronToggleButton.h"
+#include "gui/MicronTabBar.h"
 #include "gui/LcdLabel.h"
 #include "gui/StdComboBox.h"
 #include "gui/LookAndFeel.h"
@@ -43,11 +44,22 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     
     sync_nrpn = new TextButton("sync nrpn");
     sync_nrpn->addListener(this);
+    sync_nrpn->setBounds(910, 120, 30, 20);
     addAndMakeVisible(sync_nrpn);
     
     sync_sysex = new TextButton("sync sysex");
     sync_sysex->addListener(this);
+    sync_sysex->setBounds(960, 120, 30, 20);
     addAndMakeVisible(sync_sysex);
+    
+    mod1_6 = new TextButton("7 - 12");
+    mod1_6->addListener(this);
+    mod1_6->setBounds(10, 65, 40, 15);
+    addAndMakeVisible(mod1_6);
+    mod7_12 = new TextButton("1 - 6");
+    mod7_12->addListener(this);
+    mod7_12->setBounds(10, 65, 40, 15);
+    addChildComponent(mod7_12);
     
 	param_display = new LcdLabel("panel", "micronAU\nretroware");
     param_display->setJustificationType (Justification::centredLeft);
@@ -70,7 +82,6 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     // This is where our plugin's editor size is set.
     setSize (1060, 670);
 
-    //
     startTimer (50);
 }
 
@@ -78,7 +89,7 @@ MicronauAudioProcessorEditor::~MicronauAudioProcessorEditor()
 {
 }
 
-void MicronauAudioProcessorEditor::add_knob(int nprn, int x, int y, const char *text){
+void MicronauAudioProcessorEditor::add_knob(int nprn, int x, int y, const char *text, Component *parent = NULL) {
     ext_slider *s;
     s = new ext_slider(owner, nprn);
     sliders.add(s);
@@ -91,16 +102,24 @@ void MicronauAudioProcessorEditor::add_knob(int nprn, int x, int y, const char *
 
     s->addListener (this);
     s->setBounds(x, y, 40, 40);
-    addAndMakeVisible(s);
+    if (parent) {
+        parent->addAndMakeVisible(s);
+    } else {
+        addAndMakeVisible(s);
+    }
 }
 
-void MicronauAudioProcessorEditor::add_box(int nrpn, int x, int y, int width, const char *text, int loc){
+void MicronauAudioProcessorEditor::add_box(int nrpn, int x, int y, int width, const char *text, int loc, Component *parent = NULL){
     ext_combo *c;
     
     c = new ext_combo(owner, nrpn);
     c->setBounds(x, y, width, 15);
     c->addListener(this);
-    addAndMakeVisible(c);
+    if (parent) {
+        parent->addAndMakeVisible(c);
+    } else {
+        addAndMakeVisible(c);
+    }
     boxes.add(c);
     
     if (text != NULL) {
@@ -120,19 +139,50 @@ void MicronauAudioProcessorEditor::add_box(int nrpn, int x, int y, int width, co
                 l->setJustificationType (Justification::centredRight);
                 break;
         }
+        if (parent) {
+            parent->addAndMakeVisible(l);
+        } else {
+            addAndMakeVisible(l);
+        }
+    }
+}
+
+void MicronauAudioProcessorEditor::add_button(int nrpn, int x, int y, const char *text)
+{
+    ext_button *b = new ext_button(owner, nrpn);
+    buttons.add(b);
+    b->setBounds(x, y, 20, 20);
+    b->addListener (this);
+    addAndMakeVisible(b);
+    
+    if (text) {
+        Label *l = new back_label(text, x + 17, y + 3, 55, 15);
+        l->setJustificationType (Justification::centredLeft);
         addAndMakeVisible(l);
     }
 }
 
 void MicronauAudioProcessorEditor::create_mod(int n, int x, int y)
 {
-    for (int i = 0; i < 6; i++) {
-        add_knob((i*4)+(n*24)+694, x + (i*118), y, "level");
-        add_knob((i*4)+(n*24)+695, x + (i*118), y + 40, "offset");
+    int y_off = 12;
+    for (n = 0; n < 2; n++) {
+        Component *c = new Component();
+        mods[n] = c;
+        for (int i = 0; i < 6; i++) {
+            String s = "mod ";
+            s += (i + (n*6)) + 1;
+            Label *l = new back_label(s, 40 + (i*118), 0, 40, 15);
+            c->addAndMakeVisible(l);
+            add_knob((i*4)+(n*24)+694, (i*118), 0 + y_off, "level", c);
+            add_knob((i*4)+(n*24)+695, (i*118), 40 + y_off, "offset", c);
 
-        add_box((i*4) + (n*6) + 692, x + 40 + (i*118), y + 4, 75, "source", 1);
-        add_box((i*4) + (n*6) + 693, x + 40 + (i*118), y + 4 + 40, 75, "destination", 1);
+            add_box((i*4) + (n*24) + 692, 40 + (i*118), 4 + y_off, 75, "source", 1, c);
+            add_box((i*4) + (n*24) + 693, 40 + (i*118), 4 + 40 + y_off, 75, "destination", 1, c);
+        }
+        c->setBounds(x, y, 700, 100);
     }
+    addAndMakeVisible(mods[0]);
+    addChildComponent(mods[1]);
 }
 
 void MicronauAudioProcessorEditor::create_osc(int n)
@@ -214,10 +264,7 @@ void MicronauAudioProcessorEditor::create_filter(int x, int y)
     add_knob(553, x, y+17, "f1>f2");
     add_knob(670, x, y+62, "offset");
 
-    MicronToggleButton *b = new MicronToggleButton("");
-    b->setBounds(x + 10, y+100, 20, 20);
-    addAndMakeVisible(b);
-    // add_button(560);
+    add_button(560, x + 10, y + 100, NULL);
 }
 
 void MicronauAudioProcessorEditor::create_env(int n, int x, int y)
@@ -233,7 +280,8 @@ void MicronauAudioProcessorEditor::create_env(int n, int x, int y)
     add_box(579 + (n*13), x_offset, y + 40 + (n * v_space), 35, NULL, 0);
     add_box(581 + (n*13), x_offset + 40, y + 40 + (n * v_space), 35, NULL, 0);
     add_box(585 + (n*13), x_offset + 160, y + 40 + (n * v_space), 35, NULL, 0);
-
+    add_button(590 + (n*13), x_offset + 80,  y + 35 + (n * v_space), "pedal");
+    
     add_box(588 + (n*13), x + 255 + 57, y + (n * v_space), 28, "free run", 0);
     add_box(587 + (n*13), x + 255 + 33, y + 19 + (n * v_space), 52, "reset", 0);
     add_box(589 + (n*13), x + 255 + 40, y + 38 + (n * v_space), 45, "loop", 0);
@@ -307,6 +355,7 @@ void MicronauAudioProcessorEditor::create_lfo(int x, int y)
         add_knob(618 + (i*4), x+70, y + (i*70), "rate");
         add_knob(620 + (i*4), x+110, y + (i*70), "m1");
         add_box(619 + (i*4), x+78, y + (i*70) + 40, 60, "reset", 2);
+        add_button(617 + (i*4), x, y + 23 + (i* 70), "sync");
     }
     add_box(628, x, y+200, 100, "input", 0);
 }
@@ -321,9 +370,6 @@ void MicronauAudioProcessorEditor::paint (Graphics& g)
 void MicronauAudioProcessorEditor::resized()
 {
 	param_display->setBounds(885,15,150,45);
-
-    sync_nrpn->setBounds(910, 120, 30, 20);
-    sync_sysex->setBounds(960, 120, 30, 20);
 
     midi_in_menu->setBounds(910, 70, 100, 20);
     midi_out_menu->setBounds(910, 95, 100, 20);
@@ -411,11 +457,37 @@ void MicronauAudioProcessorEditor::buttonClicked (Button* button)
 {
     if (button == sync_nrpn) {
         owner->sync_via_nrpn();
+        return;
     }
     if (button == sync_sysex) {
         owner->sync_via_sysex();
+        return;
     }
+    // switch to 7-12
+    if (button == mod1_6) {
+        mods[0]->setVisible(false);
+        mods[1]->setVisible(true);
+        mod1_6->setVisible(false);
+        mod7_12->setVisible(true);
+    }
+    
+    // switch to 1-6
+    if (button == mod7_12) {
+        mods[0]->setVisible(true);
+        mods[1]->setVisible(false);
+        mod1_6->setVisible(true);
+        mod7_12->setVisible(false);
+    }
+
+    ext_button *b = dynamic_cast<ext_button*>( button );
+	if (b)
+	{
+        int v = b->getToggleState();
+		b->set_value(v);
+		param_display->setText(b->get_name() + "\n" + b->get_txt_value(v), dontSendNotification);
+	}
 }
+
 
 void MicronauAudioProcessorEditor::comboBoxChanged (ComboBox* box)
 {
@@ -430,6 +502,7 @@ void MicronauAudioProcessorEditor::comboBoxChanged (ComboBox* box)
 	if (b)
 	{
 		b->set_value(b->getSelectedItemIndex());
+		param_display->setText(b->get_name() + "\n" + b->get_txt_value(b->getSelectedItemIndex()), dontSendNotification);
 	}
 }
 
