@@ -43,7 +43,8 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
 	create_output(OUTPUT_X, OUTPUT_Y);
 	create_tracking(TRACKING_X, TRACKING_Y);
 	create_lfo(LFO_X, LFO_Y);
-    
+    create_fx1(FX_X, FX_Y);
+
     sync_nrpn = new TextButton("sync nrpn");
     sync_nrpn->addListener(this);
     sync_nrpn->setBounds(910, 120, 30, 20);
@@ -143,13 +144,17 @@ void MicronauAudioProcessorEditor::add_box(int nrpn, int x, int y, int width, co
     }
 }
 
-void MicronauAudioProcessorEditor::add_button(int nrpn, int x, int y, const char *text)
+void MicronauAudioProcessorEditor::add_button(int nrpn, int x, int y, const char *text, Component *parent = NULL)
 {
     ext_button *b = new ext_button(owner, nrpn);
     buttons.add(b);
     b->setBounds(x, y, 20, 20);
     b->addListener (this);
-    addAndMakeVisible(b);
+    if (parent) {
+        parent->addAndMakeVisible(b);
+    } else {
+        addAndMakeVisible(b);
+    }
     
     if (text) {
         Label *l = new back_label(text, x + 17, y + 3, 55, 15);
@@ -233,9 +238,6 @@ void MicronauAudioProcessorEditor::create_osc(int x, int y)
 		s += (n+1);
 		l = new back_label(s, x, y_base, 55, 15);
 		addAndMakeVisible(l);
-
-	//    l = new back_label("waveform", x+105, y_base, 55, 15);
-	//    addAndMakeVisible(l);
 	}
 }
 
@@ -439,6 +441,66 @@ void MicronauAudioProcessorEditor::create_lfo(int x, int y)
     add_box(628, x, y+200, 100, "input", 0);
 }
 
+void MicronauAudioProcessorEditor::create_fx1(int x, int y)
+{
+	create_group_box("fx/tracking", x, y, FX_W, FX_H);
+    int i;
+    int o = 0;
+
+    for (i = 0; i < 7; i++) {
+        int idx;
+        Component *c = new Component();
+
+        add_box(800, 70, 30, 80, "type", 2, c);
+        c->setBounds(x, y, FX_W, FX_H);
+        fx1[i] = c;
+
+        if (i == 0) {
+            continue;
+        }
+        if (i > 1) {
+            o = -80;
+        }
+
+        idx = i - 1;
+        if (idx < 5) {
+            add_knob(844 + (idx * 10), 150, 40, "feedbck", c);
+            if (idx == 0) {
+                add_knob(845 + (idx * 10), 150 + 40, 40, "notch", c);
+                add_box(849 + (idx * 10), 245, 43, 40, "stages", 1, c);
+            } else {
+                add_knob(845 + (idx * 10), 150 + 40, 40, "delay", c);
+            }
+            add_knob(846 + (idx * 10), 310 + o, 40, "rate", c);
+            add_knob(847 + (idx * 10), 310 + 40 + o, 40, "depth", c);
+            add_box(848 + (idx * 10), 395 + o, 43, 40, "shape", 1, c);
+            add_box(851 + (idx * 10), 335 + o, 15, 60, "sync", 2, c);
+            if (idx == 0) {
+                add_button(850, 400 + o, 14, NULL, c);
+            } else {
+                add_button(849 + (idx * 10), 400 + o, 14, NULL, c);
+            }
+
+        } else {
+            int v_x = 230;
+            int v_y = 30;
+            add_box(898, 170, 15, 45, "synth", 1, c);
+            add_box(899, 170, 15 + 40, 45, "analysis", 1, c);
+            add_knob(894, v_x, v_y, "gain", c);
+            add_knob(895, v_x+40, v_y, "boost", c);
+            add_knob(896, v_x+80, v_y, "decay", c);
+            add_knob(897, v_x+120, v_y, "shift", c);
+            add_knob(900, v_x+160, v_y, "mix", c);
+        }
+    }
+    for (i = 0; i < 7; i++) {
+        addChildComponent(fx1[i]);
+    }
+    // XXX set initial panel correctly
+    ext_combo *c = new ext_combo(owner, 800);
+    fx1[c->get_value()]->setVisible(true);
+}
+
 //==============================================================================
 void MicronauAudioProcessorEditor::paint (Graphics& g)
 {
@@ -586,6 +648,13 @@ void MicronauAudioProcessorEditor::comboBoxChanged (ComboBox* box)
 	{
 		b->set_value(b->getSelectedItemIndex());
 		param_display->setText(b->get_name() + "\n" + b->get_txt_value(b->getSelectedItemIndex()), dontSendNotification);
+        if (b->get_nrpn() == 800) {
+            int i;
+            for (i = 0; i < 7; i++) {
+                fx1[i]->setVisible(false);
+            }
+            fx1[b->getSelectedItemIndex()]->setVisible(true);
+        }
 	}
 }
 

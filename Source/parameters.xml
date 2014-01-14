@@ -997,7 +997,7 @@
         <parameter name="Output level" conversion="PERCENT" min="0" max="100" sysexoffset="784" nrpn="576" defaultval="100"/>
         <parameter name="Effects wet mix" conversion="WET_DRY" min="-50" max="50" sysexoffset="2240" nrpn="577" defaultval=-50 />
         <parameter name="Modulation type" conversion="LIST" min="0" max="6" sysexoffset="2232" nrpn="800">
-            <listitem name="bypass pitch fx" nrpnvalue="0"/>
+            <listitem name="bypass" nrpnvalue="0"/>
             <listitem name="phaser super" nrpnvalue="4"/>
             <listitem name="phaser string" nrpnvalue="5"/>
             <listitem name="flanger theta" nrpnvalue="2"/>
