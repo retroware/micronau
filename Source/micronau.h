@@ -92,6 +92,9 @@ public:
     void sync_via_sysex();
     String get_midi_port(int in_out);
     void set_midi_port(int in_out, String p);
+    void set_midi_chan(unsigned int chan);
+    unsigned int get_midi_chan();
+   
 
     int index_of_nrpn(int nrpn);
     IonSysexParam *param_of_nrpn(int nrpn);
@@ -105,6 +108,7 @@ private:
     static const int SYSEX_LEN = 432;
     typedef struct {
         unsigned char sysex[SYSEX_LEN];
+        unsigned int midi_out_chan;
         unsigned char midi_in_port[MAX_MIDI_PORT_NAME];
         unsigned char midi_out_port[MAX_MIDI_PORT_NAME];
     } preset;
@@ -116,7 +120,7 @@ private:
     HashMap<int, ext_param *> param_by_nrpn;
 
     MidiOutput *midi_out;
-    unsigned int out_channel;
+    unsigned int midi_out_channel;
     String midi_out_port;
 
     MidiInput *midi_in;

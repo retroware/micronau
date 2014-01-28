@@ -67,12 +67,23 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     midi_in_menu->setEditableText (false);
     midi_in_menu->addListener(this);
     addAndMakeVisible (midi_in_menu);
+    midi_in_menu->setBounds(910, 70, 100, 20);
 
     midi_out_menu = new StdComboBox ();
     midi_out_menu->setEditableText (false);
     midi_out_menu->addListener(this);
     addAndMakeVisible (midi_out_menu);
-    
+    midi_out_menu->setBounds(910, 95, 100, 20);
+ 
+    midi_out_chan = new StdComboBox ();
+    midi_out_chan->setEditableText (false);
+    midi_out_chan->addListener(this);
+    addAndMakeVisible (midi_out_chan);
+    midi_out_chan->setBounds(1015, 95, 40, 20);
+    for (int i = 0; i < 16; i++) {
+        midi_out_chan->addItem(String(i+1), i+1);
+    }
+
     logo = Drawable::createFromImageData (BinaryData::logo_svg, BinaryData::logo_svgSize);
 
     // This is where our plugin's editor size is set.
@@ -516,8 +527,6 @@ void MicronauAudioProcessorEditor::resized()
 {
 	param_display->setBounds(885,15,150,45);
 
-    midi_in_menu->setBounds(910, 70, 100, 20);
-    midi_out_menu->setBounds(910, 95, 100, 20);
 }
 
 void MicronauAudioProcessorEditor::timerCallback()
@@ -533,6 +542,7 @@ void MicronauAudioProcessorEditor::timerCallback()
     
     update_midi_menu(MIDI_IN_IDX);
     update_midi_menu(MIDI_OUT_IDX);
+    midi_out_chan->setSelectedItemIndex(owner->get_midi_chan());
 }
 
 void MicronauAudioProcessorEditor::update_midi_menu(int in_out)
@@ -642,6 +652,9 @@ void MicronauAudioProcessorEditor::comboBoxChanged (ComboBox* box)
     }
     if (box == midi_in_menu) {
         owner->set_midi_port(MIDI_IN_IDX, box->getItemText(idx));
+    }
+    if (box == midi_out_chan) {
+        owner->set_midi_chan(box->getSelectedItemIndex());
     }
     ext_combo *b = dynamic_cast<ext_combo *>( box );
 	if (b)
