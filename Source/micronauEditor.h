@@ -15,6 +15,8 @@
 #include "gui/MicronSlider.h"
 #include "gui/LcdComboBox.h"
 #include "gui/MicronToggleButton.h"
+#include "gui/MicronTabBar.h"
+#include "gui/SliderBank.h"
 
 class LcdLabel;
 class StdComboBox;
@@ -194,12 +196,12 @@ private:
 		OUTPUT_H = 135,
 
 		TRACKING_X = 930,
-		TRACKING_Y = OUTPUT_Y + 175,
+		TRACKING_Y = ENVS_Y + 245,
 		TRACKING_W = 120,
 		TRACKING_H = 70,
         
         FX_X = ENVS_X,
-        FX_Y = ENVS_Y + 245,
+        FX_Y = TRACKING_Y,
         FX_W = 440,
         FX_H = 105
 	};
@@ -222,7 +224,8 @@ private:
     void create_output(int x, int y);
     void create_tracking(int x, int y);
     void create_lfo(int x, int y);
-    void create_fx1(int x, int y);
+	void create_fx_and_tracking_tabs(int x, int y);
+    void create_fx1(int x, int y, Component* parent);
 
     void update_midi_menu(int in_out);
     void select_item_by_name(int in_out, String nm);
@@ -241,7 +244,10 @@ private:
     ScopedPointer<LcdLabel> param_display;
 
     MicronauAudioProcessor *owner;
+
     ScopedPointer<Component> mods[2];
+
+	ScopedPointer<MicronTabBar> fx_and_tracking_tabs;
     ScopedPointer<Component> fx1[7];
 
     // prototype

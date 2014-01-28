@@ -43,7 +43,7 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
 	create_output(OUTPUT_X, OUTPUT_Y);
 	create_tracking(TRACKING_X, TRACKING_Y);
 	create_lfo(LFO_X, LFO_Y);
-    create_fx1(FX_X, FX_Y);
+	create_fx_and_tracking_tabs(FX_X,FX_Y);
 
     sync_nrpn = new TextButton("sync nrpn");
     sync_nrpn->addListener(this);
@@ -441,9 +441,33 @@ void MicronauAudioProcessorEditor::create_lfo(int x, int y)
     add_box(628, x, y+200, 100, "input", 0);
 }
 
-void MicronauAudioProcessorEditor::create_fx1(int x, int y)
+void MicronauAudioProcessorEditor::create_fx_and_tracking_tabs(int x, int y)
 {
 	create_group_box("fx/tracking", x, y, FX_W, FX_H);
+
+	Component* fx1 = new Component;
+	Component* fx2 = new Component;
+	SliderBank* trackgen = new SliderBank;
+
+	create_fx1(0, 0, fx1);
+//	create_fx2(0, 0, fx2);
+
+	fx_and_tracking_tabs = new MicronTabBar(TabbedButtonBar::TabsAtLeft);
+
+	fx_and_tracking_tabs->setTabBarDepth (65);
+	fx_and_tracking_tabs->addTab ("fx1", Colour (0x00d3d3d3), fx1, true);
+	fx_and_tracking_tabs->addTab ("fx2", Colour (0x00d3d3d3), fx2, true);
+	fx_and_tracking_tabs->addTab ("tgen", Colour (0x00d3d3d3), trackgen, true);
+	fx_and_tracking_tabs->setCurrentTabIndex (0);
+    fx_and_tracking_tabs->setBounds (x, y, FX_W, FX_H);
+
+	addAndMakeVisible(fx_and_tracking_tabs);
+}
+
+void MicronauAudioProcessorEditor::create_fx1(int x, int y, Component* parent)
+{
+	x -= 10;
+
     int i;
     int o = 0;
 
@@ -494,7 +518,7 @@ void MicronauAudioProcessorEditor::create_fx1(int x, int y)
         }
     }
     for (i = 0; i < 7; i++) {
-        addChildComponent(fx1[i]);
+        parent->addChildComponent(fx1[i]);
     }
     // XXX set initial panel correctly
     ext_combo *c = new ext_combo(owner, 800);
