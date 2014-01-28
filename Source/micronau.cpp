@@ -37,7 +37,7 @@ MicronauAudioProcessor::MicronauAudioProcessor()
     midi_out = NULL;
     midi_out_port = "None";
     set_midi_port(MIDI_OUT_IDX, midi_out_port);
-    out_channel = 0;
+    set_midi_chan(0);
     
     midi_in = NULL;
     midi_in_port = "None";
@@ -309,7 +309,7 @@ void MicronauAudioProcessor::sync_via_nrpn()
 
 void MicronauAudioProcessor::send_nrpn(int nrpn, int value)
 {
-    unsigned char midiChannel = 176 + out_channel;
+    unsigned char midiChannel = 176 + get_midi_chan();
     unsigned char nrpnMSB;
     unsigned char nrpnLSB;
     unsigned char dataMSB;
@@ -351,10 +351,13 @@ void MicronauAudioProcessor::setStateInformation (const void* data, int sizeInBy
 		return;
 	}
 
+    set_midi_chan(p->midi_out_chan);
+    
     s = String(CharPointer_UTF8((const char *) p->midi_in_port));
     set_midi_port(MIDI_IN_IDX, s);
     s = String(CharPointer_UTF8((const char *) p->midi_out_port));
     set_midi_port(MIDI_OUT_IDX, s);
+    
 }
 
 void MicronauAudioProcessor::getStateInformation (MemoryBlock& destData)
@@ -367,6 +370,7 @@ void MicronauAudioProcessor::getStateInformation (MemoryBlock& destData)
 	params->getAsSysexMessage(sysex_buf);
     memcpy(p.sysex, sysex_buf+1, SYSEX_LEN);
 
+    p.midi_out_chan = get_midi_chan();
     s = get_midi_port(MIDI_IN_IDX);
     s.copyToUTF8(((CharPointer_UTF8::CharType *) p.midi_in_port), MAX_MIDI_PORT_NAME);
     s = get_midi_port(MIDI_OUT_IDX);
@@ -451,6 +455,16 @@ void MicronauAudioProcessor::set_midi_port(int in_out, String p)
             break;
     }
     return;
+}
+
+void MicronauAudioProcessor::set_midi_chan(unsigned int chan)
+{
+    midi_out_channel = chan;
+}
+
+unsigned int MicronauAudioProcessor::get_midi_chan()
+{
+    return midi_out_channel;
 }
 
 String MicronauAudioProcessor::get_midi_port(int in_out)
