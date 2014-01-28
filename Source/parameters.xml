@@ -1208,7 +1208,7 @@
             <listitem name="x 1/12" nrpnvalue="1"/>
             <listitem name="x 1/16" nrpnvalue="0" />
         </parameter>
-        <parameter name="Vocoder Analysis Gain" min="-100" max="100" conversion="PERCENT" sysexoffset="2248" nrpn="894" />
+        <parameter name="Voc Analysis Gain" min="-100" max="100" conversion="PERCENT" sysexoffset="2248" nrpn="894" />
         <parameter name="Vocoder Sib Boost" min="0" max="100" conversion="PERCENT"sysexoffset="2256" nrpn="895" />
         <parameter name="Vocoder Decay" min="0" max="100" conversion="PERCENT" sysexoffset="2264" nrpn="896" />
         <parameter name="Vocoder Band Shift" min="-100" max="100" conversion="PERCENT" sysexoffset="2272" nrpn="897" />
@@ -1224,7 +1224,7 @@
 	<listitem name="Right" nrpnvalue="2"/>
 	<listitem name="Stereo" nrpnvalue="3"/>
 	</parameter>
-        <parameter name="Voc Anal Mix" min="0" max="100" conversion="PERCENT" sysexoffset="2296" nrpn="900" />
+        <parameter name="Voc Analysis Mix" min="0" max="100" conversion="PERCENT" sysexoffset="2296" nrpn="900" />
 
         <parameter name="Delay type" conversion="LIST" min="0" max="6" sysexoffset="2320" nrpn="801">
             <listitem name="bypass" />
