@@ -43,7 +43,7 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
 	create_output(OUTPUT_X, OUTPUT_Y);
 	create_tracking(TRACKING_X, TRACKING_Y);
 	create_lfo(LFO_X, LFO_Y);
-    create_fx1(FX_X, FX_Y);
+	create_fx_and_tracking_tabs(FX_X,FX_Y);
 
     sync_nrpn = new TextButton("sync nrpn");
     sync_nrpn->addListener(this);
@@ -441,9 +441,33 @@ void MicronauAudioProcessorEditor::create_lfo(int x, int y)
     add_box(628, x, y+200, 100, "input", 0);
 }
 
-void MicronauAudioProcessorEditor::create_fx1(int x, int y)
+void MicronauAudioProcessorEditor::create_fx_and_tracking_tabs(int x, int y)
 {
 	create_group_box("fx/tracking", x, y, FX_W, FX_H);
+
+	Component* fx1 = new Component;
+	Component* fx2 = new Component;
+	SliderBank* trackgen = new SliderBank;
+
+	create_fx1(0, 0, fx1);
+//	create_fx2(0, 0, fx2);
+
+	fx_and_tracking_tabs = new MicronTabBar(TabbedButtonBar::TabsAtLeft);
+
+	fx_and_tracking_tabs->setTabBarDepth (65);
+	fx_and_tracking_tabs->addTab ("fx1", Colour (0x00d3d3d3), fx1, true);
+	fx_and_tracking_tabs->addTab ("fx2", Colour (0x00d3d3d3), fx2, true);
+	fx_and_tracking_tabs->addTab ("tgen", Colour (0x00d3d3d3), trackgen, true);
+	fx_and_tracking_tabs->setCurrentTabIndex (0);
+    fx_and_tracking_tabs->setBounds (x, y, FX_W, FX_H);
+
+	addAndMakeVisible(fx_and_tracking_tabs);
+}
+
+void MicronauAudioProcessorEditor::create_fx1(int x, int y, Component* parent)
+{
+	x -= 25;
+
     int i;
     int o = 0;
 
@@ -451,7 +475,7 @@ void MicronauAudioProcessorEditor::create_fx1(int x, int y)
         int idx;
         Component *c = new Component();
 
-        add_box(800, 70, 30, 80, "type", 2, c);
+        add_box(800, 70, 10, 80, "type", 2, c);
         c->setBounds(x, y, FX_W, FX_H);
         fx1[i] = c;
 
@@ -464,37 +488,41 @@ void MicronauAudioProcessorEditor::create_fx1(int x, int y)
 
         idx = i - 1;
         if (idx < 5) {
-            add_knob(844 + (idx * 10), 150, 40, "feedbck", c);
-            if (idx == 0) {
-                add_knob(845 + (idx * 10), 150 + 40, 40, "notch", c);
-                add_box(849 + (idx * 10), 245, 43, 40, "stages", 1, c);
-            } else {
-                add_knob(845 + (idx * 10), 150 + 40, 40, "delay", c);
-            }
-            add_knob(846 + (idx * 10), 310 + o, 40, "rate", c);
-            add_knob(847 + (idx * 10), 310 + 40 + o, 40, "depth", c);
-            add_box(848 + (idx * 10), 395 + o, 43, 40, "shape", 1, c);
-            add_box(851 + (idx * 10), 335 + o, 15, 60, "sync", 2, c);
-            if (idx == 0) {
-                add_button(850, 400 + o, 14, NULL, c);
-            } else {
-                add_button(849 + (idx * 10), 400 + o, 14, NULL, c);
-            }
+			const int offsX = -50;
+			
+			add_knob(844 + (idx * 10), offsX + 150, 40, "feedbck", c);
+			if (idx == 0) {
+				add_knob(845 + (idx * 10), offsX + 150 + 40, 40, "notch", c);
+				add_box(849 + (idx * 10), offsX + 245, 43, 40, "stages", 1, c);
+			} else {
+				add_knob(845 + (idx * 10), offsX + 150 + 40, 40, "delay", c);
+			}
+			add_knob(846 + (idx * 10), offsX + 310 + o, 40, "rate", c);
+			add_knob(847 + (idx * 10), offsX + 310 + 40 + o, 40, "depth", c);
+			add_box(848 + (idx * 10), offsX + 395 + o, 43, 40, "shape", 1, c);
+			add_box(851 + (idx * 10), offsX + 335 + o, 15, 60, "sync", 2, c);
+			if (idx == 0) {
+				add_button(850, offsX + 400 + o, 14, NULL, c);
+			} else {
+				add_button(849 + (idx * 10), offsX + 400 + o, 14, NULL, c);
+			}
 
         } else {
+			const int offsX = -50;
+			
             int v_x = 230;
             int v_y = 30;
-            add_box(898, 170, 15, 45, "synth", 1, c);
-            add_box(899, 170, 15 + 40, 45, "analysis", 1, c);
-            add_knob(894, v_x, v_y, "gain", c);
-            add_knob(895, v_x+40, v_y, "boost", c);
-            add_knob(896, v_x+80, v_y, "decay", c);
-            add_knob(897, v_x+120, v_y, "shift", c);
-            add_knob(900, v_x+160, v_y, "mix", c);
+            add_box(898, offsX + 170 - 50, 15 + 40, 45, "synth", 1, c);
+            add_box(899, offsX + 170, 15 + 40, 45, "analysis", 1, c);
+            add_knob(894, offsX + v_x, v_y, "gain", c);
+            add_knob(895, offsX + v_x+40, v_y, "boost", c);
+            add_knob(896, offsX + v_x+80, v_y, "decay", c);
+            add_knob(897, offsX + v_x+120, v_y, "shift", c);
+            add_knob(900, offsX + v_x+160, v_y, "mix", c);
         }
     }
     for (i = 0; i < 7; i++) {
-        addChildComponent(fx1[i]);
+        parent->addChildComponent(fx1[i]);
     }
     // XXX set initial panel correctly
     ext_combo *c = new ext_combo(owner, 800);
@@ -514,7 +542,7 @@ void MicronauAudioProcessorEditor::paint (Graphics& g)
 
 void MicronauAudioProcessorEditor::resized()
 {
-	param_display->setBounds(885,15,150,45);
+	param_display->setBounds(875,15,170,45);
 
     midi_in_menu->setBounds(910, 70, 100, 20);
     midi_out_menu->setBounds(910, 95, 100, 20);

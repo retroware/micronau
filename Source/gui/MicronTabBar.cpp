@@ -125,8 +125,14 @@ void MicronTabBar::setCurrentTabIndex (int newTabIndex, bool /*sendChangeMessage
 {
 	if (newTabIndex != curTabIndex)
 	{
+		// NOTE: have to manually manage button toggle states here as JUCE's setClickingTogglesState() was behaving unexpectedly.
+		if (curTabIndex != INVALID_TAB_INX)
+			tabs[curTabIndex]->button->setToggleState(false, dontSendNotification);
+		if (newTabIndex != INVALID_TAB_INX)
+			tabs[newTabIndex]->button->setToggleState(true, dontSendNotification);
+
 		Component* curComponent = (curTabIndex != INVALID_TAB_INX) ? tabs[curTabIndex]->content : 0;
-		Component* newComponent = tabs[newTabIndex]->content;
+		Component* newComponent = (newTabIndex != INVALID_TAB_INX) ? tabs[newTabIndex]->content : 0;
 
 		if (curComponent)
 		{
@@ -148,7 +154,7 @@ Button* MicronTabBar::createButtonForTab()
 {
 	ImageButton* button = new ImageButton();
 	button->setRadioGroupId(1);
-	button->setClickingTogglesState(true);
+//	button->setClickingTogglesState(true); // NOTE: disabled because it always gives us clicks from the button *before* the current button!
 	button->setImages (true, true, false,
 						buttonOffImg, 1.0f, Colours::transparentWhite,
 						buttonHoverImg, 1.0f, Colours::transparentWhite,
