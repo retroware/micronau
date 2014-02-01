@@ -1005,15 +1005,15 @@
             <listitem name="chorus" nrpnvalue="1"/>
             <listitem name="vocoder" nrpnvalue="6"/>
         </parameter>
-        <parameter name="Super Phaser Feedback" min="-100" max="100" conversion="PERCENT" sysexoffset="2248" nrpn="844" />
-        <parameter name="Super Phaser Notch Freq" min="0" max="100" conversion="PERCENT"sysexoffset="2256" nrpn="845" />
-        <parameter name="Super Phaser LFO Rate" min="0" max="127" conversion="FX_LFO_FREQ" sysexoffset="2264" nrpn="846" />
-        <parameter name="Super Phaser LFO Depth" min="0" max="100" conversion="PERCENT" sysexoffset="2272" nrpn="847" />
-        <parameter name="Super Phaser LFO Shape" min="0" max="1" conversion="LIST" sysexoffset="2280" nrpn="848">
+        <parameter name="FX1 Feedback" min="-100" max="100" conversion="PERCENT" sysexoffset="2248" nrpn="844" />
+        <parameter name="FX1 Notch Freq" min="0" max="100" conversion="PERCENT"sysexoffset="2256" nrpn="845" />
+        <parameter name="FX1 LFO Rate" min="0" max="127" conversion="FX_LFO_FREQ" sysexoffset="2264" nrpn="846" />
+        <parameter name="FX1 LFO Depth" min="0" max="100" conversion="PERCENT" sysexoffset="2272" nrpn="847" />
+        <parameter name="FX1 LFO Shape" min="0" max="1" conversion="LIST" sysexoffset="2280" nrpn="848">
 	<listitem name="Sine" nrpnvalue="0"/>
 	<listitem name="Triangle" nrpnvalue="1"/>
 	</parameter>
-        <parameter name="Super Phaser Stages" min="0" max="5" conversion="LIST" sysexoffset="2288" nrpn="849">
+        <parameter name="FX1 Phaser Stages" min="0" max="5" conversion="LIST" sysexoffset="2288" nrpn="849">
 	  <listitem name="4" nrpnvalue="0"/>
 	  <listitem name="8" nrpnvalue="1"/>
 	  <listitem name="16" nrpnvalue="2"/>
@@ -1021,11 +1021,11 @@
 	  <listitem name="48" nrpnvalue="4"/>
 	  <listitem name="64" nrpnvalue="5"/>
 	 </parameter>
-        <parameter name="Super Phaser LFO Sync" min="0" max="1" conversion="LIST" sysexoffset="2296" nrpn="850">
+        <parameter name="FX1 LFO Sync" min="0" max="1" conversion="LIST" sysexoffset="2296" nrpn="850">
 	  <listitem name="Follow tempo" nrpnvalue="1"/>
 	  <listitem name="Fixed" nrpnvalue="0"/>
 	</parameter>
-        <parameter name="Super Phaser LFO Synced Rate" conversion="LIST" min="0" max="24" sysexoffset="2304" nrpn="851">
+        <parameter name="FX1 LFO Synced Rate" conversion="LIST" min="0" max="24" sysexoffset="2304" nrpn="851">
             <listitem name="x 16" nrpnvalue="24"/>
             <listitem name="x 12" nrpnvalue="23"/>
             <listitem name="x 10 2/3" nrpnvalue="22"/>
@@ -1052,19 +1052,19 @@
             <listitem name="x 1/12" nrpnvalue="1"/>
             <listitem name="x 1/16" nrpnvalue="0" />
         </parameter>
-        <parameter name="String Phaser Feedback" min="0" max="100" conversion="PERCENT" sysexoffset="2248" nrpn="854" />
-        <parameter name="String Phaser Notch Freq" min="0" max="100" conversion="PERCENT"sysexoffset="2256" nrpn="855" />
-        <parameter name="String Phaser LFO Rate" min="0" max="127" conversion="FX_LFO_FREQ" sysexoffset="2264" nrpn="856" />
-        <parameter name="String Phaser LFO Depth" min="0" max="100" conversion="PERCENT" sysexoffset="2272" nrpn="857" />
-        <parameter name="String Phaser LFO Shape" min="0" max="1" conversion="LIST" sysexoffset="2280" nrpn="858">
+        <parameter name="FX1 Feedback" min="0" max="100" conversion="PERCENT" sysexoffset="2248" nrpn="854" />
+        <parameter name="FX1 Notch Freq" min="0" max="100" conversion="PERCENT"sysexoffset="2256" nrpn="855" />
+        <parameter name="FX1 LFO Rate" min="0" max="127" conversion="FX_LFO_FREQ" sysexoffset="2264" nrpn="856" />
+        <parameter name="FX1 LFO Depth" min="0" max="100" conversion="PERCENT" sysexoffset="2272" nrpn="857" />
+        <parameter name="FX1 LFO Shape" min="0" max="1" conversion="LIST" sysexoffset="2280" nrpn="858">
 	<listitem name="Sine" nrpnvalue="0"/>
 	<listitem name="Triangle" nrpnvalue="1"/>
 	</parameter>
-        <parameter name="String Phaser LFO Sync" min="0" max="1" conversion="LIST" sysexoffset="2288" nrpn="859">
+        <parameter name="FX1 LFO Sync" min="0" max="1" conversion="LIST" sysexoffset="2288" nrpn="859">
 	  <listitem name="Follow tempo" nrpnvalue="1"/>
 	  <listitem name="Fixed" nrpnvalue="0"/>
 	</parameter>
-        <parameter name="String Phaser LFO Synced Rate" conversion="LIST" min="0" max="24" sysexoffset="2304" nrpn="861">
+        <parameter name="FX1 LFO Synced Rate" conversion="LIST" min="0" max="24" sysexoffset="2304" nrpn="861">
             <listitem name="x 16" nrpnvalue="24"/>
             <listitem name="x 12" nrpnvalue="23"/>
             <listitem name="x 10 2/3" nrpnvalue="22"/>
@@ -1091,19 +1091,19 @@
             <listitem name="x 1/12" nrpnvalue="1"/>
             <listitem name="x 1/16" nrpnvalue="0" />
         </parameter>
-        <parameter name="Theta Flanger Feedback" min="-100" max="100" conversion="PERCENT" sysexoffset="2248" nrpn="864" />
-        <parameter name="Theta Flanger Man Delay" min="0" max="100" conversion="PERCENT"sysexoffset="2256" nrpn="865" />
-        <parameter name="Theta Flanger LFO Rate" min="0" max="127" conversion="FX_LFO_FREQ" sysexoffset="2264" nrpn="866" />
-        <parameter name="Theta Flanger LFO Depth" min="0" max="100" conversion="PERCENT" sysexoffset="2272" nrpn="867" />
-        <parameter name="Theta Flanger LFO Shape" min="0" max="1" conversion="LIST" sysexoffset="2280" nrpn="868">
+        <parameter name="FX1 Feedback" min="-100" max="100" conversion="PERCENT" sysexoffset="2248" nrpn="864" />
+        <parameter name="FX1 Man Delay" min="0" max="100" conversion="PERCENT"sysexoffset="2256" nrpn="865" />
+        <parameter name="FX1 LFO Rate" min="0" max="127" conversion="FX_LFO_FREQ" sysexoffset="2264" nrpn="866" />
+        <parameter name="FX1 LFO Depth" min="0" max="100" conversion="PERCENT" sysexoffset="2272" nrpn="867" />
+        <parameter name="FX1 LFO Shape" min="0" max="1" conversion="LIST" sysexoffset="2280" nrpn="868">
 	<listitem name="Sine" nrpnvalue="0"/>
 	<listitem name="Triangle" nrpnvalue="1"/>
 	</parameter>
-        <parameter name="Theta Flanger LFO Sync" min="0" max="1" conversion="LIST" sysexoffset="2288" nrpn="869">
+        <parameter name="FX1 LFO Sync" min="0" max="1" conversion="LIST" sysexoffset="2288" nrpn="869">
 	  <listitem name="Follow tempo" nrpnvalue="1"/>
 	  <listitem name="Fixed" nrpnvalue="0"/>
 	</parameter>
-        <parameter name="Theta Flanger LFO Synced Rate" conversion="LIST" min="0" max="24" sysexoffset="2304" nrpn="871">
+        <parameter name="FX1 LFO Synced Rate" conversion="LIST" min="0" max="24" sysexoffset="2304" nrpn="871">
             <listitem name="x 16" nrpnvalue="24"/>
             <listitem name="x 12" nrpnvalue="23"/>
             <listitem name="x 10 2/3" nrpnvalue="22"/>
@@ -1130,19 +1130,19 @@
             <listitem name="x 1/12" nrpnvalue="1"/>
             <listitem name="x 1/16" nrpnvalue="0" />
         </parameter>
-        <parameter name="Thru Flanger Feedback" min="-100" max="100" conversion="PERCENT" sysexoffset="2248" nrpn="874" />
-        <parameter name="Thru Flanger Man Delay" min="0" max="100" conversion="PERCENT"sysexoffset="2256" nrpn="875" />
-        <parameter name="Thru Flanger LFO Rate" min="0" max="127" conversion="FX_LFO_FREQ" sysexoffset="2264" nrpn="876" />
-        <parameter name="Thru Flanger LFO Depth" min="0" max="100" conversion="PERCENT" sysexoffset="2272" nrpn="877" />
-        <parameter name="Thru Flanger LFO Shape" min="0" max="1" conversion="LIST" sysexoffset="2280" nrpn="878">
+        <parameter name="FX1 Feedback" min="-100" max="100" conversion="PERCENT" sysexoffset="2248" nrpn="874" />
+        <parameter name="FX1 Man Delay" min="0" max="100" conversion="PERCENT"sysexoffset="2256" nrpn="875" />
+        <parameter name="FX1 LFO Rate" min="0" max="127" conversion="FX_LFO_FREQ" sysexoffset="2264" nrpn="876" />
+        <parameter name="FX1 LFO Depth" min="0" max="100" conversion="PERCENT" sysexoffset="2272" nrpn="877" />
+        <parameter name="FX1 LFO Shape" min="0" max="1" conversion="LIST" sysexoffset="2280" nrpn="878">
 	<listitem name="Sine" nrpnvalue="0"/>
 	<listitem name="Triangle" nrpnvalue="1"/>
 	</parameter>
-        <parameter name="Thru Flanger LFO Sync" min="0" max="1" conversion="LIST" sysexoffset="2288" nrpn="879">
+        <parameter name="FX1 LFO Sync" min="0" max="1" conversion="LIST" sysexoffset="2288" nrpn="879">
 	  <listitem name="Follow tempo" nrpnvalue="1"/>
 	  <listitem name="Fixed" nrpnvalue="0"/>
 	</parameter>
-        <parameter name="Thru Flanger LFO Synced Rate" conversion="LIST" min="0" max="24" sysexoffset="2304" nrpn="881">
+        <parameter name="FX1 LFO Synced Rate" conversion="LIST" min="0" max="24" sysexoffset="2304" nrpn="881">
             <listitem name="x 16" nrpnvalue="24"/>
             <listitem name="x 12" nrpnvalue="23"/>
             <listitem name="x 10 2/3" nrpnvalue="22"/>
@@ -1662,7 +1662,7 @@
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
         <parameter name="Mod 1 dest" conversion="LIST" min="0" max="77" sysexoffset="1432" nrpn="693">
-            <listitem name="none" />
+            <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
             <listitem name="FM Amnt" nrpnvalue="3"/>
@@ -1861,7 +1861,7 @@
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
         <parameter name="Mod 2 dest" conversion="LIST" min="0" max="77" sysexoffset="1440" nrpn="697">
-            <listitem name="none" />
+            <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
             <listitem name="FM Amnt" nrpnvalue="3"/>
@@ -2060,7 +2060,7 @@
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
       <parameter name="Mod 3 dest" conversion="LIST" min="0" max="77" sysexoffset="1448" nrpn="701">
-            <listitem name="none" />
+            <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
             <listitem name="FM Amnt" nrpnvalue="3"/>
@@ -2259,7 +2259,7 @@
             <listitem name="cc119" nrpnvalue="114"/>
        </parameter>
         <parameter name="Mod 4 dest" conversion="LIST" min="0" max="77" sysexoffset="1456" nrpn="705">
-            <listitem name="none" />
+            <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
             <listitem name="FM Amnt" nrpnvalue="3"/>
@@ -2458,7 +2458,7 @@
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
         <parameter name="Mod 5 dest" conversion="LIST" min="0" max="77" sysexoffset="1464" nrpn="709">
-            <listitem name="none" />
+            <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
             <listitem name="FM Amnt" nrpnvalue="3"/>
@@ -2657,7 +2657,7 @@
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
         <parameter name="Mod 6 dest" conversion="LIST" min="0" max="77" sysexoffset="1472" nrpn="713">
-            <listitem name="none" />
+            <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
             <listitem name="FM Amnt" nrpnvalue="3"/>
@@ -2857,7 +2857,7 @@
             <listitem name="cc119" nrpnvalue="114"/>
        </parameter>
         <parameter name="Mod 7 dest" conversion="LIST" min="0" max="77" sysexoffset="1480" nrpn="717">
-            <listitem name="none" />
+            <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
             <listitem name="FM Amnt" nrpnvalue="3"/>
@@ -3056,7 +3056,7 @@
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
         <parameter name="Mod 8 dest" conversion="LIST" min="0" max="77" sysexoffset="1488" nrpn="721">
-            <listitem name="none" />
+            <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
             <listitem name="FM Amnt" nrpnvalue="3"/>
@@ -3255,7 +3255,7 @@
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
         <parameter name="Mod 9 dest" conversion="LIST" min="0" max="77" sysexoffset="1496" nrpn="725">
-            <listitem name="none" />
+            <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
             <listitem name="FM Amnt" nrpnvalue="3"/>
@@ -3454,7 +3454,7 @@
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
         <parameter name="Mod 10 dest" conversion="LIST" min="0" max="77" sysexoffset="1504" nrpn="729">
-            <listitem name="none" />
+            <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
             <listitem name="FM Amnt" nrpnvalue="3"/>
@@ -3653,7 +3653,7 @@
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
         <parameter name="Mod 11 dest" conversion="LIST" min="0" max="77" sysexoffset="1512" nrpn="733">
-            <listitem name="none" />
+            <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
             <listitem name="FM Amnt" nrpnvalue="3"/>
@@ -3852,7 +3852,7 @@
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
         <parameter name="Mod 12 dest" conversion="LIST" min="0" max="77" sysexoffset="1520" nrpn="737">
-            <listitem name="none" />
+            <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
             <listitem name="FM Amnt" nrpnvalue="3"/>

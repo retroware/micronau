@@ -238,9 +238,9 @@ private:
     ScopedPointer<TextButton> sync_sysex;
     ScopedPointer<TextButton> mod1_6;
     ScopedPointer<TextButton> mod7_12;
-    ScopedPointer<StdComboBox> midi_in_menu;
-    ScopedPointer<StdComboBox> midi_out_menu;
-    ScopedPointer<StdComboBox> midi_out_chan;
+    ScopedPointer<LcdComboBox> midi_in_menu;
+    ScopedPointer<LcdComboBox> midi_out_menu;
+    ScopedPointer<LcdComboBox> midi_out_chan;
 
     ScopedPointer<LcdLabel> param_display;
 

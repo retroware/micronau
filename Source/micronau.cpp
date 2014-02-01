@@ -415,6 +415,11 @@ void MicronauAudioProcessor::handleIncomingMidiMessage (MidiInput* source, const
     }
     if (message.isSysEx()) {
         const uint8 *data = message.getSysExData();
+        char path[128];
+        sprintf(path, "/Users/dls/foo-%d", 0);
+        FILE *fd = fopen(path, "w");
+        fwrite(data, 1, 434, fd);
+        fclose(fd);
         init_from_sysex((unsigned char *) data);
     }
 }

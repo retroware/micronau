@@ -1130,9 +1130,9 @@ bool IonSysexParams::parseParamsFromContent(unsigned char *ptr, int contentSize)
    }
 
    // opcode
-   unsigned long n;
-   memcpy(&n, ptr, sizeof(unsigned long));
-   ptr += sizeof(unsigned long);
+   unsigned int n;
+   memcpy(&n, ptr, sizeof(unsigned int));
+   ptr += sizeof(unsigned int);
    
    // program header
    memcpy(&programHeader, ptr, sizeof(ProgramHeader));
@@ -1285,11 +1285,11 @@ bool IonSysexParams::getAsSysexMessage(unsigned char* sysexBuf)
     memcpy(bufPtr, &sysexHeader, sizeof(SysexHeader));
     bufPtr += sizeof(SysexHeader);
     
-    unsigned long h_opcode = 1;
-    unsigned long n_opcode = 1;
+    unsigned int h_opcode = 1;
+    unsigned int n_opcode = 1;
     n_opcode = /* TODO: some function of */ h_opcode;
 	intToLeBuff(n_opcode, bufPtr);
-    bufPtr += sizeof(unsigned long);
+    bufPtr += sizeof(unsigned int);
     
     ProgramHeader programHeader;
     /* TODO: fill program header */
@@ -1397,9 +1397,9 @@ bool IonSysex::parseBuffer(unsigned char *buffer)
    }
 
    // opcode
-   unsigned long n;
-   memcpy(&n, ptr, sizeof(unsigned long));
-   ptr += sizeof(unsigned long);
+   unsigned int n;
+   memcpy(&n, ptr, sizeof(unsigned int));
+   ptr += sizeof(unsigned int);
    
    // program header
    memcpy(&programHeader, ptr, sizeof(ProgramHeader));
@@ -1442,7 +1442,7 @@ bool IonSysex::parse(FILE *fp)
       return false;
    }
    // Check Opcode
-   unsigned long n_opcode;
+   unsigned int n_opcode;
    if(fread(&n_opcode, sizeof(unsigned int), 1, fp) != 1){
 	  logDebug("Error reading opcode");
       return false;

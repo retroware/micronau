@@ -181,7 +181,7 @@ void PluginLookAndFeel::positionComboBoxText (ComboBox& box, Label& label)
 		return;
 	}
 
-	label.setBounds (1, 1,
+	label.setBounds (1, 0,
 					 box.getWidth() - 4,
 					 box.getHeight() - 2);
 

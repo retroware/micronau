@@ -63,23 +63,23 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     param_display->setFont (Font (18.00f, Font::plain));
 	addAndMakeVisible(param_display);
 
-    midi_in_menu = new StdComboBox ();
+    midi_in_menu = new LcdComboBox ();
     midi_in_menu->setEditableText (false);
     midi_in_menu->addListener(this);
     addAndMakeVisible (midi_in_menu);
-    midi_in_menu->setBounds(910, 70, 100, 20);
+    midi_in_menu->setBounds(910, 70, 100, 15);
 
-    midi_out_menu = new StdComboBox ();
+    midi_out_menu = new LcdComboBox ();
     midi_out_menu->setEditableText (false);
     midi_out_menu->addListener(this);
     addAndMakeVisible (midi_out_menu);
-    midi_out_menu->setBounds(910, 95, 100, 20);
+    midi_out_menu->setBounds(910, 95, 100, 15);
  
-    midi_out_chan = new StdComboBox ();
+    midi_out_chan = new LcdComboBox ();
     midi_out_chan->setEditableText (false);
     midi_out_chan->addListener(this);
     addAndMakeVisible (midi_out_chan);
-    midi_out_chan->setBounds(1015, 95, 40, 20);
+    midi_out_chan->setBounds(1015, 95, 30, 15);
     for (int i = 0; i < 16; i++) {
         midi_out_chan->addItem(String(i+1), i+1);
     }
