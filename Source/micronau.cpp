@@ -32,6 +32,7 @@ MicronauAudioProcessor::MicronauAudioProcessor()
             param_by_nrpn.set(param->getNrpn(), new ext_param(param, idx));
             idx++;
         }
+
     }
 
     midi_out = NULL;
@@ -42,6 +43,8 @@ MicronauAudioProcessor::MicronauAudioProcessor()
     midi_in = NULL;
     midi_in_port = "None";
     set_midi_port(MIDI_IN_IDX, midi_in_port);
+
+    set_prog_name("micronAU");
 }
 
 MicronauAudioProcessor::~MicronauAudioProcessor()
@@ -275,6 +278,8 @@ void MicronauAudioProcessor::sync_via_nrpn()
         return;
     }
 
+    send_bank_patch();
+    
     int l = nrpns.size();
     for (unsigned int i = 0; i < l; i++) {
         IonSysexParam *param = nrpns[i];
@@ -307,6 +312,41 @@ void MicronauAudioProcessor::sync_via_nrpn()
     return;
 }
 
+void MicronauAudioProcessor::send_bank_patch()
+{
+    if (midi_out == NULL) {
+        return;
+    }
+    
+    unsigned char cmd = 0xb0 + get_midi_chan();
+    int bank, prog;
+    bank = param_of_nrpn(100)->getValue();
+    prog = param_of_nrpn(101)->getValue();
+    
+    MidiMessage *msg;
+    if (bank > 0) {
+        bank = bank - 1;
+
+        // bank msb
+        msg = new MidiMessage(cmd, 0, 0);
+        midi_out->sendMessageNow(*msg);
+        delete msg;
+        
+        // bank lsb
+        msg = new MidiMessage(cmd, 32, bank);
+        midi_out->sendMessageNow(*msg);
+        delete msg;
+    }
+
+    if (prog > 0) {
+        prog = prog - 1;
+        cmd = 0xc0 + get_midi_chan();
+        msg = new MidiMessage(cmd, prog);
+        midi_out->sendMessageNow(*msg);
+        delete msg;
+    }
+}
+
 void MicronauAudioProcessor::send_nrpn(int nrpn, int value)
 {
     unsigned char midiChannel = 176 + get_midi_chan();
@@ -317,6 +357,11 @@ void MicronauAudioProcessor::send_nrpn(int nrpn, int value)
     MidiMessage *msg;
     
     if (midi_out == NULL) {
+        return;
+    }
+    
+    if ((nrpn >= 100) && (nrpn <= 101)) {
+        send_bank_patch();
         return;
     }
     
@@ -415,11 +460,6 @@ void MicronauAudioProcessor::handleIncomingMidiMessage (MidiInput* source, const
     }
     if (message.isSysEx()) {
         const uint8 *data = message.getSysExData();
-        char path[128];
-        sprintf(path, "/Users/dls/foo-%d", 0);
-        FILE *fd = fopen(path, "w");
-        fwrite(data, 1, 434, fd);
-        fclose(fd);
         init_from_sysex((unsigned char *) data);
     }
 }
@@ -483,6 +523,11 @@ String MicronauAudioProcessor::get_midi_port(int in_out)
             break;
     }
     return "None";
+}
+
+String MicronauAudioProcessor::get_prog_name()
+{
+    return params->get_prog_name();
 }
 
 int MicronauAudioProcessor::midi_find_port_by_name(int in_out, String nm)

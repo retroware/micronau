@@ -49,9 +49,16 @@ public:
         idx = owner->index_of_nrpn(nrpn_num);
  
         vector<ListItemParameter> list_items = param->getList();
-        vector<ListItemParameter>::const_iterator i;
-        for (int i = 0; i != list_items.size(); i++) {
-            addItem(list_items[i].getName(), i+1);
+        if (list_items.size() != 0) {
+            vector<ListItemParameter>::const_iterator i;
+            for (int i = 0; i != list_items.size(); i++) {
+                addItem(list_items[i].getName(), i+1);
+            }
+        } else {
+            addItem("--", 1000);
+            for (int i = param->getMin(); i < param->getMax(); i++) {
+                addItem(String(i+1), i+1);
+            }
         }
         nrpn = nrpn_num;
     }
@@ -74,9 +81,12 @@ private:
 class ext_button : public MicronToggleButton
 {
 public:
-    ext_button(MicronauAudioProcessor *owner, int nrpn_num) : MicronToggleButton(""), plugin(owner) {
+    ext_button(MicronauAudioProcessor *owner, int nrpn_num, LookAndFeel *lf) : MicronToggleButton(""), plugin(owner) {
         param = owner->param_of_nrpn(nrpn_num);
         idx = owner->index_of_nrpn(nrpn_num);
+        if (lf) {
+            setLookAndFeel(lf);
+        }
     }
     void set_value(int v){plugin->setParameterNotifyingHost(idx, v);}
     int get_value(){ return param->getValue();}
@@ -105,6 +115,7 @@ class MicronauAudioProcessorEditor  : public AudioProcessorEditor,
                                         public SliderListener,
                                         public ButtonListener,
                                         public ComboBoxListener,
+                                        public TextEditorListener,
                                         public Timer
 {
 public:
@@ -119,6 +130,7 @@ public:
 	void sliderDragStarted (Slider* slider);
     void buttonClicked (Button* button);
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
+    void textEditorTextChanged (TextEditor &t);
     
 private:
 
@@ -208,7 +220,7 @@ private:
 
     void add_knob(int nrpn, int x, int y, const char *text, Component *parent);
     void add_box(int nprn, int x, int y, int width, const char *text, int loc, Component *parent);
-    void add_button(int nrpn, int x, int y, const char *text, Component *parent);
+    void add_button(int nrpn, int x, int y, const char *text, bool invert, Component *parent);
     
 	void create_group_box(const char* labelText, int x, int y, int w, int h);
     void create_osc(int x, int y);
@@ -232,6 +244,7 @@ private:
 
 	Image background;
     ScopedPointer<Drawable> logo;
+    ScopedPointer<LookAndFeel> inverted_button_lf;
     OwnedArray<GroupComponent> group_boxes;
 
     ScopedPointer<TextButton> sync_nrpn;
@@ -243,6 +256,7 @@ private:
     ScopedPointer<LcdComboBox> midi_out_chan;
 
     ScopedPointer<LcdLabel> param_display;
+    ScopedPointer<TextEditor> prog_name;
 
     MicronauAudioProcessor *owner;
 

@@ -94,7 +94,8 @@ public:
     void set_midi_port(int in_out, String p);
     void set_midi_chan(unsigned int chan);
     unsigned int get_midi_chan();
-   
+    String get_prog_name();
+    void set_prog_name(String s) {params->set_prog_name(s);}
 
     int index_of_nrpn(int nrpn);
     IonSysexParam *param_of_nrpn(int nrpn);
@@ -114,6 +115,7 @@ private:
     } preset;
     void send_nrpn(int nrpn, int value);
     void init_from_sysex(unsigned char *sysex);
+    void send_bank_patch();
 
     IonSysexParams *params;
     Array<IonSysexParam*> nrpns;

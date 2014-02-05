@@ -197,19 +197,24 @@ class IonSysexParams{
 	  UInt32 numParams() {return params.size();}
       ~IonSysexParams();
       bool getAsSysexMessage(unsigned char *sysBuf);
-	  // returns adjusted nrpn number if this is an fx parameter, otherwise returns normal nrpn
-	  SInt32 fx1fx2NrpnNum(IonSysexParam *p); 
-	  bool shouldSkipFx1(IonSysexParam *p);
-	  bool shouldSkipFx2(IonSysexParam *p);
-	  
-   private:
+    
+      String get_prog_name() {return m_prog_name;}
+      void set_prog_name(String s) {m_prog_name = s;}
+
+      // returns adjusted nrpn number if this is an fx parameter, otherwise returns normal nrpn
+      SInt32 fx1fx2NrpnNum(IonSysexParam *p);
+      bool shouldSkipFx1(IonSysexParam *p);
+      bool shouldSkipFx2(IonSysexParam *p);
+
+    private:
       SysexHeader sysexHeader;
       ProgramHeader programHeader;
       void initFromXml();
       vector<IonSysexParam*> params;
 	  IonSysexParam *fx1Param;
 	  IonSysexParam *fx2Param;
- };
+      String m_prog_name;
+};
 
 // parameters loaded from sysex
 class IonSysex{

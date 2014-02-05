@@ -59,4 +59,16 @@ private:
 	Image lcdPanel;
 };
 
+class InvertedButtonLookAndFeel : public LookAndFeel, public DeletedAtShutdown
+{
+public:
+    InvertedButtonLookAndFeel();
+    
+	void drawToggleButton (Graphics& g, ToggleButton& button, bool isMouseOverButton, bool isButtonDown);
+
+private:
+	Image toggleButtonOff;
+	Image toggleButtonOn;
+};
+
 #endif  // LOOKANDFEEL_H_INCLUDED

@@ -497,7 +497,7 @@ bool IonSysexParam::writeValueToBuffer(unsigned char *buffer)
 {
 	int i;
     if(m_conv == NAME){
-        return writeNameToBuffer(buffer);
+        return true;
     }
 	if (m_offset < 0) {
 		return true;
@@ -642,7 +642,7 @@ bool IonSysexParam::setValueFromContent(unsigned char *content)
 	  return true;
    }
    if(m_conv == NAME){
-      return setNameFromContent(content);
+      return true;
    }
    if (m_offset == -1) {
       return true;
@@ -1159,6 +1159,15 @@ bool IonSysexParams::parseParamsFromContent(unsigned char *ptr, int contentSize)
 	   }
 //     params[i].printDebug();
    }
+    
+   {
+        char name[15];
+        memset(name, 0, 15);
+        memcpy(name,&decodedContent[0],15);
+        name[14] = 0;
+        m_prog_name = String(name);
+   }
+
    delete decodedContent;
    return true;
 }
@@ -1272,9 +1281,16 @@ bool IonSysexParams::getAsSysexMessage(unsigned char* sysexBuf)
     }
 	// if not 1, then we add a new program
 	rawContent[293] = 1;
-	// the arp stuff
-	// micron file id
-	// ion bank - none seem to be important
+     {
+        char str[16];
+        bzero(str, sizeof(str));
+        m_prog_name.copyToUTF8(str, sizeof(str));
+        //	const char *str = CFStringGetCStringPtr(m_textValue, 0);
+        bzero(&rawContent[0], 15);
+        memcpy((char *) &rawContent[0], str, 14);
+        bzero(&rawContent[296], 15);
+        memcpy(&rawContent[296], str, 14);
+    }
 	cs = checksum(rawContent, 315);
 	
 	sysexHeader.hdr[0] = 0xf0 ;
@@ -1314,7 +1330,6 @@ bool IonSysexParams::getAsSysexMessage(unsigned char* sysexBuf)
 	}
 	
 	bufPtr += sizeof(ProgramHeader);
-    
     vector <unsigned char> raw;
     vector <unsigned char> encoded;
     for(int j = 0; j < 315; j++) raw.push_back(rawContent[j]);

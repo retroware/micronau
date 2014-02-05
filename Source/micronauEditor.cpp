@@ -29,7 +29,8 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     owner = ownerFilter;
     
     // create all of the gui elements and hook them up to the processor
-
+    inverted_button_lf = new InvertedButtonLookAndFeel();
+    
 	create_osc(OSCS_X, OSCS_Y);
 	create_env(ENVS_X, ENVS_Y);
 	create_prefilt(PREFILT_X, PREFILT_Y);
@@ -83,6 +84,15 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     for (int i = 0; i < 16; i++) {
         midi_out_chan->addItem(String(i+1), i+1);
     }
+
+    prog_name = new TextEditor();
+    addAndMakeVisible (prog_name);
+    prog_name->setBounds(910, 155, 120, 15);
+    prog_name->addListener(this);
+    add_box(666, 910, 175, 100,  NULL, 0, NULL);
+    add_box(100, 910, 195, 30, "Bank", 1, NULL);
+    add_box(101, 950, 195, 30, "Patch", 1, NULL);
+
 
     logo = Drawable::createFromImageData (BinaryData::logo_svg, BinaryData::logo_svgSize);
 
@@ -155,9 +165,15 @@ void MicronauAudioProcessorEditor::add_box(int nrpn, int x, int y, int width, co
     }
 }
 
-void MicronauAudioProcessorEditor::add_button(int nrpn, int x, int y, const char *text, Component *parent = NULL)
+void MicronauAudioProcessorEditor::add_button(int nrpn, int x, int y, const char *text, bool invert, Component *parent = NULL)
 {
-    ext_button *b = new ext_button(owner, nrpn);
+    ext_button *b;
+    if (invert) {
+        b = new ext_button(owner, nrpn, inverted_button_lf);
+    } else {
+        b = new ext_button(owner, nrpn, NULL);
+    }
+    
     buttons.add(b);
     b->setBounds(x, y, 20, 20);
     b->addListener (this);
@@ -317,7 +333,7 @@ void MicronauAudioProcessorEditor::create_filter(int x, int y)
     add_knob(553, x, y+17, "f1>f2");
     add_knob(670, x, y+62, "offset");
 
-    add_button(560, x + 10, y + 100, NULL);
+    add_button(560, x + 10, y + 100, NULL, false);
 }
 
 void MicronauAudioProcessorEditor::create_env(int x, int y)
@@ -337,7 +353,7 @@ void MicronauAudioProcessorEditor::create_env(int x, int y)
 		add_box(579 + (n*13), x_offset, y + 40 + (n * v_space), 35, NULL, 0);
 		add_box(581 + (n*13), x_offset + 40, y + 40 + (n * v_space), 35, NULL, 0);
 		add_box(585 + (n*13), x_offset + 160, y + 40 + (n * v_space), 35, NULL, 0);
-		add_button(590 + (n*13), x_offset + 80,  y + 35 + (n * v_space), "pedal");
+		add_button(590 + (n*13), x_offset + 80,  y + 35 + (n * v_space), "pedal", false);
 		
 		add_box(588 + (n*13), x + 255 + 57, y + (n * v_space), 28, "free run", 0);
 		add_box(587 + (n*13), x + 255 + 33, y + 19 + (n * v_space), 52, "reset", 0);
@@ -447,7 +463,7 @@ void MicronauAudioProcessorEditor::create_lfo(int x, int y)
         add_knob(618 + (i*4), x+70, y + (i*70), "rate");
         add_knob(620 + (i*4), x+110, y + (i*70), "m1");
         add_box(619 + (i*4), x+78, y + (i*70) + 40, 60, "reset", 2);
-        add_button(617 + (i*4), x, y + 23 + (i* 70), "sync");
+        add_button(617 + (i*4), x, y + 23 + (i* 70), "sync", true);
     }
     add_box(628, x, y+200, 100, "input", 0);
 }
@@ -513,9 +529,9 @@ void MicronauAudioProcessorEditor::create_fx1(int x, int y, Component* parent)
 			add_box(848 + (idx * 10), offsX + 395 + o, 43, 40, "shape", 1, c);
 			add_box(851 + (idx * 10), offsX + 335 + o, 15, 60, "sync", 2, c);
 			if (idx == 0) {
-				add_button(850, offsX + 400 + o, 14, NULL, c);
+				add_button(850, offsX + 400 + o, 14, NULL, true, c);
 			} else {
-				add_button(849 + (idx * 10), offsX + 400 + o, 14, NULL, c);
+				add_button(849 + (idx * 10), offsX + 400 + o, 14, NULL, true, c);
 			}
 
         } else {
@@ -570,6 +586,8 @@ void MicronauAudioProcessorEditor::timerCallback()
     
     update_midi_menu(MIDI_IN_IDX);
     update_midi_menu(MIDI_OUT_IDX);
+    prog_name->setText(owner->get_prog_name());
+    
     midi_out_chan->setSelectedItemIndex(owner->get_midi_chan());
 }
 
@@ -721,4 +739,12 @@ void MicronauAudioProcessorEditor::select_item_by_name(int in_out, String nm)
     }
     menu->setSelectedItemIndex(0);
 }
+
+void MicronauAudioProcessorEditor::textEditorTextChanged (TextEditor &t) {
+    String prog;
+    prog = t.getText();
+    
+    owner->set_prog_name(prog.substring(0,14));
+}
+
 

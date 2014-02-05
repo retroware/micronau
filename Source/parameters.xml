@@ -44,49 +44,6 @@
     <parameter name="M1" conversion="INT32" min="0" max="127" nrpn="206" defaultval="0"/>
     <parameter name="M2" conversion="INT32" min="0" max="127" nrpn="207" defaultval="0"/>
 
-	<parameter name="RND osc strength" conversion="INT32" min="0" max="127" nrpn="250" />
-	<parameter name="RND osc para" conversion="LIST" min="0" max="1" nrpn="251">
-      <listitem name="off" />
-	  <listitem name="on" />
-	</parameter>
-
-	<parameter name="RND osc type" conversion="LIST" min="0" max="1" nrpn="252">
-      <listitem name="off" />
-	  <listitem name="on" />
-	</parameter>
-
-	<parameter name="RND osc level" conversion="LIST" min="0" max="1" nrpn="253">
-      <listitem name="off" />
-	  <listitem name="on" />
-	</parameter>
-
-	<parameter name="RND filter strength" conversion="INT32" min="0" max="127" nrpn="255" />
-	<parameter name="RND filter para" conversion="LIST" min="0" max="1" nrpn="256">
-      <listitem name="off" />
-	  <listitem name="on" />
-	</parameter>
-
-	<parameter name="RND filter type" conversion="LIST" min="0" max="1" nrpn="257">
-      <listitem name="off" />
-	  <listitem name="on" />
-	</parameter>
-
-	<parameter name="RND filter level" conversion="LIST" min="0" max="1" nrpn="258">
-      <listitem name="off" />
-	  <listitem name="on" />
-	</parameter>
-	
-	<parameter name="RND mod strength" conversion="INT32" min="0" max="127" nrpn="260" />
-	<parameter name="RND mod depth" conversion="LIST" min="0" max="1" nrpn="261">
-      <listitem name="off" />
-	  <listitem name="on" />
-	</parameter>
-
-	<parameter name="RND env depth" conversion="LIST" min="0" max="1" nrpn="262">
-      <listitem name="off" />
-	  <listitem name="on" />
-	</parameter>
-
 	<parameter name="fx" conversion="LIST" min="0" max="1" nrpn="275">
       <listitem name="fx1" />
 	  <listitem name="fx2" />
@@ -591,17 +548,17 @@
      </parameter>
      <parameter name="micron file id" conversion="INT16" min="0" max="16383" sysexoffset="2360"  nrpn="105"/>
      <parameter name="category" conversion="LIST" min="0" max="10" sysexoffset="184" nrpn="666">
-            <listitem name="Cat: recent" />
-            <listitem name="Cat: faves" />
-            <listitem name="Cat: bass" />
-            <listitem name="Cat: lead" />
-            <listitem name="Cat: pad" />
-            <listitem name="Cat: string" />
-            <listitem name="Cat: brass" />
-            <listitem name="Cat: key" />
-            <listitem name="Cat: comp" />
-            <listitem name="Cat: drum" />
-            <listitem name="Cat: sfx" />
+            <listitem name="recent" />
+            <listitem name="faves" />
+            <listitem name="bass" />
+            <listitem name="lead" />
+            <listitem name="pad" />
+            <listitem name="string" />
+            <listitem name="brass" />
+            <listitem name="key" />
+            <listitem name="comp" />
+            <listitem name="drum" />
+            <listitem name="sfx" />
         </parameter>
 		<parameter name="Voice" conversion="TEXT_LABEL"></parameter>
         <parameter name="Poly mode" conversion="LIST" min="0" max="1" sysexoffset="120" nrpn="512">

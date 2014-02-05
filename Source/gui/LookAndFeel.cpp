@@ -508,3 +508,17 @@ return;
 
     }
 }
+
+InvertedButtonLookAndFeel::InvertedButtonLookAndFeel() {
+	toggleButtonOff = ImageCache::getFromMemory (BinaryData::pbutton0_png,
+                                                 BinaryData::pbutton0_pngSize);
+	toggleButtonOn = ImageCache::getFromMemory (BinaryData::pbutton1_png,
+                                                BinaryData::pbutton1_pngSize);
+}
+
+void InvertedButtonLookAndFeel::drawToggleButton (Graphics& g, ToggleButton& button, bool isMouseOverButton, bool isButtonDown)
+{
+	const Image& buttonImg = button.getToggleState() ? toggleButtonOff : toggleButtonOn;
+    g.drawImageAt(buttonImg, 2.0f, 1.0f + (button.getHeight() - buttonImg.getHeight()) * 0.5f);
+    
+}
