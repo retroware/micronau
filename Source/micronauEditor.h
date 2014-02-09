@@ -238,6 +238,8 @@ private:
     void create_lfo(int x, int y);
 	void create_fx_and_tracking_tabs(int x, int y);
     void create_fx1(int x, int y, Component* parent);
+    void create_fx2(int x, int y, Component* parent);
+
 
     void update_midi_menu(int in_out);
     void select_item_by_name(int in_out, String nm);
@@ -264,6 +266,7 @@ private:
 
 	ScopedPointer<MicronTabBar> fx_and_tracking_tabs;
     ScopedPointer<Component> fx1[7];
+    ScopedPointer<Component> fx2[7];
 
     // prototype
     OwnedArray<ext_slider> sliders;

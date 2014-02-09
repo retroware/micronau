@@ -186,7 +186,11 @@ void MicronauAudioProcessorEditor::add_button(int nrpn, int x, int y, const char
     if (text) {
         Label *l = new back_label(text, x + 17, y + 3, 55, 15);
         l->setJustificationType (Justification::centredLeft);
-        addAndMakeVisible(l);
+        if (parent) {
+            parent->addAndMakeVisible(l);
+        } else {
+            addAndMakeVisible(l);
+        }
     }
 }
 
@@ -477,7 +481,7 @@ void MicronauAudioProcessorEditor::create_fx_and_tracking_tabs(int x, int y)
 	SliderBank* trackgen = new SliderBank;
 
 	create_fx1(0, 0, fx1);
-//	create_fx2(0, 0, fx2);
+	create_fx2(0, 0, fx2);
 
 	fx_and_tracking_tabs = new MicronTabBar(TabbedButtonBar::TabsAtLeft);
 
@@ -551,9 +555,67 @@ void MicronauAudioProcessorEditor::create_fx1(int x, int y, Component* parent)
     for (i = 0; i < 7; i++) {
         parent->addChildComponent(fx1[i]);
     }
-    // XXX set initial panel correctly
-    ext_combo *c = new ext_combo(owner, 800);
-    fx1[c->get_value()]->setVisible(true);
+
+    fx1[owner->param_of_nrpn(800)->getValue()]->setVisible(true);
+}
+
+void MicronauAudioProcessorEditor::create_fx2(int x, int y, Component* parent)
+{
+	x -= 25;
+    
+    int i;
+    // 1, 2: sync rate, button, knobs: delay, regen, bright
+    // 3: l delay , regen, bringh, r delay
+    // 4, 5, 6: difuse, decay, bright, color
+    for (i = 0; i < 7; i++) {
+        int idx;
+        Component *c = new Component();
+        
+        add_box(801, 70, 10, 80, "type", 2, c);
+        c->setBounds(x, y, FX_W, FX_H);
+        fx2[i] = c;
+        
+        if (i == 0) {
+            continue;
+        }
+
+        idx = i - 1;
+        int offsX = 140;
+        switch (idx) {
+            case 0:
+            case 1:
+                add_knob(920 + (idx * 5), offsX, 40, "delay", c);
+                add_knob(921 + (idx * 5), offsX + 40, 40, "regen", c);
+                add_knob(922 + (idx * 5), offsX + 80, 40, "bright", c);
+                add_box(924 + (idx * 5), 70, 40, 60, NULL, 2, c);
+                add_button(923 + (idx*5), 70, 60, "sync", false, c);
+              break;
+                
+            case 2:
+                offsX = 70;
+                add_knob(920 + (idx * 5), offsX, 40, "l delay", c);
+                add_knob(921 + (idx * 5), offsX + 40, 40, "regen", c);
+                add_knob(922 + (idx * 5), offsX + 80, 40, "bright", c);
+                add_knob(923 + (idx * 5), offsX + 120, 40, "r delay", c);
+               break;
+
+            case 3:
+            case 4:
+            case 5:
+                offsX = 70;
+                add_knob(920 + (idx * 5), offsX, 40, "diffuse", c);
+                add_knob(921 + (idx * 5), offsX + 40, 40, "decay", c);
+                add_knob(922 + (idx * 5), offsX + 80, 40, "bright", c);
+                add_knob(923 + (idx * 5), offsX + 120, 40, "color", c);
+                break;
+        }
+
+    }
+    for (i = 0; i < 7; i++) {
+        parent->addChildComponent(fx2[i]);
+    }
+
+    fx2[owner->param_of_nrpn(801)->getValue()]->setVisible(true);
 }
 
 //==============================================================================
@@ -713,6 +775,13 @@ void MicronauAudioProcessorEditor::comboBoxChanged (ComboBox* box)
                 fx1[i]->setVisible(false);
             }
             fx1[b->getSelectedItemIndex()]->setVisible(true);
+        }
+        if (b->get_nrpn() == 801) {
+            int i;
+            for (i = 0; i < 7; i++) {
+                fx2[i]->setVisible(false);
+            }
+            fx2[b->getSelectedItemIndex()]->setVisible(true);
         }
 	}
 }
