@@ -397,12 +397,19 @@ void MicronauAudioProcessor::setStateInformation (const void* data, int sizeInBy
 	}
 
     set_midi_chan(p->midi_out_chan);
-    
+    param_of_nrpn(100)->setValue(p->bank);
+    param_of_nrpn(101)->setValue(p->patch);
+   
     s = String(CharPointer_UTF8((const char *) p->midi_in_port));
     set_midi_port(MIDI_IN_IDX, s);
     s = String(CharPointer_UTF8((const char *) p->midi_out_port));
     set_midi_port(MIDI_OUT_IDX, s);
     
+/*
+    if ((p->bank != 0) && (p->patch != 0)) {
+        sync_via_nrpn();
+    }
+*/
 }
 
 void MicronauAudioProcessor::getStateInformation (MemoryBlock& destData)
@@ -416,6 +423,9 @@ void MicronauAudioProcessor::getStateInformation (MemoryBlock& destData)
     memcpy(p.sysex, sysex_buf+1, SYSEX_LEN);
 
     p.midi_out_chan = get_midi_chan();
+    p.bank = param_of_nrpn(100)->getValue();
+    p.patch = param_of_nrpn(101)->getValue();
+
     s = get_midi_port(MIDI_IN_IDX);
     s.copyToUTF8(((CharPointer_UTF8::CharType *) p.midi_in_port), MAX_MIDI_PORT_NAME);
     s = get_midi_port(MIDI_OUT_IDX);

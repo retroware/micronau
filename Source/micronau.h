@@ -112,6 +112,8 @@ private:
         unsigned int midi_out_chan;
         unsigned char midi_in_port[MAX_MIDI_PORT_NAME];
         unsigned char midi_out_port[MAX_MIDI_PORT_NAME];
+        unsigned int bank;
+        unsigned int patch;
     } preset;
     void send_nrpn(int nrpn, int value);
     void init_from_sysex(unsigned char *sysex);
