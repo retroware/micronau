@@ -10,9 +10,10 @@
 
 #include "MicronSlider.h"
 #include "SliderBank.h"
+#include "micronauEditor.h"
 
 //==============================================================================
-SliderBank::SliderBank ()
+SliderBank::SliderBank (MicronauAudioProcessor *owner, MicronauAudioProcessorEditor *parent)
 {
 	for (int i = 0; i < 33; ++i)
 	{
@@ -20,14 +21,16 @@ SliderBank::SliderBank ()
 		const int SLIDER_WIDTH = 11;
 		const int SLIDER_HEIGHT = 100;
 
-		MicronSlider* newSlider = new MicronSlider ("TrackingSlider");
+		ext_slider *newSlider = new ext_slider(owner, 633+i);
+        parent->addSlider(newSlider);
+        newSlider->addListener(parent);
 		newSlider->setBounds (i*SLIDER_SPACING, 0, SLIDER_WIDTH, SLIDER_HEIGHT);
 		newSlider->setRange (-100, 100, 0.1);
 		newSlider->setSliderStyle (Slider::LinearVertical);
 		newSlider->setTextBoxStyle (Slider::NoTextBox, false, 80, 20);
 		newSlider->addListener (this);
-		sliders.add(newSlider);
 
+        sliders[i] = newSlider;
 		addAndMakeVisible ( newSlider );
 	}
 
@@ -181,4 +184,18 @@ void SliderBank::mouseDrag (const MouseEvent& event)
 	}
 
 	prevSlider = slider;
+}
+
+void SliderBank::hide_12_16(bool is_12)
+{
+    int i;
+    for (i = 0; i < 33; i++) {
+        sliders[i]->setVisible(true);
+    }
+    if (is_12) {
+        for (i = 0; i < 4; i++) {
+            sliders[i]->setVisible(false);
+            sliders[32 - i]->setVisible(false);
+        }
+    }
 }

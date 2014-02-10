@@ -15,7 +15,7 @@
 #include "gui/LcdLabel.h"
 #include "gui/StdComboBox.h"
 #include "gui/LookAndFeel.h"
-
+#include "tracking.h"
 
 //==============================================================================
 MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcessor* ownerFilter)
@@ -98,6 +98,11 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
 
     // This is where our plugin's editor size is set.
     setSize (1060, 670);
+
+    update_tracking();
+    
+    update_midi_menu(MIDI_IN_IDX, true);
+    update_midi_menu(MIDI_OUT_IDX, true);
 
 	timerCallback(); // call the timer callback once now to update all gui components, so user does not see them jump.
     startTimer (50);
@@ -478,7 +483,7 @@ void MicronauAudioProcessorEditor::create_fx_and_tracking_tabs(int x, int y)
 
 	Component* fx1 = new Component;
 	Component* fx2 = new Component;
-	SliderBank* trackgen = new SliderBank;
+	trackgen = new SliderBank(owner, this);
 
 	create_fx1(0, 0, fx1);
 	create_fx2(0, 0, fx2);
@@ -646,14 +651,22 @@ void MicronauAudioProcessorEditor::timerCallback()
         boxes[i]->setSelectedItemIndex(boxes[i]->get_value(), dontSendNotification);
     }
     
-    update_midi_menu(MIDI_IN_IDX);
-    update_midi_menu(MIDI_OUT_IDX);
+    for (int i = 0; i < buttons.size(); i++) {
+        if (buttons[i]->get_value() == 0) {
+            buttons[i]->setToggleState(false, dontSendNotification);
+        } else {
+            buttons[i]->setToggleState(true, dontSendNotification);
+        }
+    }
+
+    update_midi_menu(MIDI_IN_IDX, false);
+    update_midi_menu(MIDI_OUT_IDX, false);
     prog_name->setText(owner->get_prog_name());
     
     midi_out_chan->setSelectedItemIndex(owner->get_midi_chan());
 }
 
-void MicronauAudioProcessorEditor::update_midi_menu(int in_out)
+void MicronauAudioProcessorEditor::update_midi_menu(int in_out, bool init)
 {
     ComboBox *menu;
     StringArray x;
@@ -681,7 +694,7 @@ void MicronauAudioProcessorEditor::update_midi_menu(int in_out)
             }
         }
     }
-    if (midi_changed) {
+    if (midi_changed || init) {
         int idx = menu->getSelectedItemIndex();
         String current_midi;
         if (idx == -1) {
@@ -694,7 +707,11 @@ void MicronauAudioProcessorEditor::update_midi_menu(int in_out)
         for (int i = 0; i < x.size(); i++) {
             menu->addItem(x[i], i+1);
         }
-        select_item_by_name(in_out, current_midi);
+        if (init) {
+            select_item_by_name(in_out, owner->get_midi_port(in_out));
+        } else {
+            select_item_by_name(in_out, current_midi);
+        }
     } else {
         select_item_by_name(in_out, owner->get_midi_port(in_out));
     }
@@ -783,6 +800,9 @@ void MicronauAudioProcessorEditor::comboBoxChanged (ComboBox* box)
             }
             fx2[b->getSelectedItemIndex()]->setVisible(true);
         }
+        if ((b->get_nrpn() == 631) || (b->get_nrpn() == 632)){
+            update_tracking();
+        }
 	}
 }
 
@@ -815,5 +835,54 @@ void MicronauAudioProcessorEditor::textEditorTextChanged (TextEditor &t) {
     
     owner->set_prog_name(prog.substring(0,14));
 }
+
+void MicronauAudioProcessorEditor::update_tracking()
+{
+    int i;
+    int preset, num_points;
+    preset = owner->param_of_nrpn(631)->getValue();
+    num_points = owner->param_of_nrpn(632)->getValue() * 6;
+    if (num_points == 0) {
+        trackgen->hide_12_16(true);
+    } else {
+        trackgen->hide_12_16(false);
+    }
+    
+    switch (preset) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+            {
+                for (i = 0; i <= 32; i++) {
+                    owner->param_of_nrpn(633 + i)->setValue(tracking[preset + num_points - 1][i]);
+                }
+            }
+            break;
+        case 7:
+            // zero
+            for (i = 633; i <= 665; i++) {
+                owner->param_of_nrpn(i)->setValue(0);
+            }
+            break;
+        case 8:
+            // max
+            for (i = 633; i <= 665; i++) {
+                owner->param_of_nrpn(i)->setValue(100);
+            }
+            break;
+        case 9:
+            // min
+            for (i = 633; i <= 665; i++) {
+                owner->param_of_nrpn(i)->setValue(-100);
+            }
+            break;
+        default:
+            break;
+    }
+ }
+
 
 

@@ -20,6 +20,7 @@
 
 class LcdLabel;
 class StdComboBox;
+class SliderBank;
 
 class ext_slider : public MicronSlider
 {
@@ -131,6 +132,7 @@ public:
     void buttonClicked (Button* button);
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
     void textEditorTextChanged (TextEditor &t);
+    void addSlider(ext_slider *s) {sliders.add(s);}
     
 private:
 
@@ -221,6 +223,7 @@ private:
     void add_knob(int nrpn, int x, int y, const char *text, Component *parent);
     void add_box(int nprn, int x, int y, int width, const char *text, int loc, Component *parent);
     void add_button(int nrpn, int x, int y, const char *text, bool invert, Component *parent);
+    void update_tracking();
     
 	void create_group_box(const char* labelText, int x, int y, int w, int h);
     void create_osc(int x, int y);
@@ -241,7 +244,7 @@ private:
     void create_fx2(int x, int y, Component* parent);
 
 
-    void update_midi_menu(int in_out);
+    void update_midi_menu(int in_out, bool init);
     void select_item_by_name(int in_out, String nm);
 
 	Image background;
@@ -267,6 +270,7 @@ private:
 	ScopedPointer<MicronTabBar> fx_and_tracking_tabs;
     ScopedPointer<Component> fx1[7];
     ScopedPointer<Component> fx2[7];
+	SliderBank* trackgen;
 
     // prototype
     OwnedArray<ext_slider> sliders;
