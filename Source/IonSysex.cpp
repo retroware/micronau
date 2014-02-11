@@ -286,7 +286,7 @@ String IonSysexParam::getConvertedValue(SInt32 val)
 				sprintf(buf,"%d%%",(int)val);
 				break;
 			case WET_DRY:
-				sprintf(buf, "%d%% dry, %d%% wet", 50-val, (50+val));
+				sprintf(buf, "%d%% dry, %d%% wet", (int)(50-val), (int)(50+val));
 				break;
 			case POST_BAL:
 				if (val == 0) {
@@ -301,9 +301,9 @@ String IonSysexParam::getConvertedValue(SInt32 val)
 				break;
 			case PRE_BAL:
 				if (val < 0) {
-					sprintf(buf, "%d%% f1, %d%% f2", -val+50, (50+val));
+					sprintf(buf, "%d%% f1, %d%% f2", (int)(-val+50), (int)(50+val));
 				} else {
-					sprintf(buf, "%d%% f1, %d%% f2", (50-val), val+50);
+					sprintf(buf, "%d%% f1, %d%% f2", (int)(50-val), (int)(val+50));
 				}
 				break;
 			case TENTHS_OF_PERCENT:
@@ -313,11 +313,11 @@ String IonSysexParam::getConvertedValue(SInt32 val)
 				sprintf(buf,"%.1f",((val)/10.0));
 				break;
 			case BALANCE:
-				sprintf(buf,"%d",(50 - val));
+				sprintf(buf,"%d",(int)(50 - val));
 				break;
 			case FX1_FX2_BALANCE:
 				
-				sprintf(buf,"%d%% fx1 %d%% fx2",(50 - val),100-(50-val));
+				sprintf(buf,"%d%% fx1 %d%% fx2",(int)(50 - val),(int)(100-(50-val)));
 				break;
 			case FILTER_OFFSET_FREQ:
 				hzToString(buf, (float) (20 * pow((float) 1000, (float) val/1023)));
@@ -383,14 +383,14 @@ String IonSysexParam::getConvertedValue(SInt32 val)
 					break;
 				}
 				if (val < 0) {
-					sprintf(buf, "L and %d%% R to f1", -val);
+					sprintf(buf, "L and %d%% R to f1", (int)-val);
 				} else {
-					sprintf(buf, "R and %d%% L to f2", val);
+					sprintf(buf, "R and %d%% L to f2", (int)val);
 				}
 				break;
 					
 			default:
-				sprintf(buf,"%d",val);
+				sprintf(buf,"%d", (int)val);
 				break;
 	   }
 	}

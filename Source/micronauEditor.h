@@ -21,6 +21,7 @@
 class LcdLabel;
 class StdComboBox;
 class SliderBank;
+class LcdTextEditor;
 
 class ext_slider : public MicronSlider
 {
@@ -113,6 +114,7 @@ public:
 
 //==============================================================================
 class MicronauAudioProcessorEditor  : public AudioProcessorEditor,
+										public AudioProcessorListener,
                                         public SliderListener,
                                         public ButtonListener,
                                         public ComboBoxListener,
@@ -125,15 +127,20 @@ public:
 
     //==============================================================================
     void paint (Graphics& g);
-    void resized();
     void timerCallback();
+	void updateGuiComponents();
     void sliderValueChanged (Slider* slider);
 	void sliderDragStarted (Slider* slider);
+	void mouseDown(const MouseEvent& event);
+    KeyboardFocusTraverser* createFocusTraverser();
     void buttonClicked (Button* button);
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
     void textEditorTextChanged (TextEditor &t);
     void addSlider(ext_slider *s) {sliders.add(s);}
-    
+
+    void audioProcessorParameterChanged (AudioProcessor* processor, int parameterIndex, float newValue) { paramHasChanged = true; }
+	void audioProcessorChanged (AudioProcessor* processor) { paramHasChanged = true; }
+
 private:
 
 	// layout of all the major component groups
@@ -261,9 +268,10 @@ private:
     ScopedPointer<LcdComboBox> midi_out_chan;
 
     ScopedPointer<LcdLabel> param_display;
-    ScopedPointer<TextEditor> prog_name;
+    ScopedPointer<LcdTextEditor> prog_name;
 
     MicronauAudioProcessor *owner;
+	bool paramHasChanged; // using this flag to avoid repeatedly updating program name which interferes with editing of the name
 
     ScopedPointer<Component> mods[2];
 

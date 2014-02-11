@@ -198,7 +198,7 @@ public:
         @see getSelectedId, setSelectedItemIndex, setText
     */
     void setSelectedId (int newItemId,
-                        NotificationType notification = sendNotificationAsync);
+                        NotificationType notification = sendNotificationSync);
 
     //==============================================================================
     /** Returns the index of the item that's currently shown in the box.

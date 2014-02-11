@@ -13,6 +13,7 @@
 #include "gui/MicronToggleButton.h"
 #include "gui/MicronTabBar.h"
 #include "gui/LcdLabel.h"
+#include "gui/LcdTextEditor.h"
 #include "gui/StdComboBox.h"
 #include "gui/LookAndFeel.h"
 #include "tracking.h"
@@ -28,6 +29,8 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
 
     owner = ownerFilter;
     
+	setFocusContainer(true);
+
     // create all of the gui elements and hook them up to the processor
     inverted_button_lf = new InvertedButtonLookAndFeel();
     
@@ -62,6 +65,7 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     param_display->setColour (TextEditor::textColourId, Colours::black);
     param_display->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
     param_display->setFont (Font (18.00f, Font::plain));
+	param_display->setBounds(875,15,170,45);
 	addAndMakeVisible(param_display);
 
     midi_in_menu = new LcdComboBox ();
@@ -85,7 +89,7 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
         midi_out_chan->addItem(String(i+1), i+1);
     }
 
-    prog_name = new TextEditor();
+    prog_name = new LcdTextEditor();
     addAndMakeVisible (prog_name);
     prog_name->setBounds(910, 155, 120, 15);
     prog_name->addListener(this);
@@ -93,23 +97,26 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     add_box(100, 910, 195, 30, "Bank", 1, NULL);
     add_box(101, 950, 195, 30, "Patch", 1, NULL);
 
-
     logo = Drawable::createFromImageData (BinaryData::logo_svg, BinaryData::logo_svgSize);
 
-    // This is where our plugin's editor size is set.
+	// whole gui size
     setSize (1060, 670);
 
-    update_tracking();
-    
     update_midi_menu(MIDI_IN_IDX, true);
     update_midi_menu(MIDI_OUT_IDX, true);
 
-	timerCallback(); // call the timer callback once now to update all gui components, so user does not see them jump.
-    startTimer (50);
+	// setup gui updating timer, ensure it only actually updates after parameter change notifications from the plugin
+	owner->addListener(this);
+	paramHasChanged = false;
+	startTimer (50);
+
+	updateGuiComponents();
 }
 
 MicronauAudioProcessorEditor::~MicronauAudioProcessorEditor()
 {
+	if (owner)
+		owner->removeListener(this);
 }
 
 void MicronauAudioProcessorEditor::add_knob(int nprn, int x, int y, const char *text, Component *parent = NULL) {
@@ -470,7 +477,8 @@ void MicronauAudioProcessorEditor::create_lfo(int x, int y)
     for (int i = 0; i < 3; i++) {
         add_box(671 + i, x, y + (i*70) + 3, 65, labels[i], 2);
         add_knob(618 + (i*4), x+70, y + (i*70), "rate");
-        add_knob(620 + (i*4), x+110, y + (i*70), "m1");
+		if (i != 2)
+			add_knob(620 + (i*4), x+110, y + (i*70), "m1");
         add_box(619 + (i*4), x+78, y + (i*70) + 40, 60, "reset", 2);
         add_button(617 + (i*4), x, y + 23 + (i* 70), "sync", true);
     }
@@ -634,23 +642,16 @@ void MicronauAudioProcessorEditor::paint (Graphics& g)
         logo->drawWithin (g, Rectangle<float> (790, 20, 68, 40), RectanglePlacement::stretchToFit, 1.000f);
 }
 
-void MicronauAudioProcessorEditor::resized()
+void MicronauAudioProcessorEditor::updateGuiComponents()
 {
-	param_display->setBounds(875,15,170,45);
+	for (int i = 0; i < sliders.size(); i++) {
+		sliders[i]->setValue(sliders[i]->get_value(), dontSendNotification);
+	}
 
-}
-
-void MicronauAudioProcessorEditor::timerCallback()
-{
-    // update gui if parameters have changed
-    for (int i = 0; i < sliders.size(); i++) {
-        sliders[i]->setValue(sliders[i]->get_value(), dontSendNotification);
-    }
-
-    for (int i = 0; i < boxes.size(); i++) {
-        boxes[i]->setSelectedItemIndex(boxes[i]->get_value(), dontSendNotification);
-    }
-    
+	for (int i = 0; i < boxes.size(); i++) {
+		boxes[i]->setSelectedItemIndex(boxes[i]->get_value(), dontSendNotification);
+	}
+	
     for (int i = 0; i < buttons.size(); i++) {
         if (buttons[i]->get_value() == 0) {
             buttons[i]->setToggleState(false, dontSendNotification);
@@ -658,12 +659,23 @@ void MicronauAudioProcessorEditor::timerCallback()
             buttons[i]->setToggleState(true, dontSendNotification);
         }
     }
-
-    update_midi_menu(MIDI_IN_IDX, false);
-    update_midi_menu(MIDI_OUT_IDX, false);
-    prog_name->setText(owner->get_prog_name());
     
-    midi_out_chan->setSelectedItemIndex(owner->get_midi_chan());
+    update_tracking();
+
+	update_midi_menu(MIDI_IN_IDX, false);
+	update_midi_menu(MIDI_OUT_IDX, false);
+
+	prog_name->setText(owner->get_prog_name(), false);
+	midi_out_chan->setSelectedItemIndex(owner->get_midi_chan(), dontSendNotification);
+}
+
+void MicronauAudioProcessorEditor::timerCallback()
+{
+    // update gui if any parameters have changed
+	if (paramHasChanged)
+		updateGuiComponents();
+
+	paramHasChanged = false;
 }
 
 void MicronauAudioProcessorEditor::update_midi_menu(int in_out, bool init)
@@ -804,6 +816,8 @@ void MicronauAudioProcessorEditor::comboBoxChanged (ComboBox* box)
             update_tracking();
         }
 	}
+
+	updateGuiComponents();
 }
 
 void MicronauAudioProcessorEditor::select_item_by_name(int in_out, String nm)
@@ -822,11 +836,11 @@ void MicronauAudioProcessorEditor::select_item_by_name(int in_out, String nm)
     }
     for (i = 0; i < menu->getNumItems(); i++) {
         if (menu->getItemText(i) == nm) {
-            menu->setSelectedItemIndex(i);
+            menu->setSelectedItemIndex(i, dontSendNotification);
             return;
         }
     }
-    menu->setSelectedItemIndex(0);
+    menu->setSelectedItemIndex(0, dontSendNotification);
 }
 
 void MicronauAudioProcessorEditor::textEditorTextChanged (TextEditor &t) {
@@ -884,5 +898,35 @@ void MicronauAudioProcessorEditor::update_tracking()
     }
  }
 
+// -------------------------------------------------------------------------------------------------------
+// This code ensures that any time the user clicks away from something like a text editor which wants
+// keyboard focus, the text editor will lose focus and nothing else will aquire focus.
+//
+
+// NOTE: we can seemingly just use a KeyboardFocusTraverser, but it seems more correct to make one which always returns nothing.
+class NullKeyboardFocusTraverser : public KeyboardFocusTraverser
+{
+public:
+    Component* getNextComponent (Component* current) { return 0; }
+    Component* getPreviousComponent (Component* current) { return 0; }
+	Component* getDefaultComponent (Component* parentComponent) { return 0; }
+};
+
+void MicronauAudioProcessorEditor::mouseDown(const MouseEvent& event)
+{	// user clicked background, so take focus away from whatever was focused.
+	Component::unfocusAllComponents();
+}
+
+KeyboardFocusTraverser* MicronauAudioProcessorEditor::createFocusTraverser()
+{	// user may have finished with something like a combo box, so make sure the next thing to focus on is nothing.
+
+	// NOTE: we also have to unfocus all components, otherwise text editors don't seem to let go of focus after something else is clicked.
+	Component::unfocusAllComponents();
+
+	return new NullKeyboardFocusTraverser;
+}
+
+//
+// -------------------------------------------------------------------------------------------------------
 
 
