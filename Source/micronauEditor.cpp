@@ -662,9 +662,6 @@ void MicronauAudioProcessorEditor::updateGuiComponents()
     
     update_tracking();
 
-	update_midi_menu(MIDI_IN_IDX, false);
-	update_midi_menu(MIDI_OUT_IDX, false);
-
 	prog_name->setText(owner->get_prog_name(), false);
 	midi_out_chan->setSelectedItemIndex(owner->get_midi_chan(), dontSendNotification);
 }
@@ -676,6 +673,9 @@ void MicronauAudioProcessorEditor::timerCallback()
 		updateGuiComponents();
 
 	paramHasChanged = false;
+
+	update_midi_menu(MIDI_IN_IDX, false);
+	update_midi_menu(MIDI_OUT_IDX, false);
 }
 
 void MicronauAudioProcessorEditor::update_midi_menu(int in_out, bool init)
