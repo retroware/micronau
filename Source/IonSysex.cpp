@@ -854,6 +854,10 @@ bool IonSysexParam::isFxSelector() {
 	return false;
 }
 
+bool IonSysexParam::isTrackingGenValue(){
+	return (m_nrpn >= 633 && m_nrpn <= 633+32);
+}
+
 SInt32 IonSysexParam::fxSelectorToNrpn() {
 	switch (m_nrpn) {
         case FX1_SELECTOR:

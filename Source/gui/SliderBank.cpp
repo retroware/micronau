@@ -47,7 +47,7 @@ SliderBank::SliderBank (MicronauAudioProcessor *owner, MicronauAudioProcessorEdi
 	for (int i = getNumChildComponents(); --i >= 0;)
 		getChildComponent(i)->setInterceptsMouseClicks(false, false);
 
-	updateMaxBoundX();
+	updateBoundsX();
 }
 
 SliderBank::~SliderBank()
@@ -61,22 +61,26 @@ void SliderBank::paint (Graphics& g)
 
 void SliderBank::resized()
 {
-	updateMaxBoundX();
+	updateBoundsX();
 }
 
 void SliderBank::sliderValueChanged (Slider* sliderThatWasMoved)
 {
 }
 
-void SliderBank::updateMaxBoundX()
+void SliderBank::updateBoundsX()
 {
+       minBoundX = 1000000;
        maxBoundX = 0;
        for (int i = getNumChildComponents(); --i >= 0;)
        {
                MicronSlider* slider = dynamic_cast<MicronSlider*>(getChildComponent(i));
-               if (slider)
+               if (slider && slider->isVisible())
                {
+                       const int sliderLeftEdge = slider->getBounds().getX() - 5;
                        const int sliderRightEdge = slider->getBounds().getRight() + 5;
+                       if (sliderLeftEdge < minBoundX)
+                               minBoundX = sliderLeftEdge;
                        if (sliderRightEdge > maxBoundX)
                                maxBoundX = sliderRightEdge;
                }
@@ -95,7 +99,7 @@ MicronSlider* SliderBank::findSliderAtPos(const Point<int>& pos)
 	for (int i = getNumChildComponents(); --i >= 0;)
 	{
 		MicronSlider* slider = dynamic_cast<MicronSlider*>(getChildComponent(i));
-		if (slider)
+		if (slider && slider->isVisible())
 		{
 			const int SLIGHT_X_ADJUSTMENT = 2;
 			float sliderDist = abs( slider->getBounds().getCentre().getX()+SLIGHT_X_ADJUSTMENT - pos.getX() );
@@ -158,7 +162,7 @@ void SliderBank::mouseDrag (const MouseEvent& event)
 	if (lockedSliderBeingDragged)
 		slider = lockedSliderBeingDragged;
 	else
-		if ( event.getPosition().getX() >= 0 && event.getPosition().getX() < maxBoundX )
+		if ( event.getPosition().getX() >= minBoundX && event.getPosition().getX() < maxBoundX )
 			slider = findSliderAtPos(event.getPosition());
 
 	if ( ! slider )
@@ -198,4 +202,6 @@ void SliderBank::hide_12_16(bool is_12)
             sliders[32 - i]->setVisible(false);
         }
     }
+
+	updateBoundsX();
 }

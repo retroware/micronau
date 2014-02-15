@@ -894,6 +894,7 @@ void MicronauAudioProcessorEditor::update_tracking()
             }
             break;
         default:
+			// using custom tracking values, so no need to update
             break;
     }
  }
