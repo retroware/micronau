@@ -61,7 +61,7 @@
 	<listitem name="Porta" />
 	<listitem name="PortaType" />
 	<listitem name="PortaTime" />
-      <listitem name="Pitch heel" />
+      <listitem name="Pitch Wheel" />
 	<listitem name="Analog drift" />
 	<listitem name="Osc Sync" />
 	<listitem name="FM Amount" />
@@ -225,7 +225,7 @@
 	<listitem name="Porta" />
 	<listitem name="PortaType" />
 	<listitem name="PortaTime" />
-      <listitem name="Pitch heel" />
+      <listitem name="Pitch Wheel" />
 	<listitem name="Analog drift" />
 	<listitem name="Osc Sync" />
 	<listitem name="FM Amount" />
@@ -389,7 +389,7 @@
 	<listitem name="Porta" />
 	<listitem name="PortaType" />
 	<listitem name="PortaTime" />
-      <listitem name="Pitch heel" />
+      <listitem name="Pitch Wheel" />
 	<listitem name="Analog drift" />
 	<listitem name="Osc Sync" />
 	<listitem name="FM Amount" />
