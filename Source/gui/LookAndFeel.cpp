@@ -15,17 +15,21 @@
 
 juce_ImplementSingleton (PluginLookAndFeel);
 
-PluginLookAndFeel::PluginLookAndFeel() {
+PluginLookAndFeel::PluginLookAndFeel()
+{
     blackKnob = ImageCache::getFromMemory (BinaryData::knobBack_png,
                                            BinaryData::knobBack_pngSize);
     blackKnobMarker = ImageCache::getFromMemory (BinaryData::knob_png,
                                      BinaryData::knob_pngSize);
+
 	toggleButtonOff = ImageCache::getFromMemory (BinaryData::pbutton0_png,
                                            BinaryData::pbutton0_pngSize);
 	toggleButtonOn = ImageCache::getFromMemory (BinaryData::pbutton1_png,
                                            BinaryData::pbutton1_pngSize);
+
 	sliderThumb = ImageCache::getFromMemory (BinaryData::sliderThumb_png,
                                            BinaryData::sliderThumb_pngSize);
+
 	lcdPanel = ImageCache::getFromMemory (BinaryData::lcd_panel_png,
                                            BinaryData::lcd_panel_pngSize);
 
@@ -42,7 +46,8 @@ void PluginLookAndFeel::drawRotarySlider (Graphics &g,
                                           float sliderPosProportional,
                                           float rotaryStartAngle,
                                           float rotaryEndAngle,
-                                          Slider &slider) {
+                                          Slider &slider)
+{
     const Image& k = blackKnob;
     int centerX = x + width /2;
     int centerY = y + height/2;
@@ -290,7 +295,7 @@ void PluginLookAndFeel::drawGroupComponentOutline (Graphics& g, int width, int h
     const float textH = 15.0f;
     const float indent = 3.0f;
     const float textEdgeGap = 4.0f;
-    float cs = 4.0f;
+    float cs = 5.0f;
 
     Font f (textH);
 
@@ -314,6 +319,8 @@ void PluginLookAndFeel::drawGroupComponentOutline (Graphics& g, int width, int h
     g.setColour (group.findColour (GroupComponent::outlineColourId)
                     .withMultipliedAlpha (alpha));
 
+	const float borderThickness = 2.5f;
+
 	{
 		Path p;
 		p.startNewSubPath (x + textX + textW, y);
@@ -322,7 +329,7 @@ void PluginLookAndFeel::drawGroupComponentOutline (Graphics& g, int width, int h
 		p.addArc (x + w - cs2, y, cs2, cs2, 0, float_Pi * 0.5f);
 		p.lineTo (x + w, y + 2*cs);
 
-		g.strokePath (p, PathStrokeType (1.5f));
+		g.strokePath (p, PathStrokeType (borderThickness));
 	}
 
 	{
@@ -336,12 +343,12 @@ void PluginLookAndFeel::drawGroupComponentOutline (Graphics& g, int width, int h
 		p.addArc (x, y, cs2, cs2, float_Pi * 1.5f, float_Pi * 2.0f);
 		p.lineTo (x + textX, y);
 
-		g.strokePath (p, PathStrokeType (1.5f));
+		g.strokePath (p, PathStrokeType (borderThickness));
 	}
 	
     g.setColour (group.findColour (GroupComponent::textColourId)
                     .withMultipliedAlpha (alpha));
-    g.setFont (f);
+    g.setFont (f.boldened());
     g.drawText (text,
                 roundToInt (x + textX), 0,
                 roundToInt (textW),

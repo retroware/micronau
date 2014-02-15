@@ -78,7 +78,10 @@ void MicronauAudioProcessor::setParameter (int index, float newValue)
     int value = (int) newValue;
    
     // XXX - handle the tracking matrix
-    
+	// if trackging gen preset is modified, switch to custom tracking gen
+    if (param->isTrackingGenValue() && nrpns[index_of_nrpn(631)]->getValue() != 0)
+		setParameter(index_of_nrpn(631), 0);	
+	
     param->setValue(value);
 
     // handle custom list values

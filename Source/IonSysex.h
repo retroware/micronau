@@ -145,6 +145,7 @@ class IonSysexParam {
 	  int getCntrlOffset();
 	  bool hasNrpn();
       bool isFxSelector();
+	  bool isTrackingGenValue();
 	  SInt32 fxSelectorToNrpn();
 	  SInt32 fxMin();
 	  SInt32 fxMax();

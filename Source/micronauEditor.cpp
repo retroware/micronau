@@ -22,13 +22,20 @@
 MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcessor* ownerFilter)
     : AudioProcessorEditor (ownerFilter)
 {
+    owner = ownerFilter;
+    
 	LookAndFeel::setDefaultLookAndFeel( PluginLookAndFeel::getInstance() );
 
 	background = ImageCache::getFromMemory (BinaryData::background_png,
                                      BinaryData::background_pngSize);
 
-    owner = ownerFilter;
-    
+    buttonOffImg = ImageCache::getFromMemory (BinaryData::led_button_off_png,
+                                           BinaryData::led_button_off_pngSize);
+    buttonHoverImg = ImageCache::getFromMemory (BinaryData::led_button_dim_png,
+                                           BinaryData::led_button_dim_pngSize);
+    buttonOnImg = ImageCache::getFromMemory (BinaryData::led_button_on_png,
+                                           BinaryData::led_button_on_pngSize);
+
 	setFocusContainer(true);
 
     // create all of the gui elements and hook them up to the processor
@@ -49,14 +56,28 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
 	create_lfo(LFO_X, LFO_Y);
 	create_fx_and_tracking_tabs(FX_X,FX_Y);
 
-    sync_nrpn = new TextButton("sync nrpn");
+	add_label("sync", SYNC_X, SYNC_Y, 35, 15);
+
+	add_label("nrpn", SYNC_X + 40, SYNC_Y + 13, 35, 15);
+
+	ImageButton* sync_nrpn = new ImageButton();
+	sync_nrpn->setImages (true, true, false,
+						buttonOffImg, 1.0f, Colours::transparentWhite,
+						buttonHoverImg, 1.0f, Colours::transparentWhite,
+						buttonOnImg, 1.0f, Colours::transparentWhite, 0.0f);
     sync_nrpn->addListener(this);
-    sync_nrpn->setBounds(910, 120, 30, 20);
+    sync_nrpn->setBounds(SYNC_X + 40, SYNC_Y, 35, 15);
     addAndMakeVisible(sync_nrpn);
     
-    sync_sysex = new TextButton("sync sysex");
+	add_label("sysex", SYNC_X + 85, SYNC_Y + 13, 35, 15);
+
+	ImageButton* sync_sysex = new ImageButton();
+	sync_sysex->setImages (true, true, false,
+						buttonOffImg, 1.0f, Colours::transparentWhite,
+						buttonHoverImg, 1.0f, Colours::transparentWhite,
+						buttonOnImg, 1.0f, Colours::transparentWhite, 0.0f);
     sync_sysex->addListener(this);
-    sync_sysex->setBounds(960, 120, 30, 20);
+    sync_sysex->setBounds(SYNC_X + 85, SYNC_Y, 35, 15);
     addAndMakeVisible(sync_sysex);
     
 	param_display = new LcdLabel("panel", "micronAU\nretroware");
@@ -68,23 +89,23 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
 	param_display->setBounds(875,15,170,45);
 	addAndMakeVisible(param_display);
 
-    midi_in_menu = new LcdComboBox ();
+    midi_in_menu = new StdComboBox ();
     midi_in_menu->setEditableText (false);
     midi_in_menu->addListener(this);
     addAndMakeVisible (midi_in_menu);
     midi_in_menu->setBounds(910, 70, 100, 15);
 
-    midi_out_menu = new LcdComboBox ();
+    midi_out_menu = new StdComboBox ();
     midi_out_menu->setEditableText (false);
     midi_out_menu->addListener(this);
     addAndMakeVisible (midi_out_menu);
     midi_out_menu->setBounds(910, 95, 100, 15);
  
-    midi_out_chan = new LcdComboBox ();
+    midi_out_chan = new StdComboBox ();
     midi_out_chan->setEditableText (false);
     midi_out_chan->addListener(this);
     addAndMakeVisible (midi_out_chan);
-    midi_out_chan->setBounds(1015, 95, 30, 15);
+    midi_out_chan->setBounds(1015, 95, 33, 15);
     for (int i = 0; i < 16; i++) {
         midi_out_chan->addItem(String(i+1), i+1);
     }
@@ -169,11 +190,14 @@ void MicronauAudioProcessorEditor::add_box(int nrpn, int x, int y, int width, co
                 l->setJustificationType (Justification::centredRight);
                 break;
         }
+		
         if (parent) {
             parent->addAndMakeVisible(l);
         } else {
             addAndMakeVisible(l);
         }
+		
+		labelComponents.add(l);
     }
 }
 
@@ -197,6 +221,7 @@ void MicronauAudioProcessorEditor::add_button(int nrpn, int x, int y, const char
     
     if (text) {
         Label *l = new back_label(text, x + 17, y + 3, 55, 15);
+		labelComponents.add(l);
         l->setJustificationType (Justification::centredLeft);
         if (parent) {
             parent->addAndMakeVisible(l);
@@ -208,22 +233,9 @@ void MicronauAudioProcessorEditor::add_button(int nrpn, int x, int y, const char
 
 void MicronauAudioProcessorEditor::create_mod(int x, int y)
 {
-	create_group_box("modulation matrix", x, y, MODMAT_W, MODMAT_H);
+	add_group_box("modulation matrix", x, y, MODMAT_W, MODMAT_H);
 
-	x += 3;
-	y += 0;
-
-    mod1_6 = new TextButton("7 - 12");
-    mod1_6->addListener(this);
-    mod1_6->setBounds(x, y+30, 40, 15);
-    addAndMakeVisible(mod1_6);
-    mod7_12 = new TextButton("1 - 6");
-    mod7_12->addListener(this);
-    mod7_12->setBounds(x, y+30, 40, 15);
-    addChildComponent(mod7_12);
-
-	x += 40;
-	y -= 2;
+	Component* mods[2];
 
     int y_off = 12;
     for (int n = 0; n < 2; n++) {
@@ -232,21 +244,31 @@ void MicronauAudioProcessorEditor::create_mod(int x, int y)
         for (int i = 0; i < 6; i++) {
             String s = "mod ";
             s += (i + (n*6)) + 1;
-            Label *l = new back_label(s, 40 + (i*118), 0, 40, 15);
+            Label *l = new back_label(s, 40 + (i*117), 0, 40, 15);
+			labelComponents.add(l);
             c->addAndMakeVisible(l);
-            add_knob((i*4)+(n*24)+694, (i*118), 0 + y_off, "level", c);
-            add_knob((i*4)+(n*24)+695, (i*118), 40 + y_off, "offset", c);
+            add_knob((i*4)+(n*24)+694, (i*117), 0 + y_off, "level", c);
+            add_knob((i*4)+(n*24)+695, (i*117), 40 + y_off, "offset", c);
 
-            add_box((i*4) + (n*24) + 692, 40 + (i*118), 4 + y_off, 75, "source", 1, c);
-            add_box((i*4) + (n*24) + 693, 40 + (i*118), 4 + 40 + y_off, 75, "destination", 1, c);
+            add_box((i*4) + (n*24) + 692, 40 + (i*117), 4 + y_off, 75, "source", 1, c);
+            add_box((i*4) + (n*24) + 693, 40 + (i*117), 4 + 40 + y_off, 75, "dest", 1, c);
         }
         c->setBounds(x, y, 700, 100);
     }
-    addAndMakeVisible(mods[0]);
-    addChildComponent(mods[1]);
+
+	mod_tabs = new MicronTabBar(TabbedButtonBar::TabsAtTop);
+
+	mod_tabs->setTabBarDepth (42);
+	mod_tabs->setTabBarMargins(25, 0);
+	mod_tabs->addTab ("1 - 6", Colour (0x00d3d3d3), mods[0], false);
+	mod_tabs->addTab ("7 - 12", Colour (0x00d3d3d3), mods[1], false);
+	mod_tabs->setCurrentTabIndex (0);
+    mod_tabs->setBounds (x, y, MODMAT_W, MODMAT_H);
+
+	addAndMakeVisible(mod_tabs);
 }
 
-void MicronauAudioProcessorEditor::create_group_box(const char* labelText, int x, int y, int w, int h)
+void MicronauAudioProcessorEditor::add_group_box(const String& labelText, int x, int y, int w, int h)
 {
 	GroupComponent* groupBox = new GroupComponent(labelText,labelText);
 	group_boxes.add(groupBox);
@@ -259,15 +281,21 @@ void MicronauAudioProcessorEditor::create_group_box(const char* labelText, int x
 	addAndMakeVisible(groupBox);
 }
 
+void MicronauAudioProcessorEditor::add_label(const String& labelText, int x, int y, int w, int h)
+{
+	Label* l = new back_label(labelText, x, y, w, h);
+	labelComponents.add(l);
+	addAndMakeVisible(l);
+}
+
 void MicronauAudioProcessorEditor::create_osc(int x, int y)
 {
-	create_group_box("oscillators", x, y, OSCS_W, OSCS_H);
+	add_group_box("oscillators", x, y, OSCS_W, OSCS_H);
 
 	for (int n = 0; n < 3; ++n)
 	{
 		int y_base;
 		const char *labels[] = {"shape","octave", "semi", "fine", "wheel"};
-		Label *l;
 		
 		y_base = y + n * 65;
 		
@@ -279,62 +307,53 @@ void MicronauAudioProcessorEditor::create_osc(int x, int y)
 
 		String s = "osc";
 		s += (n+1);
-		l = new back_label(s, x, y_base, 55, 15);
-		addAndMakeVisible(l);
+
+		add_label(s, x, y_base, 55, 15);
 	}
 }
 
 void MicronauAudioProcessorEditor::create_prefilt(int x, int y)
 {
-	create_group_box("pre filter mix", x, y, PREFILT_W, PREFILT_H);
+	add_group_box("pre filter mix", x, y, PREFILT_W, PREFILT_H);
 
-	x += 35;
-	y += 10;
+	x += 30;
+	y += 7;
 
     const char *labels[] = {"osc1", "osc2", "osc3", "ring", "noise", "ext in"};
-    Label *l;
     for (int i = 0; i < 6; i++) {
         add_knob(541 + i, x, y + (i * 40), NULL);
         add_knob(547 + i, x + 50, y + (i * 40), NULL);
-        l = new back_label(labels[i], x-40, y + i*40 + 12, 40, 15);
-        addAndMakeVisible(l);
+        add_label(labels[i], x-33, y + i*40 + 14, 40, 15);
     }
 
-    l = new back_label("level", x, y - 15, 40, 15);
-    addAndMakeVisible(l);
+    add_label("level", x + 5, y - 12, 40, 15);
 
-    l = new back_label("balance", x+40, y - 15, 60, 15);
-    addAndMakeVisible(l);
+    add_label("balance", x+45, y - 12, 60, 15);
 }
 
 void MicronauAudioProcessorEditor::create_postfilt(int x, int y)
 {
-	create_group_box("post filter mix", x, y, POSTFILT_W, POSTFILT_H);
+	add_group_box("post filter mix", x, y, POSTFILT_W, POSTFILT_H);
 
 	x += 35;
 	y += 10;
 
     const char *labels[] = {"filter1", "filter2", "prefilter"};
-    Label *l;
     for (int i = 0; i < 3; i++) {
         add_knob(566 + i, x, y + (i * 40), NULL);
         add_knob(569 + i, x + 40, y + (i * 40), NULL);
-        l = new back_label(labels[i], x-40, y + i*40 + 12, 40, 15);
-        addAndMakeVisible(l);
+        add_label(labels[i], x-40, y + i*40 + 12, 40, 15);
     }
     add_box(573, x+100, y+5, 58, "polarity", 1);
     add_box(572, x+100, y+45, 58, "input", 1);
     
-    l = new back_label("level", x, y - 15, 40, 15);
-    addAndMakeVisible(l);
-    
-    l = new back_label("balance", x+40, y - 15, 60, 15);
-    addAndMakeVisible(l);
+    add_label("level", x, y - 15, 40, 15);
+    add_label("balance", x+40, y - 15, 60, 15);
 }
 
 void MicronauAudioProcessorEditor::create_filter(int x, int y)
 {
-	create_group_box("filters", x, y, FILT_W, FILT_H);
+	add_group_box("filters", x, y, FILT_W, FILT_H);
 
     for (int i = 0; i < 2; i++) {
         int x_offset = 50;
@@ -354,7 +373,7 @@ void MicronauAudioProcessorEditor::create_filter(int x, int y)
 
 void MicronauAudioProcessorEditor::create_env(int x, int y)
 {
-	create_group_box("envelopes", ENVS_X, ENVS_Y, ENVS_W, ENVS_H);
+	add_group_box("envelopes", ENVS_X, ENVS_Y, ENVS_W, ENVS_H);
 
 	for (int n = 0; n < 3; ++n)
 	{
@@ -365,6 +384,8 @@ void MicronauAudioProcessorEditor::create_env(int x, int y)
 		for (int i = 0; i < 5; i++) {
 			add_knob(base_nrpns[i] + (n * 13), x_offset + (i * 40), y + (n * v_space), labels[i]);
 		}
+		
+		add_knob(586 + (n*13), x + 245, y + (n * v_space), "velocity");
 
 		add_box(579 + (n*13), x_offset, y + 40 + (n * v_space), 35, NULL, 0);
 		add_box(581 + (n*13), x_offset + 40, y + 40 + (n * v_space), 35, NULL, 0);
@@ -375,19 +396,15 @@ void MicronauAudioProcessorEditor::create_env(int x, int y)
 		add_box(587 + (n*13), x + 255 + 33, y + 19 + (n * v_space), 52, "reset", 0);
 		add_box(589 + (n*13), x + 255 + 40, y + 38 + (n * v_space), 45, "loop", 0);
 
-		Label *l;
-		l = new back_label("amp", x, y+6, 40, 15);
-		addAndMakeVisible(l);
-		l = new back_label("filter", x, y+6+v_space, 40, 15);
-		addAndMakeVisible(l);
-		l = new back_label("env3", x, y+6+(v_space * 2), 40, 15);
-		addAndMakeVisible(l);
+		add_label("amp", x, y+6, 40, 15);
+		add_label("filter", x, y+6+v_space, 40, 15);
+		add_label("env3", x, y+6+(v_space * 2), 40, 15);
 	}
 }
 
 void MicronauAudioProcessorEditor::create_fm(int x, int y)
 {
-	create_group_box("fm", x, y, FM_W, FM_H);
+	add_group_box("fm", x, y, FM_W, FM_H);
 
 	x -= 15;
 	y += 0;
@@ -400,7 +417,7 @@ void MicronauAudioProcessorEditor::create_fm(int x, int y)
 
 void MicronauAudioProcessorEditor::create_voice(int x, int y)
 {
-	create_group_box("voice", x, y, VOICE_W, VOICE_H);
+	add_group_box("voice", x, y, VOICE_W, VOICE_H);
 
 	x -= 15;
 	y += 0;
@@ -414,7 +431,7 @@ void MicronauAudioProcessorEditor::create_voice(int x, int y)
 
 void MicronauAudioProcessorEditor::create_portamento(int x, int y)
 {
-	create_group_box("portamento", x, y, PORTA_W, PORTA_H);
+	add_group_box("portamento", x, y, PORTA_W, PORTA_H);
 
 	x -= 15;
 	y += 0;
@@ -427,7 +444,7 @@ void MicronauAudioProcessorEditor::create_portamento(int x, int y)
 
 void MicronauAudioProcessorEditor::create_xyz(int x, int y)
 {
-	create_group_box("xyz assign", x, y, XYZ_W, XYZ_H);
+	add_group_box("xyz assign", x, y, XYZ_W, XYZ_H);
 
 	x += 5;
 	y += 2;
@@ -439,7 +456,7 @@ void MicronauAudioProcessorEditor::create_xyz(int x, int y)
 
 void MicronauAudioProcessorEditor::create_output(int x, int y)
 {
-	create_group_box("output", x, y, OUTPUT_W, OUTPUT_H);
+	add_group_box("output", x, y, OUTPUT_W, OUTPUT_H);
 
 	x += 19;
 	y += 0;
@@ -449,13 +466,13 @@ void MicronauAudioProcessorEditor::create_output(int x, int y)
     add_knob(575, x + 75, y+45, "level");
     add_knob(576, x + 75, y+90, "level");
     add_box(574, x-15, y + 50, 85, "drive", 1);
-    addAndMakeVisible( new back_label("effects", x - 8, y + 7, 50, 15) );
-    addAndMakeVisible( new back_label("program", x + 28, y + 95, 50, 15) );
+    add_label("effects", x - 8, y + 7, 50, 15);
+    add_label("program", x + 28, y + 95, 50, 15);
 }
 
 void MicronauAudioProcessorEditor::create_tracking(int x, int y)
 {
-	create_group_box("tracking", x, y, TRACKING_W, TRACKING_H);
+	add_group_box("tracking", x, y, TRACKING_W, TRACKING_H);
 
 	x += 5;
 	y += 0;
@@ -467,7 +484,7 @@ void MicronauAudioProcessorEditor::create_tracking(int x, int y)
 
 void MicronauAudioProcessorEditor::create_lfo(int x, int y)
 {
-	create_group_box("lfos", x, y, LFO_W, LFO_H);
+	add_group_box("lfos", x, y, LFO_W, LFO_H);
 
 	x += 30;
 	y += 0;
@@ -487,20 +504,20 @@ void MicronauAudioProcessorEditor::create_lfo(int x, int y)
 
 void MicronauAudioProcessorEditor::create_fx_and_tracking_tabs(int x, int y)
 {
-	create_group_box("fx/tracking", x, y, FX_W, FX_H);
+	add_group_box("fx/tracking", x, y, FX_W, FX_H);
 
-	Component* fx1 = new Component;
-	Component* fx2 = new Component;
+	Component* fx1tab = new Component;
+	Component* fx2tab = new Component;
 	trackgen = new SliderBank(owner, this);
 
-	create_fx1(0, 0, fx1);
-	create_fx2(0, 0, fx2);
+	create_fx1(0, 0, fx1tab);
+	create_fx2(0, 0, fx2tab);
 
 	fx_and_tracking_tabs = new MicronTabBar(TabbedButtonBar::TabsAtLeft);
 
 	fx_and_tracking_tabs->setTabBarDepth (65);
-	fx_and_tracking_tabs->addTab ("fx1", Colour (0x00d3d3d3), fx1, true);
-	fx_and_tracking_tabs->addTab ("fx2", Colour (0x00d3d3d3), fx2, true);
+	fx_and_tracking_tabs->addTab ("fx1", Colour (0x00d3d3d3), fx1tab, true);
+	fx_and_tracking_tabs->addTab ("fx2", Colour (0x00d3d3d3), fx2tab, true);
 	fx_and_tracking_tabs->addTab ("tgen", Colour (0x00d3d3d3), trackgen, true);
 	fx_and_tracking_tabs->setCurrentTabIndex (0);
     fx_and_tracking_tabs->setBounds (x, y, FX_W, FX_H);
@@ -755,21 +772,6 @@ void MicronauAudioProcessorEditor::buttonClicked (Button* button)
         owner->sync_via_sysex();
         return;
     }
-    // switch to 7-12
-    if (button == mod1_6) {
-        mods[0]->setVisible(false);
-        mods[1]->setVisible(true);
-        mod1_6->setVisible(false);
-        mod7_12->setVisible(true);
-    }
-    
-    // switch to 1-6
-    if (button == mod7_12) {
-        mods[0]->setVisible(true);
-        mods[1]->setVisible(false);
-        mod1_6->setVisible(true);
-        mod7_12->setVisible(false);
-    }
 
     ext_button *b = dynamic_cast<ext_button*>( button );
 	if (b)
@@ -894,6 +896,7 @@ void MicronauAudioProcessorEditor::update_tracking()
             }
             break;
         default:
+			// using custom tracking values, so no need to update
             break;
     }
  }

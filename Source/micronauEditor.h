@@ -128,7 +128,6 @@ public:
     //==============================================================================
     void paint (Graphics& g);
     void timerCallback();
-	void updateGuiComponents();
     void sliderValueChanged (Slider* slider);
 	void sliderDragStarted (Slider* slider);
 	void mouseDown(const MouseEvent& event);
@@ -186,6 +185,9 @@ private:
 		POSTFILT_W = 200,
 		POSTFILT_H = FILT_H,
 
+		SYNC_X = 885,
+		SYNC_Y = POSTFILT_Y - 27,
+
 		LFO_X = PREFILT_X,
 		LFO_Y = 440,
 		LFO_W = 185,
@@ -230,9 +232,10 @@ private:
     void add_knob(int nrpn, int x, int y, const char *text, Component *parent);
     void add_box(int nprn, int x, int y, int width, const char *text, int loc, Component *parent);
     void add_button(int nrpn, int x, int y, const char *text, bool invert, Component *parent);
-    void update_tracking();
     
-	void create_group_box(const char* labelText, int x, int y, int w, int h);
+	void add_group_box(const String& labelText, int x, int y, int w, int h);
+	void add_label(const String& labelText, int x, int y, int w, int h);
+
     void create_osc(int x, int y);
     void create_prefilt(int x, int y);
     void create_postfilt(int x, int y);
@@ -250,22 +253,26 @@ private:
     void create_fx1(int x, int y, Component* parent);
     void create_fx2(int x, int y, Component* parent);
 
-
+	void updateGuiComponents();
+    void update_tracking();
     void update_midi_menu(int in_out, bool init);
+
     void select_item_by_name(int in_out, String nm);
 
 	Image background;
+	Image buttonOffImg;
+	Image buttonHoverImg;
+	Image buttonOnImg;
+
     ScopedPointer<Drawable> logo;
     ScopedPointer<LookAndFeel> inverted_button_lf;
     OwnedArray<GroupComponent> group_boxes;
 
-    ScopedPointer<TextButton> sync_nrpn;
-    ScopedPointer<TextButton> sync_sysex;
-    ScopedPointer<TextButton> mod1_6;
-    ScopedPointer<TextButton> mod7_12;
-    ScopedPointer<LcdComboBox> midi_in_menu;
-    ScopedPointer<LcdComboBox> midi_out_menu;
-    ScopedPointer<LcdComboBox> midi_out_chan;
+    ScopedPointer<Button> sync_nrpn;
+    ScopedPointer<Button> sync_sysex;
+    ScopedPointer<ComboBox> midi_in_menu;
+    ScopedPointer<ComboBox> midi_out_menu;
+    ScopedPointer<ComboBox> midi_out_chan;
 
     ScopedPointer<LcdLabel> param_display;
     ScopedPointer<LcdTextEditor> prog_name;
@@ -273,12 +280,13 @@ private:
     MicronauAudioProcessor *owner;
 	bool paramHasChanged; // using this flag to avoid repeatedly updating program name which interferes with editing of the name
 
-    ScopedPointer<Component> mods[2];
-
+	ScopedPointer<MicronTabBar> mod_tabs;
 	ScopedPointer<MicronTabBar> fx_and_tracking_tabs;
     ScopedPointer<Component> fx1[7];
     ScopedPointer<Component> fx2[7];
 	SliderBank* trackgen;
+
+	OwnedArray<Label> labelComponents;
 
     // prototype
     OwnedArray<ext_slider> sliders;

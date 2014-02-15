@@ -50,7 +50,7 @@ private:
 	void mouseUp (const MouseEvent& event);
     void mouseDrag (const MouseEvent& event);
 
-	void updateMaxBoundX();
+	void updateBoundsX();
 	MicronSlider* findSliderAtPos(const Point<int>& pos);
 	void resetDoubleClickTimer();
 
@@ -60,7 +60,8 @@ private:
 	MicronSlider* prevSlider; // for tracking while 'painting' sliders
 	bool resettingValuesToDefault; // for painting slider default-resets with double-click and drag
 	Time prevMouseDownTime; // for double-click detection (built-in doubleclick doesn't allow us to correctly drag afterwards).
-	int maxBoundX; // so we don't keep painting sliders too far off the right edge.
+	int minBoundX; // so we don't keep painting sliders too far off the edges.
+	int maxBoundX; // " "
 
     ext_slider *sliders[33];
     //==============================================================================
