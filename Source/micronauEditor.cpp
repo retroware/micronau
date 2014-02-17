@@ -669,11 +669,12 @@ void MicronauAudioProcessorEditor::updateGuiComponents()
 void MicronauAudioProcessorEditor::timerCallback()
 {
     // update gui if any parameters have changed
-	if (paramHasChanged)
+	if ((paramHasChanged) || (owner->get_progchange())) {
 		updateGuiComponents();
-
-	paramHasChanged = false;
-
+        owner->set_progchange(false);
+        paramHasChanged = false;
+    }
+    
 	update_midi_menu(MIDI_IN_IDX, false);
 	update_midi_menu(MIDI_OUT_IDX, false);
 }

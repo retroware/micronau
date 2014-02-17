@@ -99,7 +99,9 @@ public:
 
     int index_of_nrpn(int nrpn);
     IonSysexParam *param_of_nrpn(int nrpn);
-
+    bool get_progchange() {return prog_changed;}
+    void set_progchange(bool v) {prog_changed = v;}
+    
     static int midi_find_port_by_name(int idx, String nm);
 private:
     //==============================================================================
@@ -115,7 +117,7 @@ private:
         unsigned int bank;
         unsigned int patch;
     } preset;
-    void send_nrpn(int nrpn, int value);
+    void send_nrpn(int nrpn, int value, bool send_bank=true);
     void init_from_sysex(unsigned char *sysex);
     void send_bank_patch();
 
@@ -129,5 +131,6 @@ private:
 
     MidiInput *midi_in;
     String midi_in_port;
+    bool prog_changed;
 };
 #endif  // __PLUGINPROCESSOR_H_CCAD67E2__

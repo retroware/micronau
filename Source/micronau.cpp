@@ -9,11 +9,20 @@
 
 /*
 TODO:
-
-    sysex load
     handle incoming nrpn messages
-    presest save/restore
-    handle adding/deleteing midi ports
+    
+    start with a reasonable default patch
+ 
+    gui tweaks
+      combo box text center
+      long knob labels
+      sync button style
+      used tabbed pane for mod section
+      rework fm section a bit
+      add x/y/z, sliders and pitch bend (possibly)
+ 
+    Test!
+ 
  */
 
 #include "micronau.h"
@@ -45,6 +54,7 @@ MicronauAudioProcessor::MicronauAudioProcessor()
     set_midi_port(MIDI_IN_IDX, midi_in_port);
 
     set_prog_name("micronAU");
+    set_progchange(true);
 }
 
 MicronauAudioProcessor::~MicronauAudioProcessor()
@@ -307,7 +317,7 @@ void MicronauAudioProcessor::sync_via_nrpn()
         if (nrpn_num >= 512) {
             nrpn_num -= 512;
         }
-        send_nrpn(nrpn_num, param->getNrpnValue());
+        send_nrpn(nrpn_num, param->getNrpnValue(), false);
     }
     return;
 }
@@ -347,7 +357,7 @@ void MicronauAudioProcessor::send_bank_patch()
     }
 }
 
-void MicronauAudioProcessor::send_nrpn(int nrpn, int value)
+void MicronauAudioProcessor::send_nrpn(int nrpn, int value, bool send_bank)
 {
     unsigned char midiChannel = 176 + get_midi_chan();
     unsigned char nrpnMSB;
@@ -360,7 +370,7 @@ void MicronauAudioProcessor::send_nrpn(int nrpn, int value)
         return;
     }
     
-    if ((nrpn >= 100) && (nrpn <= 101)) {
+    if (send_bank && (nrpn >= 100) && (nrpn <= 101)) {
         send_bank_patch();
         return;
     }
@@ -405,11 +415,11 @@ void MicronauAudioProcessor::setStateInformation (const void* data, int sizeInBy
     s = String(CharPointer_UTF8((const char *) p->midi_out_port));
     set_midi_port(MIDI_OUT_IDX, s);
     
-/*
+    set_progchange(true);
+
     if ((p->bank != 0) && (p->patch != 0)) {
         sync_via_nrpn();
     }
-*/
 }
 
 void MicronauAudioProcessor::getStateInformation (MemoryBlock& destData)
@@ -461,6 +471,7 @@ void MicronauAudioProcessor::init_from_sysex(unsigned char *sysex)
 		param = params->getParam(i);
         sendParamChangeMessageToListeners(i, param->getValue());
 	}
+    set_progchange(true);
 }
     
 void MicronauAudioProcessor::handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message)
