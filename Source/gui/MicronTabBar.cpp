@@ -31,12 +31,12 @@ void MicronTabBar::addTab (const String& tabName,
 						  const bool deleteComponentWhenNotNeeded,
 						  const int /*insertIndex*/)
 {
+	Label* label = createLabelForTab(tabName);
+	addAndMakeVisible(label);
+
 	Button* button = createButtonForTab();
 	button->addListener(this);
 	addAndMakeVisible(button);
-
-	Label* label = createLabelForTab(tabName);
-	addAndMakeVisible(label);
 
 	if (contentComponent)
 		addChildComponent(contentComponent);
@@ -75,15 +75,17 @@ void MicronTabBar::resized()
 	switch (labelOrientation)
 	{
 	case TabbedButtonBar::TabsAtTop: // place labels above buttons
-		tabHeight = 24;
-		labelsX = -7;
-		buttonsOffsetY = 14;
+		tabHeight = 15;
+		buttonsX = 7;
+//		labelsX = -7;
+		labelsOffsetY = -14;
 		labelsJustification = Justification::centredTop;
 		break;
 		
 	case TabbedButtonBar::TabsAtBottom: // place labels below buttons
 		tabHeight = 15;
-		labelsX = -7;
+		buttonsX = 7;
+//		labelsX = -7;
 		labelsOffsetY = 14;
 		labelsJustification = Justification::centredTop;
 		break;
