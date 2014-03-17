@@ -30,13 +30,19 @@ public:
         param = owner->param_of_nrpn(nrpn_num);
         idx = owner->index_of_nrpn(nrpn_num);
         setRange (param->getMin(), param->getMax(), 1);
+        setDoubleClickReturnValue(true, param->getDefaultValue());
     }
     void set_value(int v){plugin->setParameterNotifyingHost(idx, v);}
     int get_value(){ return param->getValue();}
     const String get_name () { return param->getName();}
     const String get_txt_value (int v) { return param->getConvertedValue(v);}
 	// this setRange override adjusts mouse drag sensitivity so that smaller ranges are more sensitive than larger ranges.
-	void setRange (double newMin, double newMax, double newInt) { MicronSlider::setRange (newMin, newMax, newInt); setMouseDragSensitivity( 20.0*(4.0+log10(newMax - newMin)) ); }
+	void setRange (double newMin, double newMax, double newInt) {
+            MicronSlider::setRange (newMin, newMax, newInt);
+            setMouseDragSensitivity( 20.0*(4.0+log10(newMax - newMin)) );
+    }
+//    void mouseDoubleClick(const MouseEvent& event);
+    
 private:
     IonSysexParam *param;
     MicronauAudioProcessor *plugin;
@@ -119,6 +125,7 @@ class MicronauAudioProcessorEditor  : public AudioProcessorEditor,
                                         public ButtonListener,
                                         public ComboBoxListener,
                                         public TextEditorListener,
+                                        public MouseListener,
                                         public Timer
 {
 public:
@@ -137,7 +144,6 @@ public:
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
     void textEditorTextChanged (TextEditor &t);
     void addSlider(ext_slider *s) {sliders.add(s);}
-
     void audioProcessorParameterChanged (AudioProcessor* processor, int parameterIndex, float newValue) { paramHasChanged = true; }
 	void audioProcessorChanged (AudioProcessor* processor) { paramHasChanged = true; }
 

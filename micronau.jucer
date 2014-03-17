@@ -11,6 +11,7 @@
               includeBinaryInAppConfig="1">
   <MAINGROUP id="Z7l85g" name="micronau">
     <GROUP id="{E6F88093-29FA-DE20-1C16-D06398D26127}" name="Resources">
+      <FILE id="doMF9C" name="default.syx" compile="0" resource="1" file="Source/default.syx"/>
       <FILE id="tMVkcu" name="logo.svg" compile="0" resource="1" file="Source/gui/logo.svg"/>
       <FILE id="MigGlu" name="background.png" compile="0" resource="1" file="Source/gui/background.png"/>
       <FILE id="x3gphZ" name="knob.png" compile="0" resource="1" file="Source/gui/knob.png"/>

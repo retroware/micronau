@@ -613,7 +613,7 @@
             <listitem name="pulse" />
         </parameter>
 		<parameter name="Osc 1 shape" conversion="PERCENT" min="-100" max="100" sysexoffset="240" nrpn="524" />
-        <parameter name="Osc 1 octave" conversion="LIST" min="0" max="6" sysexoffset="264" nrpn="525 "defaultval="3">
+        <parameter name="Osc 1 octave" conversion="LIST" min="0" max="6" sysexoffset="264" nrpn="525" defaultval="3">
 			<listitem name="-3 octaves" nrpnvalue="-3"/>
             <listitem name="-2 octaves " nrpnvalue="-2"/>
             <listitem name="-1 octave" nrpnvalue="-1"/>

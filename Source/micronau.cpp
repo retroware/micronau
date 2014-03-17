@@ -11,14 +11,13 @@
 TODO:
     handle incoming nrpn messages
     
-    start with a reasonable default patch
+    request patch button
  
     gui tweaks
       combo box text center
       long knob labels
       sync button style
       used tabbed pane for mod section
-      rework fm section a bit
       add x/y/z, sliders and pitch bend (possibly)
  
     Test!
@@ -53,8 +52,9 @@ MicronauAudioProcessor::MicronauAudioProcessor()
     midi_in_port = "None";
     set_midi_port(MIDI_IN_IDX, midi_in_port);
 
-    set_prog_name("micronAU");
-    set_progchange(true);
+    int sz;
+    const char *x = BinaryData::getNamedResource("default_syx", sz);
+    init_from_sysex((unsigned char *) &x[1]);
 }
 
 MicronauAudioProcessor::~MicronauAudioProcessor()

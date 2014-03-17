@@ -344,7 +344,7 @@ void MicronauAudioProcessorEditor::create_filter(int x, int y)
         add_knob((i*6)+559, x + x_offset + 80, y+(i*80), "envamt");
         add_knob((i*6)+558, x + x_offset + 120, y+(i*80), "keytrk");
 
-        add_box((i*6)+555, x + 88, y + 42 + (i * 80), 135, NULL, 0);
+        add_box((i*6)+555, x + 108, y + 42 + (i * 80), 100, "type", 2);
     }
     add_knob(553, x, y+17, "f1>f2");
     add_knob(670, x, y+62, "offset");
@@ -387,15 +387,15 @@ void MicronauAudioProcessorEditor::create_env(int x, int y)
 
 void MicronauAudioProcessorEditor::create_fm(int x, int y)
 {
-	create_group_box("fm", x, y, FM_W, FM_H);
+	create_group_box("fm/sync/noise", x, y, FM_W, FM_H);
 
 	x -= 15;
 	y += 0;
 
     add_box(520, x + 20, y + 0, 90, "sync", 1);
-    add_box(522, x + 20, y + 35, 90, "algorithm", 1);
-    add_box(554, x + 123, y + 20, 45, "noise", 1);
-    add_knob(521, x + 180, y + 14, "amount");
+    add_box(522, x + 20, y + 40, 90, "fm algorithm", 1);
+    add_box(554, x + 150, y + 0, 45, "noise", 1);
+    add_knob(521, x + 120, y + 35, "amount");
 }
 
 void MicronauAudioProcessorEditor::create_voice(int x, int y)
@@ -405,9 +405,9 @@ void MicronauAudioProcessorEditor::create_voice(int x, int y)
 	x -= 15;
 	y += 0;
 
-    add_box(512, x + 20, y + 0, 60, "poly", 0);
-    add_box(513, x + 20, y + 25, 60, "unison", 0);
-    add_box(518, x + 20, y + 50, 105, "pitch wheel", 0);
+    add_box(512, x + 20, y + 0, 40, "poly", 0);
+    add_box(513, x + 20, y + 25, 20, "unison", 0);
+    add_box(518, x + 20, y + 50, 40, "pitch wheel", 0);
     add_knob(519, x + 145, y, "drift");
     add_knob(514, x + 180, y, "detune");
 }
@@ -419,8 +419,8 @@ void MicronauAudioProcessorEditor::create_portamento(int x, int y)
 	x -= 15;
 	y += 0;
 
-    add_box(515, x + 20, y + 0, 60, "mode", 0);
-    add_box(516, x + 20, y + 25, 90, "type", 0);
+    add_box(515, x + 20, y + 0, 50, "mode", 0);
+    add_box(516, x + 20, y + 25, 70, "type", 0);
     add_knob(517, x + 180, y, "time");
 
 }
@@ -445,7 +445,7 @@ void MicronauAudioProcessorEditor::create_output(int x, int y)
 	y += 0;
 
     add_knob(742, x + 35, y, "fx1/fx2");
-    add_knob(577, x + 75, y, "wet/dry");
+    add_knob(577, x + 75, y, "dry/wet");
     add_knob(575, x + 75, y+45, "level");
     add_knob(576, x + 75, y+90, "level");
     add_box(574, x-15, y + 50, 85, "drive", 1);
@@ -482,7 +482,7 @@ void MicronauAudioProcessorEditor::create_lfo(int x, int y)
         add_box(619 + (i*4), x+78, y + (i*70) + 40, 60, "reset", 2);
         add_button(617 + (i*4), x, y + 23 + (i* 70), "sync", true);
     }
-    add_box(628, x, y+200, 100, "input", 0);
+    add_box(628, x, y+200, 60, "input", 0);
 }
 
 void MicronauAudioProcessorEditor::create_fx_and_tracking_tabs(int x, int y)
@@ -917,6 +917,13 @@ void MicronauAudioProcessorEditor::mouseDown(const MouseEvent& event)
 {	// user clicked background, so take focus away from whatever was focused.
 	Component::unfocusAllComponents();
 }
+
+#if 0
+void ext_slider::mouseDoubleClick(const MouseEvent& event)
+{
+   set_value(param->getDefaultValue());
+}
+#endif
 
 KeyboardFocusTraverser* MicronauAudioProcessorEditor::createFocusTraverser()
 {	// user may have finished with something like a combo box, so make sure the next thing to focus on is nothing.
