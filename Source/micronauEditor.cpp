@@ -60,7 +60,7 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
 
 	add_label("nrpn", SYNC_X + 40, SYNC_Y + 13, 35, 15);
 
-	ImageButton* sync_nrpn = new ImageButton();
+	sync_nrpn = new ImageButton();
 	sync_nrpn->setImages (true, true, false,
 						buttonOffImg, 1.0f, Colours::transparentWhite,
 						buttonHoverImg, 1.0f, Colours::transparentWhite,
@@ -71,7 +71,7 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     
 	add_label("sysex", SYNC_X + 85, SYNC_Y + 13, 35, 15);
 
-	ImageButton* sync_sysex = new ImageButton();
+    sync_sysex = new ImageButton();
 	sync_sysex->setImages (true, true, false,
 						buttonOffImg, 1.0f, Colours::transparentWhite,
 						buttonHoverImg, 1.0f, Colours::transparentWhite,
@@ -80,6 +80,16 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     sync_sysex->setBounds(SYNC_X + 85, SYNC_Y, 35, 15);
     addAndMakeVisible(sync_sysex);
     
+	add_label("request", SYNC_X + 115, SYNC_Y + 13, 65, 15);
+	request = new ImageButton();
+	request->setImages (true, true, false,
+                           buttonOffImg, 1.0f, Colours::transparentWhite,
+                           buttonHoverImg, 1.0f, Colours::transparentWhite,
+                           buttonOnImg, 1.0f, Colours::transparentWhite, 0.0f);
+    request->addListener(this);
+    request->setBounds(SYNC_X + 130, SYNC_Y, 35, 15);
+    addAndMakeVisible(request);
+
 	param_display = new LcdLabel("panel", "micronAU\nretroware");
     param_display->setJustificationType (Justification::centredLeft);
     param_display->setEditable (false, false, false);
@@ -94,12 +104,14 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     midi_in_menu->addListener(this);
     addAndMakeVisible (midi_in_menu);
     midi_in_menu->setBounds(910, 70, 100, 15);
+	add_label("midi in", 910 - 64, 72, 75, 15);
 
     midi_out_menu = new StdComboBox ();
     midi_out_menu->setEditableText (false);
     midi_out_menu->addListener(this);
     addAndMakeVisible (midi_out_menu);
     midi_out_menu->setBounds(910, 95, 100, 15);
+	add_label("midi out", 910 - 60, 97, 75, 15);
  
     midi_out_chan = new StdComboBox ();
     midi_out_chan->setEditableText (false);
@@ -116,7 +128,7 @@ MicronauAudioProcessorEditor::MicronauAudioProcessorEditor (MicronauAudioProcess
     prog_name->addListener(this);
     add_box(666, 910, 175, 100,  NULL, 0, NULL);
     add_box(100, 910, 195, 30, "Bank", 1, NULL);
-    add_box(101, 950, 195, 30, "Patch", 1, NULL);
+    add_box(101, 950, 195, 30, "Prgm", 1, NULL);
 
     logo = Drawable::createFromImageData (BinaryData::logo_svg, BinaryData::logo_svgSize);
 
@@ -677,6 +689,13 @@ void MicronauAudioProcessorEditor::updateGuiComponents()
         }
     }
     
+    for (int i = 0; i < 7; i++) {
+        fx1[i]->setVisible(false);
+        fx2[i]->setVisible(false);
+    }
+    fx1[owner->param_of_nrpn(800)->getValue()]->setVisible(true);
+    fx2[owner->param_of_nrpn(801)->getValue()]->setVisible(true);
+
     update_tracking();
 
 	prog_name->setText(owner->get_prog_name(), false);
@@ -771,6 +790,10 @@ void MicronauAudioProcessorEditor::buttonClicked (Button* button)
     }
     if (button == sync_sysex) {
         owner->sync_via_sysex();
+        return;
+    }
+    if (button == request) {
+        owner->send_request();
         return;
     }
 

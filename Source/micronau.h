@@ -90,6 +90,8 @@ public:
     // micronau specific from here on down
     void sync_via_nrpn();
     void sync_via_sysex();
+    void send_request();
+ 
     String get_midi_port(int in_out);
     void set_midi_port(int in_out, String p);
     void set_midi_chan(unsigned int chan);

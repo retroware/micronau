@@ -65,7 +65,7 @@ public:
         } else {
             addItem("--", 1000);
             for (int i = param->getMin(); i < param->getMax(); i++) {
-                addItem(String(i+1), i+1);
+                addItem(String(i), i+1);
             }
         }
         nrpn = nrpn_num;
@@ -191,7 +191,7 @@ private:
 		POSTFILT_W = 200,
 		POSTFILT_H = FILT_H,
 
-		SYNC_X = 885,
+		SYNC_X = 875,
 		SYNC_Y = POSTFILT_Y - 27,
 
 		LFO_X = PREFILT_X,
@@ -274,8 +274,10 @@ private:
     ScopedPointer<LookAndFeel> inverted_button_lf;
     OwnedArray<GroupComponent> group_boxes;
 
-    ScopedPointer<Button> sync_nrpn;
-    ScopedPointer<Button> sync_sysex;
+    ScopedPointer<ImageButton> sync_nrpn;
+    ScopedPointer<ImageButton> sync_sysex;
+    ScopedPointer<ImageButton> request;
+
     ScopedPointer<ComboBox> midi_in_menu;
     ScopedPointer<ComboBox> midi_out_menu;
     ScopedPointer<ComboBox> midi_out_chan;

@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <parameters>
 	<parameter name="name" conversion="NAME" sysexoffset="0" />
-    <parameter name="Bank" conversion="INT32" min="0" max="7" nrpn="100" defaultval="0"/>
-    <parameter name="Program" conversion="INT32" min="0" max="127" nrpn="101" defaultval="0"/>
+    <parameter name="Bank" conversion="BANK" min="0" max="8" nrpn="100" defaultval="0"/>
+    <parameter name="Program" conversion="BANK" min="0" max="128" nrpn="101" defaultval="0"/>
     <parameter name="MIDI Channel" conversion="LIST" min="0" max="15" nrpn="102" defaultval="0">
 	<listitem name="1" />
 	<listitem name="2" />

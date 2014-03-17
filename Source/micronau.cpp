@@ -10,15 +10,16 @@
 /*
 TODO:
     handle incoming nrpn messages
-    
-    request patch button
- 
+
+    effects version
+
     gui tweaks
       combo box text center
       long knob labels
-      sync button style
-      used tabbed pane for mod section
       add x/y/z, sliders and pitch bend (possibly)
+ 
+    vst version (possibly)
+    windows version (possibly)
  
     Test!
  
@@ -486,6 +487,31 @@ void MicronauAudioProcessor::handleIncomingMidiMessage (MidiInput* source, const
         const uint8 *data = message.getSysExData();
         init_from_sysex((unsigned char *) data);
     }
+}
+
+void MicronauAudioProcessor::send_request()
+{
+    unsigned char req[]= {0x00, 0x00, 0x0e, 0x26, 0x41, 0x0, 0x0, 0x0};
+    int bank, prog;
+    bank = param_of_nrpn(100)->getValue();
+    prog = param_of_nrpn(101)->getValue();
+
+    if (midi_out == NULL) {
+        return;
+    }
+    
+    if ((bank == 0) || (prog == 0)) {
+        return;
+    }
+    bank--;
+
+    prog--;
+	req[5] = bank;
+    req[6] = (prog >> 7) & 1;
+    req[7] = prog & 0x7f;
+    
+    MidiMessage sysexe_msg = MidiMessage::createSysExMessage(req, sizeof(req));
+    midi_out->sendMessageNow(sysexe_msg);
 }
 
 void MicronauAudioProcessor::set_midi_port(int in_out, String p)

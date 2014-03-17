@@ -282,6 +282,13 @@ String IonSysexParam::getConvertedValue(SInt32 val)
 	}
 	else {
 		switch(m_conv){
+			case BANK:
+				if (val == 0) {
+                    sprintf(buf,"None");
+                } else {
+                    sprintf(buf,"%d", (int)(val - 1));
+                }
+				break;
 			case PERCENT:
 				sprintf(buf,"%d%%",(int)val);
 				break;
@@ -1009,6 +1016,8 @@ void IonSysexParams::initFromXml()
 					param->setConversion(IonSysexParam::PRE_BAL);
 				else if(convString == "POST_BAL")
 					param->setConversion(IonSysexParam::POST_BAL);
+				else if(convString == "BANK")
+					param->setConversion(IonSysexParam::BANK);
 				else if(convString == "EXT_IN")
 					param->setConversion(IonSysexParam::EXT_IN);
 				else if(convString == "OCTAVE")

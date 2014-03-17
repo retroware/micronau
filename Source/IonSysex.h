@@ -117,7 +117,8 @@ class IonSysexParam {
 		 FX_LFO_FREQ,
 		 MS,
 		 OCTAVE,
-		 SEMITONE
+		 SEMITONE,
+         BANK
       };
 
       const char *getName() { return m_name; }
