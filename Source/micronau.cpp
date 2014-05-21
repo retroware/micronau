@@ -81,6 +81,11 @@ float MicronauAudioProcessor::getParameter (int index)
     return nrpns[index]->getValue();
 }
 
+bool MicronauAudioProcessor::isMetaParameter (int parameterIndex) const
+{
+    return true;
+}
+
 void MicronauAudioProcessor::setParameter (int index, float newValue)
 {
     IonSysexParam *param;

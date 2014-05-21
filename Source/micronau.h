@@ -61,6 +61,7 @@ public:
     float getParameterMaxValue (int parameterIndex);
     float getParameterDefaultValue (int parameterIndex);
     int getParameterNumSteps (int parameterIndex);
+    bool isMetaParameter (int parameterIndex) const;
 
     const String getInputChannelName (int channelIndex) const;
     const String getOutputChannelName (int channelIndex) const;
