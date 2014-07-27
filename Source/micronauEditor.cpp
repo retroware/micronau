@@ -506,7 +506,9 @@ void MicronauAudioProcessorEditor::create_lfo(int x, int y)
     for (int i = 0; i < 3; i++) {
         add_box(671 + i, x, y + (i*70) + 3, 65, labels[i], 2);
         add_knob(618 + (i*4), x+70, y + (i*70), "rate");
-		if (i != 2)
+		if (i == 2)
+			add_knob(629, x+110, y + (i*70), "smooth");
+		else
 			add_knob(620 + (i*4), x+110, y + (i*70), "m1");
         add_box(619 + (i*4), x+78, y + (i*70) + 40, 60, "reset", 2);
         add_button(617 + (i*4), x, y + 23 + (i* 70), "sync", true);
