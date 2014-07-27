@@ -11,32 +11,32 @@ static int tracking_n_to_s[112];
 
 void init_mapping() {
 unsigned int i;
-	for (i = 0; i < sizeof(mod_dst_s_to_n)/sizeof(int); i++) {
-		mod_dst_n_to_s[i] = 0;
-	}		
 	for (i = 0; i < sizeof(mod_dst_n_to_s)/sizeof(int); i++) {
+		mod_dst_n_to_s[i] = 0;
+	}
+	for (i = 0; i < sizeof(mod_dst_s_to_n)/sizeof(int); i++) {
 		mod_dst_n_to_s[mod_dst_s_to_n[i]] = i;
 	}
 
-	for (i = 0; i < sizeof(mod_src_s_to_n)/sizeof(int); i++) {
+	for (i = 0; i < sizeof(mod_src_n_to_s)/sizeof(int); i++) {
 		mod_src_n_to_s[i] = 0;
-	}		
+	}
 	for (i = 0; i < sizeof(mod_src_s_to_n)/sizeof(int); i++) {
 		mod_src_n_to_s[mod_src_s_to_n[i]] = i;
 	}
-	for (i = 0; i < sizeof(sh_s_to_n)/sizeof(int); i++) {
+	for (i = 0; i < sizeof(sh_n_to_s)/sizeof(int); i++) {
 		sh_n_to_s[i] = 0;
 	}
 	for (i = 0; i < sizeof(sh_s_to_n)/sizeof(int); i++) {
 		sh_n_to_s[sh_s_to_n[i]] = i;
 	}
-	for (i = 0; i < sizeof(filter_s_to_n)/sizeof(int); i++) {
+	for (i = 0; i < sizeof(filter_n_to_s)/sizeof(int); i++) {
 		filter_n_to_s[i] = 0;
 	}
 	for (i = 0; i < sizeof(filter_s_to_n)/sizeof(int); i++) {
 		filter_n_to_s[filter_s_to_n[i]] = i;
 	}
-	for (i = 0; i < sizeof(tracking_s_to_n)/sizeof(int); i++) {
+	for (i = 0; i < sizeof(tracking_n_to_s)/sizeof(int); i++) {
 		tracking_n_to_s[i] = 0;
 	}
 	for (i = 0; i < sizeof(tracking_s_to_n)/sizeof(int); i++) {

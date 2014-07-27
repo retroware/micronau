@@ -848,9 +848,9 @@
             <listitem name="on" />
         </parameter>
         <parameter name="Env 1 loop" conversion="LIST" min="0" max="3" sysexoffset="1032" nrpn="589" defaultval="3">
-            <listitem name="decay" nrpnvalue="1"/>
-            <listitem name="zero" nrpnvalue="2"/>
-            <listitem name="hold" nrpnvalue="3" />
+            <listitem name="atk/dcy" nrpnvalue="1"/>
+            <listitem name="entire" nrpnvalue="2"/>
+            <listitem name="held" nrpnvalue="3" />
             <listitem name="off" nrpnvalue="0"/>
         </parameter>
         <parameter name="Env 1 velocity" conversion="PERCENT" min="0" max="100" sysexoffset="1008" nrpn="586" />
@@ -889,9 +889,9 @@
             <listitem name="on" />
         </parameter>
         <parameter name="Env 2 loop" conversion="LIST" min="0" max="3" sysexoffset="1040" nrpn="602" paramname="loop 2 " defaultval="3">
-            <listitem name="decay" nrpnvalue="1"/>
-            <listitem name="zero" nrpnvalue="2"/>
-            <listitem name="hold" nrpnvalue="3" />
+            <listitem name="atk/dcy" nrpnvalue="1"/>
+            <listitem name="entire" nrpnvalue="2"/>
+            <listitem name="held" nrpnvalue="3" />
             <listitem name="off" nrpnvalue="0"/>
         </parameter>
         <parameter name="Env 2 velocity" conversion="PERCENT" min="0" max="100" sysexoffset="1016" nrpn="599" paramname="vel 2" />
@@ -930,9 +930,9 @@
             <listitem name="on" />
         </parameter>
         <parameter name="Env 3 loop" conversion="LIST" min="0" max="3" sysexoffset="1048" nrpn="615" paramname="loop 3" defaultval="3">
-            <listitem name="decay" nrpnvalue="1"/>
-            <listitem name="zero" nrpnvalue="2"/>
-            <listitem name="hold" nrpnvalue="3" />
+            <listitem name="atk/dcy" nrpnvalue="1"/>
+            <listitem name="entire" nrpnvalue="2"/>
+            <listitem name="held" nrpnvalue="3" />
             <listitem name="off" nrpnvalue="0"/>
         </parameter>
         <parameter name="Env 3 velocity" conversion="PERCENT" min="0" max="100" sysexoffset="1024" nrpn="612" paramname="vel 3" />
@@ -1618,7 +1618,7 @@
             <listitem name="cc118" nrpnvalue="113"/>
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
-        <parameter name="Mod 1 dest" conversion="LIST" min="0" max="77" sysexoffset="1432" nrpn="693">
+        <parameter name="Mod 1 dest" conversion="LIST" min="0" max="79" sysexoffset="1432" nrpn="693">
             <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
@@ -1817,7 +1817,7 @@
             <listitem name="cc118" nrpnvalue="113"/>
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
-        <parameter name="Mod 2 dest" conversion="LIST" min="0" max="77" sysexoffset="1440" nrpn="697">
+        <parameter name="Mod 2 dest" conversion="LIST" min="0" max="79" sysexoffset="1440" nrpn="697">
             <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
@@ -2016,7 +2016,7 @@
             <listitem name="cc118" nrpnvalue="113"/>
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
-      <parameter name="Mod 3 dest" conversion="LIST" min="0" max="77" sysexoffset="1448" nrpn="701">
+      <parameter name="Mod 3 dest" conversion="LIST" min="0" max="79" sysexoffset="1448" nrpn="701">
             <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
@@ -2215,7 +2215,7 @@
             <listitem name="cc118" nrpnvalue="113"/>
             <listitem name="cc119" nrpnvalue="114"/>
        </parameter>
-        <parameter name="Mod 4 dest" conversion="LIST" min="0" max="77" sysexoffset="1456" nrpn="705">
+        <parameter name="Mod 4 dest" conversion="LIST" min="0" max="79" sysexoffset="1456" nrpn="705">
             <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
@@ -2414,7 +2414,7 @@
             <listitem name="cc118" nrpnvalue="113"/>
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
-        <parameter name="Mod 5 dest" conversion="LIST" min="0" max="77" sysexoffset="1464" nrpn="709">
+        <parameter name="Mod 5 dest" conversion="LIST" min="0" max="79" sysexoffset="1464" nrpn="709">
             <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
@@ -2613,7 +2613,7 @@
             <listitem name="cc118" nrpnvalue="113"/>
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
-        <parameter name="Mod 6 dest" conversion="LIST" min="0" max="77" sysexoffset="1472" nrpn="713">
+        <parameter name="Mod 6 dest" conversion="LIST" min="0" max="79" sysexoffset="1472" nrpn="713">
             <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
@@ -2813,7 +2813,7 @@
             <listitem name="cc118" nrpnvalue="113"/>
             <listitem name="cc119" nrpnvalue="114"/>
        </parameter>
-        <parameter name="Mod 7 dest" conversion="LIST" min="0" max="77" sysexoffset="1480" nrpn="717">
+        <parameter name="Mod 7 dest" conversion="LIST" min="0" max="79" sysexoffset="1480" nrpn="717">
             <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
@@ -3012,7 +3012,7 @@
             <listitem name="cc118" nrpnvalue="113"/>
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
-        <parameter name="Mod 8 dest" conversion="LIST" min="0" max="77" sysexoffset="1488" nrpn="721">
+        <parameter name="Mod 8 dest" conversion="LIST" min="0" max="79" sysexoffset="1488" nrpn="721">
             <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
@@ -3211,7 +3211,7 @@
             <listitem name="cc118" nrpnvalue="113"/>
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
-        <parameter name="Mod 9 dest" conversion="LIST" min="0" max="77" sysexoffset="1496" nrpn="725">
+        <parameter name="Mod 9 dest" conversion="LIST" min="0" max="79" sysexoffset="1496" nrpn="725">
             <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
@@ -3410,7 +3410,7 @@
             <listitem name="cc118" nrpnvalue="113"/>
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
-        <parameter name="Mod 10 dest" conversion="LIST" min="0" max="77" sysexoffset="1504" nrpn="729">
+        <parameter name="Mod 10 dest" conversion="LIST" min="0" max="79" sysexoffset="1504" nrpn="729">
             <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
@@ -3609,7 +3609,7 @@
             <listitem name="cc118" nrpnvalue="113"/>
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
-        <parameter name="Mod 11 dest" conversion="LIST" min="0" max="77" sysexoffset="1512" nrpn="733">
+        <parameter name="Mod 11 dest" conversion="LIST" min="0" max="79" sysexoffset="1512" nrpn="733">
             <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
@@ -3808,7 +3808,7 @@
             <listitem name="cc118" nrpnvalue="113"/>
             <listitem name="cc119" nrpnvalue="114"/>
         </parameter>
-        <parameter name="Mod 12 dest" conversion="LIST" min="0" max="77" sysexoffset="1520" nrpn="737">
+        <parameter name="Mod 12 dest" conversion="LIST" min="0" max="79" sysexoffset="1520" nrpn="737">
             <listitem name="None" />
             <listitem name="Pitch" nrpnvalue="1"/>
             <listitem name="PtchNar" nrpnvalue="2"/>
